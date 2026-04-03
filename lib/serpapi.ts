@@ -93,8 +93,9 @@ function parseBlogResults(html: string): Array<{ link: string; blogId: string }>
     if (seen.has(link)) continue
     seen.add(link)
 
-    // 광고 링크 제외
-    if (block.includes('adcr.naver.com') || block.includes('ader.naver.com')) continue
+    // 광고 블록 제외 (블로그 링크 앞에 ad_section이 있는 경우만 광고로 판별)
+    const beforeLink = block.substring(0, block.indexOf(link))
+    if (beforeLink.includes('ad_section')) continue
 
     results.push({ link, blogId })
   }
