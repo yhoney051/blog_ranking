@@ -85,11 +85,13 @@ export function Sidebar() {
         <div className={cn("px-3 py-3", collapsed && "px-2")}>
           {collapsed ? (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="mx-auto flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-xs font-bold cursor-default">
-                  {profile.email.slice(0, 2).toUpperCase()}
-                </div>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={
+                  <div className="mx-auto flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-xs font-bold cursor-default">
+                    {profile.email.slice(0, 2).toUpperCase()}
+                  </div>
+                }
+              />
               <TooltipContent side="right">
                 {profile.email} ({profile.plan})
               </TooltipContent>
