@@ -13,6 +13,7 @@ type Props = { onAdded: () => void }
 export function KeywordForm({ onAdded }: Props) {
   const [keyword, setKeyword] = useState('')
   const [blogUrl, setBlogUrl] = useState('')
+  const [tag, setTag] = useState('')
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -23,7 +24,7 @@ export function KeywordForm({ onAdded }: Props) {
       const res = await fetch('/api/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keyword, blog_url: blogUrl }),
+        body: JSON.stringify({ keyword, blog_url: blogUrl, tag: tag.trim() || undefined }),
       })
       if (res.status === 403) {
         const body = await res.json()
@@ -33,6 +34,7 @@ export function KeywordForm({ onAdded }: Props) {
       if (!res.ok) throw new Error('등록 실패')
       setKeyword('')
       setBlogUrl('')
+      setTag('')
       setOpen(false)
       toast.success('키워드가 등록되었습니다')
       onAdded()
@@ -70,6 +72,10 @@ export function KeywordForm({ onAdded }: Props) {
           <div className="flex-1 space-y-1.5">
             <Label htmlFor="url" className="text-xs text-muted-foreground">네이버 블로그 URL</Label>
             <Input id="url" value={blogUrl} onChange={(e) => setBlogUrl(e.target.value)} placeholder="blog.naver.com/xxx" required className="h-9" />
+          </div>
+          <div className="w-full sm:w-32 space-y-1.5">
+            <Label htmlFor="tag" className="text-xs text-muted-foreground">태그 (선택)</Label>
+            <Input id="tag" value={tag} onChange={(e) => setTag(e.target.value)} placeholder="예: 맛집" className="h-9" />
           </div>
           <Button type="submit" disabled={loading} className="w-full sm:w-auto h-9 px-6">
             {loading ? '등록 중...' : '등록'}

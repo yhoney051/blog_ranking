@@ -60,7 +60,12 @@ export async function POST(req: Request) {
 
   const { data, error } = await supabaseServer
     .from('keywords')
-    .insert({ keyword: body.keyword, blog_url: body.blog_url, user_id: userId })
+    .insert({
+      keyword: body.keyword,
+      blog_url: body.blog_url,
+      tag: body.tag || null,
+      user_id: userId,
+    })
     .select()
     .single()
 

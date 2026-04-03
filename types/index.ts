@@ -4,6 +4,7 @@ export type Keyword = {
   user_id: string              // 소유자 (auth.users.id)
   keyword: string
   blog_url: string
+  tag: string | null            // 분류 태그 (예: 맛집, 여행)
   current_rank: number | null   // 현재 순위 (null = 아직 조회 안 함)
   previous_rank: number | null  // 직전 순위 (변동 계산용)
   last_checked_at: string | null
@@ -32,6 +33,7 @@ export type RankHistory = {
 export type KeywordFormInput = {
   keyword: string
   blog_url: string
+  tag?: string
 }
 
 // 순위 변동 방향

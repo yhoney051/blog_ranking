@@ -48,7 +48,15 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const [rankFilter, setRankFilter] = useState<RankFilter>('all')
+  const [tagFilter, setTagFilter] = useState<string>('all')
   const [sort, setSort] = useState<SortOption>('rank')
+
+  // 등록된 태그 목록 자동 추출
+  const availableTags = useMemo(() => {
+    const tags = new Set<string>()
+    keywords.forEach((kw) => { if (kw.tag) tags.add(kw.tag) })
+    return Array.from(tags).sort()
+  }, [keywords])
 
   // 검색 + 순위 필터
   const filtered = useMemo(() => {
@@ -60,6 +68,11 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
       result = result.filter(
         (kw) => kw.keyword.toLowerCase().includes(q) || kw.blog_url.toLowerCase().includes(q)
       )
+    }
+
+    // 태그 필터
+    if (tagFilter !== 'all') {
+      result = result.filter((kw) => kw.tag === tagFilter)
     }
 
     // 순위 필터
@@ -88,7 +101,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
     })
 
     return result
-  }, [keywords, search, rankFilter, sort])
+  }, [keywords, search, rankFilter, tagFilter, sort])
 
   // 페이지네이션
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
@@ -142,6 +155,38 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
             ))}
           </div>
 
+          {/* 태그 필터 */}
+          {availableTags.length > 0 && (
+            <>
+              <div className="h-4 w-px bg-border hidden sm:block" />
+              <div className="flex items-center gap-1 flex-wrap">
+                <Badge
+                  variant={tagFilter === 'all' ? 'default' : 'outline'}
+                  className={cn(
+                    'cursor-pointer text-xs px-2.5 py-0.5 transition-colors',
+                    tagFilter === 'all' ? '' : 'hover:bg-accent'
+                  )}
+                  onClick={() => { setTagFilter('all'); setPage(0) }}
+                >
+                  전체 태그
+                </Badge>
+                {availableTags.map((t) => (
+                  <Badge
+                    key={t}
+                    variant={tagFilter === t ? 'default' : 'outline'}
+                    className={cn(
+                      'cursor-pointer text-xs px-2.5 py-0.5 transition-colors',
+                      tagFilter === t ? '' : 'hover:bg-accent'
+                    )}
+                    onClick={() => { setTagFilter(t); setPage(0) }}
+                  >
+                    {t}
+                  </Badge>
+                ))}
+              </div>
+            </>
+          )}
+
           <div className="h-4 w-px bg-border hidden sm:block" />
 
           {/* 정렬 */}
@@ -170,6 +215,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
           <TableHeader>
             <TableRow className="bg-muted/50 border-b border-border">
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">키워드</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 hidden sm:table-cell">태그</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">블로그 URL</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center">순위</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center hidden sm:table-cell">추이</TableHead>
@@ -182,6 +228,13 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
             {paged.map((kw) => (
               <TableRow key={kw.id} className="border-b border-border/50 hover:bg-accent/30 transition-colors">
                 <TableCell className="font-medium text-card-foreground py-3.5">{kw.keyword}</TableCell>
+                <TableCell className="py-3.5 hidden sm:table-cell">
+                  {kw.tag ? (
+                    <Badge variant="secondary" className="text-xs">{kw.tag}</Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
+                </TableCell>
                 <TableCell className="py-3.5">
                   <a
                     href={kw.blog_url.startsWith('http') ? kw.blog_url : `https://${kw.blog_url}`}
