@@ -25,8 +25,8 @@ async function getBrightDataBlogRank(
   const apiKey = process.env.BRIGHTDATA_API_KEY
   if (!apiKey) throw new Error('BRIGHTDATA_API_KEY 환경변수가 설정되지 않았습니다')
 
-  // 네이버 블로그탭 검색 URL
-  const naverUrl = `https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(keyword)}`
+  // 모바일 네이버 블로그탭 검색 URL (HTML 가볍고 실제 유저 결과와 동일)
+  const naverUrl = `https://m.search.naver.com/search.naver?where=blog&query=${encodeURIComponent(keyword)}`
 
   const res = await fetch('https://api.brightdata.com/request', {
     method: 'POST',
@@ -80,9 +80,9 @@ function parseBlogResults(html: string): Array<{ link: string; blogId: string }>
   for (let i = 1; i < blocks.length; i++) {
     const block = blocks[i]
 
-    // 포스트 링크: blog.naver.com/아이디/글번호
+    // 포스트 링크: m.blog.naver.com/아이디/글번호 (모바일)
     const linkMatch = block.match(
-      /href="(https?:\/\/blog\.naver\.com\/([^/"]+)\/(\d+))"/i
+      /href="(https?:\/\/m\.blog\.naver\.com\/([^/"]+)\/(\d+))"/i
     )
     if (!linkMatch) continue
 
