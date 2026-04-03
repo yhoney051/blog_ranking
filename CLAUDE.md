@@ -4,9 +4,14 @@
 - 프레임워크: Next.js 14 (App Router)
 - UI: Shadcn UI + Tailwind CSS
 - DB: Supabase (PostgreSQL)
-- 순위 조회: SerpAPI
+- 순위 조회: Bright Data SERP API (네이버 블로그탭)
 - 배포: Vercel
 - 패키지 매니저: pnpm 우선 사용
+
+## 환경변수
+- BRIGHTDATA_API_KEY: Bright Data SERP API 키 (네이버 블로그탭 순위 조회용)
+- SUPABASE 관련: Supabase 연결 정보
+- CRON_SECRET: Vercel Cron 인증용
 
 ## 핵심 규칙
 - 50줄 이상 수정 전 반드시 내 승인을 기다려

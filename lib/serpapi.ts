@@ -1,56 +1,103 @@
 // 네이버 블로그 순위 조회 모듈
-// 네이버 공식 블로그 검색 API 사용
+// Bright Data SERP API로 네이버 블로그탭 실제 검색 결과 조회
 
 export async function getNaverBlogRank(
   keyword: string,
   blogUrl: string
 ): Promise<number | null> {
-  return getNaverBlogRankAPI(keyword, blogUrl)
+  return getBrightDataBlogRank(keyword, blogUrl)
 }
 
-// 네이버 공식 블로그 검색 API로 블로그 URL의 순위를 반환
-// 찾지 못하면 null 반환
+// URL 정규화 (https://, http://, www, m. 제거)
+function normalizeUrl(url: string): string {
+  return url
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/^(www\.|m\.)/, '')
+    .replace(/\/$/, '')
+}
 
-async function getNaverBlogRankAPI(
+// Bright Data SERP API로 네이버 블로그탭 HTML을 가져와서 파싱
+async function getBrightDataBlogRank(
   keyword: string,
   blogUrl: string
 ): Promise<number | null> {
-  const params = new URLSearchParams({
-    query: keyword,
-    display: '100', // 최대 100개 결과
-    sort: 'sim',    // 정확도순 (네이버 기본 검색 순위)
+  const apiKey = process.env.BRIGHTDATA_API_KEY
+  if (!apiKey) throw new Error('BRIGHTDATA_API_KEY 환경변수가 설정되지 않았습니다')
+
+  // 네이버 블로그탭 검색 URL
+  const naverUrl = `https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(keyword)}`
+
+  const res = await fetch('https://api.brightdata.com/request', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      zone: 'serp_api1',
+      url: naverUrl,
+      format: 'raw',
+    }),
   })
 
-  const res = await fetch(
-    `https://openapi.naver.com/v1/search/blog?${params}`,
-    {
-      headers: {
-        'X-Naver-Client-Id': process.env.NAVER_CLIENT_ID!,
-        'X-Naver-Client-Secret': process.env.NAVER_CLIENT_SECRET!,
-      },
-    }
-  )
-  if (!res.ok) throw new Error(`네이버 API 오류: ${res.status}`)
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`Bright Data API 오류: ${res.status} - ${errText}`)
+  }
 
-  const data = await res.json()
-  const items: Array<{ link: string; bloggerlink: string }> = data.items ?? []
+  const html = await res.text()
+  if (!html || html.length < 100) {
+    throw new Error('Bright Data API 빈 응답')
+  }
 
-  console.log('[NaverAPI] 결과 수:', items.length)
-  console.log('[NaverAPI] 첫 번째:', items[0]?.link)
-  console.log('[NaverAPI] 비교 대상:', blogUrl)
+  // HTML 파싱하여 블로그 결과 추출
+  const blogResults = parseBlogResults(html)
 
-  // URL 정규화
-  const normalize = (url: string) =>
-    url.toLowerCase().replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')
+  console.log('[BrightData] 키워드:', keyword)
+  console.log('[BrightData] 블로그 결과 수:', blogResults.length)
+  console.log('[BrightData] 비교 대상:', blogUrl)
 
-  const target = normalize(blogUrl)
-
-  // 블로그 주소가 포함된 결과 찾기 (개별 포스트 URL도 매칭)
-  const index = items.findIndex((item) => {
-    const link = normalize(item.link)
-    const blogger = normalize(item.bloggerlink ?? '')
-    return link.includes(target) || blogger.includes(target)
+  // blogUrl 매칭
+  const target = normalizeUrl(blogUrl)
+  const index = blogResults.findIndex((item) => {
+    const link = normalizeUrl(item.link)
+    const blogId = normalizeUrl(item.blogId)
+    return link.includes(target) || target.includes(blogId)
   })
 
   return index === -1 ? null : index + 1
+}
+
+// 네이버 블로그탭 HTML에서 검색 결과 파싱
+function parseBlogResults(html: string): Array<{ link: string; blogId: string }> {
+  // profile-info-title-text 기준으로 블록 분할 (각 블록 = 1개 검색 결과)
+  const blocks = html.split(/profile-info-title-text/)
+  const results: Array<{ link: string; blogId: string }> = []
+  const seen = new Set<string>()
+
+  // 첫 번째 블록은 헤더이므로 스킵
+  for (let i = 1; i < blocks.length; i++) {
+    const block = blocks[i]
+
+    // 포스트 링크: blog.naver.com/아이디/글번호
+    const linkMatch = block.match(
+      /href="(https?:\/\/blog\.naver\.com\/([^/"]+)\/(\d+))"/i
+    )
+    if (!linkMatch) continue
+
+    const link = linkMatch[1]
+    const blogId = linkMatch[2]
+
+    // 중복 제거
+    if (seen.has(link)) continue
+    seen.add(link)
+
+    // 광고 링크 제외
+    if (block.includes('adcr.naver.com') || block.includes('ader.naver.com')) continue
+
+    results.push({ link, blogId })
+  }
+
+  return results
 }
