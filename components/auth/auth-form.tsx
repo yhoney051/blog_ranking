@@ -60,7 +60,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   // 소셜 로그인 핸들러
-  const handleSocialLogin = async (provider: 'google' | 'kakao') => {
+  const handleSocialLogin = async (provider: 'google') => {
     setSocialLoading(provider)
     setError(null)
 
@@ -122,22 +122,6 @@ export function AuthForm({ mode }: AuthFormProps) {
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                       </svg>
                       Google로 {isLogin ? '로그인' : '시작하기'}
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  disabled={socialLoading !== null}
-                  onClick={() => handleSocialLogin('kakao')}
-                >
-                  {socialLoading === 'kakao' ? '연결 중...' : (
-                    <>
-                      <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="#000000">
-                        <path d="M12 3C6.48 3 2 6.36 2 10.44c0 2.62 1.75 4.93 4.37 6.24-.14.53-.92 3.41-.95 3.63 0 0-.02.16.08.22.1.06.22.03.22.03.29-.04 3.37-2.2 3.9-2.57.76.11 1.55.17 2.38.17 5.52 0 10-3.36 10-7.72S17.52 3 12 3z" />
-                      </svg>
-                      카카오로 {isLogin ? '로그인' : '시작하기'}
                     </>
                   )}
                 </Button>
