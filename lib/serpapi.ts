@@ -54,9 +54,10 @@ async function getBrightDataBlogRank(
   // HTML 파싱하여 블로그 결과 추출
   const blogResults = parseBlogResults(html)
 
-  console.log('[BrightData] 키워드:', keyword)
-  console.log('[BrightData] 블로그 결과 수:', blogResults.length)
-  console.log('[BrightData] 비교 대상:', blogUrl)
+  // 디버그 로그 (프로덕션에서는 환경변수로 제어)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[BrightData] 키워드:', keyword, '| 결과 수:', blogResults.length)
+  }
 
   // blogUrl 매칭
   const target = normalizeUrl(blogUrl)

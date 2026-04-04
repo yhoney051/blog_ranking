@@ -5,8 +5,14 @@ import { getNaverBlogRank } from '@/lib/serpapi'
 // GET /api/cron/check-ranks — 모든 키워드의 순위를 자동 체크 (Vercel Cron)
 export async function GET(request: Request) {
   // CRON_SECRET 검증 (Vercel Cron이 자동으로 Authorization 헤더에 Bearer 토큰 전송)
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) {
+    console.error('[CRON] CRON_SECRET 환경변수가 설정되지 않았습니다.')
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+  }
+
   const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -38,9 +44,10 @@ export async function GET(request: Request) {
 
       // rank_histories에 기록 저장
       if (rank !== null) {
-        await supabaseServer
+        const { error: histErr } = await supabaseServer
           .from('rank_histories')
           .insert({ keyword_id: kw.id, rank })
+        if (histErr) console.error(`[CRON] 히스토리 저장 실패 (${kw.id}):`, histErr.message)
       }
 
       success++

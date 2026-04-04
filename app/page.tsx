@@ -138,8 +138,17 @@ export default function LandingPage() {
       </section>
 
       {/* 푸터 */}
-      <footer className="py-8 px-4 text-center text-sm text-muted-foreground border-t">
-        © 2026 블로그 순위 체커. All rights reserved.
+      <footer className="py-8 px-4 border-t">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            &copy; 2026 블로그 순위 체커. All rights reserved.
+          </p>
+          <div className="flex gap-4 text-sm text-muted-foreground">
+            <Link href="/terms" className="hover:text-foreground transition-colors">이용약관</Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">개인정보 처리방침</Link>
+            <span>support@blogrank.kr</span>
+          </div>
+        </div>
       </footer>
     </div>
   )
