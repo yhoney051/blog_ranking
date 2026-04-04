@@ -1,15 +1,20 @@
 'use client'
 
 // 전역 에러 바운더리 — 예기치 않은 오류 발생 시 표시
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
 export default function Error({
-  error: _error,
+  error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    console.error('[Error Boundary]', error)
+  }, [error])
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="text-center space-y-4">
