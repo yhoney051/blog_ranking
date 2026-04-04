@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Search, Settings, ChevronLeft, ChevronRight, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, BarChart3 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 
 const navItems = [
   { icon: LayoutDashboard, label: "대시보드", href: "/dashboard" },
-  { icon: Search, label: "키워드 관리", href: "/dashboard" },
   { icon: Settings, label: "설정", href: "/dashboard/settings" },
 ];
 
