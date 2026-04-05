@@ -5,7 +5,7 @@ import { HeadingBlock } from '@/components/formatter/blocks/heading-block'
 import { QuoteBlock } from '@/components/formatter/blocks/quote-block'
 import { DividerBlock } from '@/components/formatter/blocks/divider-block'
 import { ListBlock } from '@/components/formatter/blocks/list-block'
-import { Heart, MessageCircle, Send, Share2 } from 'lucide-react'
+import { Heart, MessageCircle, Share2 } from 'lucide-react'
 
 interface FormatPreviewProps {
   result: FormatResponse

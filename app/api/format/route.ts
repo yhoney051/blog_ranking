@@ -8,7 +8,7 @@ import type { FormatResponse } from '@/types/formatter'
 
 // 불완전한 JSON에서 마지막 완전한 블록까지만 추출
 function repairJson(raw: string): string {
-  let text = raw.replace(/```json\n?|\n?```/g, '').trim()
+  const text = raw.replace(/```json\n?|\n?```/g, '').trim()
 
   try {
     JSON.parse(text)
