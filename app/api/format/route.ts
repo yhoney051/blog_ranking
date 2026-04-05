@@ -74,6 +74,12 @@ export async function POST(req: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[POST /api/format]', message)
-    return NextResponse.json({ error: `포맷 분석에 실패했습니다: ${message}` }, { status: 500 })
+
+    // Rate limit 에러 감지
+    if (message.includes('429') || message.includes('RESOURCE_EXHAUSTED') || message.includes('quota')) {
+      return NextResponse.json({ error: 'AI 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요.' }, { status: 429 })
+    }
+
+    return NextResponse.json({ error: '포맷 분석에 실패했습니다. 잠시 후 다시 시도해주세요.' }, { status: 500 })
   }
 }
