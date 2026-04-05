@@ -16,6 +16,69 @@ import { LineChart, Line, ResponsiveContainer } from 'recharts'
 
 type Props = { keywords: Keyword[]; onRefreshed: () => void; onDeleted: () => void }
 
+// 태그 인라인 편집 컴포넌트
+function EditableTag({ keyword, onUpdated }: { keyword: Keyword; onUpdated: () => void }) {
+  const [editing, setEditing] = useState(false)
+  const [value, setValue] = useState(keyword.tag || '')
+  const [saving, setSaving] = useState(false)
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/keywords/${keyword.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tag: value }),
+      })
+      if (res.ok) {
+        toast.success('태그가 수정되었습니다')
+        onUpdated()
+      } else {
+        toast.error('태그 수정에 실패했습니다')
+      }
+    } catch {
+      toast.error('태그 수정 중 오류가 발생했습니다')
+    } finally {
+      setSaving(false)
+      setEditing(false)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSave()
+    if (e.key === 'Escape') { setEditing(false); setValue(keyword.tag || '') }
+  }
+
+  if (editing) {
+    return (
+      <Input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleSave}
+        onKeyDown={handleKeyDown}
+        disabled={saving}
+        placeholder="태그 입력"
+        className="h-7 w-24 text-xs"
+        autoFocus
+      />
+    )
+  }
+
+  return (
+    <button
+      onClick={() => setEditing(true)}
+      className="cursor-pointer hover:opacity-70 transition-opacity"
+      title="클릭하여 태그 수정"
+    >
+      {keyword.tag ? (
+        <Badge variant="secondary" className="text-xs">{keyword.tag}</Badge>
+      ) : (
+        <span className="text-xs text-muted-foreground hover:text-primary">+ 태그</span>
+      )}
+    </button>
+  )
+}
+
 const PAGE_SIZE = 10
 
 // 순위에 따른 뱃지 색상
@@ -229,11 +292,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
               <TableRow key={kw.id} className="border-b border-border/50 hover:bg-accent/30 transition-colors">
                 <TableCell className="font-medium text-card-foreground py-3.5">{kw.keyword}</TableCell>
                 <TableCell className="py-3.5 hidden sm:table-cell">
-                  {kw.tag ? (
-                    <Badge variant="secondary" className="text-xs">{kw.tag}</Badge>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">-</span>
-                  )}
+                  <EditableTag keyword={kw} onUpdated={onRefreshed} />
                 </TableCell>
                 <TableCell className="py-3.5">
                   <a
