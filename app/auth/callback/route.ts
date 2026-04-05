@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
 
     if (count === 0) {
-      return NextResponse.redirect(new URL('/onboarding', request.url))
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
