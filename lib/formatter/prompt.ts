@@ -44,7 +44,7 @@ level 3: 소제목 (하위 항목)
 - highlight: "#fff9c4" → 노란 형광펜 (핵심 구절)
 
 ## 문장 역할별 도구 선택 기준
-- 소제목/섹션 시작 → line-quote 인용구 (꺾쇠 ┌┘ 스타일). heading은 사용하지 마세요.
+- 소제목/섹션 시작 → line-quote 인용구 (꺾쇠 ┌┘ 스타일). heading은 사용하지 마세요. 소제목 텍스트에는 반드시 bold: true를 적용하세요.
 - 핵심 키워드 1~3개 → bold만 적용
 - 핵심 문장(독자가 반드시 알아야 할 정보) → bold + highlight("#fff9c4") 동시 적용
 - 강조할 구절(3~8어절 정도) → highlight("#fff9c4")만 적용 (bold 없이)
