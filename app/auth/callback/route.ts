@@ -4,6 +4,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse, type NextRequest } from 'next/server'
+import { supabaseServer } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -40,6 +41,19 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type')
   if (type === 'recovery') {
     return NextResponse.redirect(new URL('/reset-password', request.url))
+  }
+
+  // 신규 사용자(키워드 0개)는 온보딩으로, 기존 사용자는 대시보드로
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const { count } = await supabaseServer
+      .from('keywords')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+
+    if (count === 0) {
+      return NextResponse.redirect(new URL('/onboarding', request.url))
+    }
   }
 
   return NextResponse.redirect(new URL('/dashboard', request.url))
