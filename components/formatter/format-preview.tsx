@@ -34,9 +34,9 @@ export function FormatPreview({ result }: FormatPreviewProps) {
         </div>
       </div>
 
-      {/* 본문 영역 */}
-      <div className="flex-1 overflow-y-auto px-5 py-6">
-        <div className="space-y-2">
+      {/* 본문 영역 — 모바일 네이버 블로그 너비 */}
+      <div className="flex-1 overflow-y-auto py-6">
+        <div className="max-w-[375px] mx-auto px-5 space-y-2">
           {result.blocks.map((block, i) => {
             switch (block.type) {
               case 'paragraph':
