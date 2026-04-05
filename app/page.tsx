@@ -305,7 +305,7 @@ export default function HomePage() {
 
               {/* CTA */}
               <Button onClick={handleGoToDashboard} className="w-full h-11 rounded-xl text-sm font-medium">
-                대시보드에서 계속 추적하기
+                다음 키워드 추가
               </Button>
             </div>
           )}
