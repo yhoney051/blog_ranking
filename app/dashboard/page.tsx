@@ -112,8 +112,8 @@ export default function Home() {
         <div className="p-4 lg:p-6 space-y-8 max-w-[1400px] mx-auto">
           {/* 비회원 배너 */}
           {isLoggedIn === false && (
-            <div className="rounded-xl border border-blue-200/60 dark:border-blue-800/50 bg-blue-50 dark:bg-blue-900/20 p-4 flex items-center justify-between">
-              <span className="text-sm text-blue-700 dark:text-blue-400">
+            <div className="rounded-xl border border-violet-200/60 dark:border-violet-800/50 bg-violet-50 dark:bg-violet-900/20 p-4 flex items-center justify-between">
+              <span className="text-sm text-violet-700 dark:text-violet-400">
                 가입하면 키워드가 영구 저장되고, 매일 자동으로 순위를 추적해요
               </span>
               <Link href="/signup">

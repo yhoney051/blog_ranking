@@ -37,7 +37,7 @@ export function Sidebar() {
     >
       {/* 로고 */}
       <div className="flex items-center gap-2 px-4 h-14 border-b border-sidebar-border">
-        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shrink-0">
+        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-violet-600 text-white dark:bg-violet-500 dark:text-white shrink-0">
           <BarChart3 className="h-4 w-4" />
         </div>
         {!collapsed && (

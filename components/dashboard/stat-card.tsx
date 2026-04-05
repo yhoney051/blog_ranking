@@ -37,7 +37,7 @@ export function StatCard({
       className={cn(
         "rounded-xl border bg-card p-4 transition-colors",
         isNorthstar
-          ? "border-blue-200 dark:border-blue-800/50 ring-1 ring-blue-500/10"
+          ? "border-violet-200 dark:border-violet-800/50 ring-1 ring-violet-500/10"
           : "border-slate-200/60 dark:border-slate-700/50"
       )}
     >
@@ -47,7 +47,7 @@ export function StatCard({
           <p
             className={cn(
               "text-2xl font-bold tabular-nums tracking-tight",
-              isNorthstar ? "text-blue-600 dark:text-blue-400" : "text-card-foreground"
+              isNorthstar ? "text-violet-600 dark:text-violet-400" : "text-card-foreground"
             )}
           >
             {value}
@@ -57,7 +57,7 @@ export function StatCard({
           className={cn(
             "flex items-center justify-center h-10 w-10 rounded-lg flex-shrink-0",
             iconClassName || (isNorthstar
-              ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+              ? "bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
               : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")
           )}
         >
@@ -78,7 +78,7 @@ export function StatCard({
           </span>
         )}
         {badge && (
-          <span className="text-[10px] bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-1.5 py-0.5 rounded-md font-medium">
+          <span className="text-[10px] bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 px-1.5 py-0.5 rounded-md font-medium">
             {badge}
           </span>
         )}
