@@ -14,21 +14,13 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
     <div className="relative my-4">
       <ToolBadge toolName={toolName} />
 
-      {/* 따옴표: 큰 회색 따옴표 장식 + 소제목용 (bold는 큰 글씨) */}
+      {/* 따옴표: 큰 회색 따옴표 장식 + 인용문 */}
       {variant === 'quotemark' && (
         <blockquote className="py-6 px-4">
           <span className="block text-5xl text-slate-300 dark:text-slate-600 leading-none mb-3 font-serif">&ldquo;</span>
-          <div className="pl-2 whitespace-pre-wrap">
-            {content.map((seg, i) => (
-              <span
-                key={i}
-                className={seg.bold ? 'block text-xl font-bold text-foreground leading-snug mt-1' : 'text-[15px] leading-relaxed text-foreground'}
-                style={seg.color ? { color: seg.color } : undefined}
-              >
-                {seg.text}
-              </span>
-            ))}
-          </div>
+          <p className="text-[15px] leading-relaxed text-foreground pl-2 whitespace-pre-wrap">
+            <InlineText segments={content} />
+          </p>
         </blockquote>
       )}
 
@@ -53,13 +45,21 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
         </div>
       )}
 
-      {/* 라인&따옴표: 꺾쇠 ┌ ┘ + 가운데 정렬 */}
+      {/* 라인&따옴표: 꺾쇠 ┌ ┘ + 가운데 정렬 + 소제목용 */}
       {variant === 'line-quote' && (
         <blockquote className="relative py-8 px-8">
           <span className="absolute top-0 left-4 text-3xl text-slate-700 dark:text-slate-400 font-mono leading-none">&#x250C;</span>
-          <p className="text-[15px] leading-relaxed text-foreground text-center whitespace-pre-wrap">
-            <InlineText segments={content} />
-          </p>
+          <div className="text-center whitespace-pre-wrap">
+            {content.map((seg, i) => (
+              <span
+                key={i}
+                className={seg.bold ? 'block text-xl font-bold text-foreground leading-snug mt-1' : 'text-[15px] leading-relaxed text-foreground'}
+                style={seg.color ? { color: seg.color } : undefined}
+              >
+                {seg.text}
+              </span>
+            ))}
+          </div>
           <span className="absolute bottom-0 right-4 text-3xl text-slate-700 dark:text-slate-400 font-mono leading-none">&#x2518;</span>
         </blockquote>
       )}
