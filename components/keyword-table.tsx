@@ -12,9 +12,57 @@ import { Trash2, Search, ExternalLink, ChevronLeft, ChevronRight, ArrowUpDown } 
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-import { LineChart, Line, ResponsiveContainer } from 'recharts'
 
 type Props = { keywords: Keyword[]; onRefreshed: () => void; onDeleted: () => void }
+
+const PAGE_SIZE = 10
+
+// 순위에 따른 색상 위계 (blue → emerald → amber → red)
+function getRankColor(rank: number | null) {
+  if (rank === null) return 'text-muted-foreground'
+  if (rank <= 3) return 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-bold'
+  if (rank <= 10) return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-semibold'
+  if (rank <= 30) return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-semibold'
+  return 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+}
+
+// 인라인 SVG 스파크라인 (64x24px, 끝점 dot 강조)
+function Sparkline({ data, width = 64, height = 24 }: {
+  data: { rank: number; checked_at: string }[];
+  width?: number;
+  height?: number;
+}) {
+  if (data.length < 2) return <span className="text-xs text-muted-foreground">-</span>
+
+  const ranks = data.map(d => d.rank)
+  const min = Math.min(...ranks)
+  const max = Math.max(...ranks)
+  const range = max - min || 1
+
+  // 순위는 낮을수록 좋으므로 y축 반전 (낮은 순위 = 높은 위치)
+  const points = ranks.map((r, i) => ({
+    x: (i / (ranks.length - 1)) * (width - 4) + 2,
+    y: ((r - min) / range) * (height - 6) + 3,
+  }))
+  // 반전: 순위 낮을수록 위쪽
+  const invertedPoints = points.map(p => ({ x: p.x, y: height - p.y }))
+
+  const pathD = invertedPoints
+    .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+    .join(' ')
+
+  const lastPoint = invertedPoints[invertedPoints.length - 1]
+  const isImproving = ranks[ranks.length - 1] < ranks[0]
+  const isSame = ranks[ranks.length - 1] === ranks[0]
+  const color = isSame ? '#94a3b8' : isImproving ? '#10b981' : '#ef4444'
+
+  return (
+    <svg width={width} height={height} className="inline-block">
+      <path d={pathD} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={lastPoint.x} cy={lastPoint.y} r={2.5} fill={color} />
+    </svg>
+  )
+}
 
 // 태그 인라인 편집 컴포넌트
 function EditableTag({ keyword, onUpdated }: { keyword: Keyword; onUpdated: () => void }) {
@@ -73,21 +121,10 @@ function EditableTag({ keyword, onUpdated }: { keyword: Keyword; onUpdated: () =
       {keyword.tag ? (
         <Badge variant="secondary" className="text-xs">{keyword.tag}</Badge>
       ) : (
-        <span className="text-xs text-muted-foreground hover:text-primary">+ 태그</span>
+        <span className="text-xs text-muted-foreground hover:text-foreground">+ 태그</span>
       )}
     </button>
   )
-}
-
-const PAGE_SIZE = 10
-
-// 순위에 따른 뱃지 색상
-function getRankColor(rank: number | null) {
-  if (rank === null) return 'text-muted-foreground'
-  if (rank <= 3) return 'bg-primary/10 text-primary font-bold'
-  if (rank <= 10) return 'bg-success/10 text-success font-semibold'
-  if (rank <= 30) return 'bg-warning/10 text-warning-foreground font-semibold'
-  return 'bg-muted text-muted-foreground'
 }
 
 type RankFilter = 'all' | 'top10' | 'top30' | 'unranked'
@@ -125,7 +162,6 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
   const filtered = useMemo(() => {
     let result = keywords
 
-    // 텍스트 검색
     if (search.trim()) {
       const q = search.toLowerCase()
       result = result.filter(
@@ -133,12 +169,10 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
       )
     }
 
-    // 태그 필터
     if (tagFilter !== 'all') {
       result = result.filter((kw) => kw.tag === tagFilter)
     }
 
-    // 순위 필터
     if (rankFilter === 'top10') {
       result = result.filter((kw) => kw.current_rank !== null && kw.current_rank <= 10)
     } else if (rankFilter === 'top30') {
@@ -147,7 +181,6 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
       result = result.filter((kw) => kw.current_rank === null)
     }
 
-    // 정렬
     result = [...result].sort((a, b) => {
       if (sort === 'rank') {
         const ra = a.current_rank ?? 9999
@@ -157,7 +190,6 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
       if (sort === 'created') {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       }
-      // 변동순: 순위 상승폭이 큰 순서
       const da = a.current_rank !== null && a.previous_rank !== null ? a.previous_rank - a.current_rank : -9999
       const db = b.current_rank !== null && b.previous_rank !== null ? b.previous_rank - b.current_rank : -9999
       return db - da
@@ -166,7 +198,6 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
     return result
   }, [keywords, search, rankFilter, tagFilter, sort])
 
-  // 페이지네이션
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
@@ -194,7 +225,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
               className="pl-8 h-9"
             />
           </div>
-          <span className="text-xs text-muted-foreground hidden sm:block">
+          <span className="text-xs text-muted-foreground hidden sm:block tabular-nums">
             {filtered.length}개 키워드
           </span>
         </div>
@@ -202,86 +233,88 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
           {/* 순위 필터 */}
           <div className="flex items-center gap-1">
             {rankFilters.map((f) => (
-              <Badge
+              <button
                 key={f.key}
-                variant={rankFilter === f.key ? 'default' : 'outline'}
                 className={cn(
-                  'cursor-pointer text-xs px-2.5 py-0.5 transition-colors',
+                  'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                   rankFilter === f.key
-                    ? ''
-                    : 'hover:bg-accent'
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 )}
                 onClick={() => { setRankFilter(f.key); setPage(0) }}
               >
                 {f.label}
-              </Badge>
+              </button>
             ))}
           </div>
 
           {/* 태그 필터 */}
           {availableTags.length > 0 && (
             <>
-              <div className="h-4 w-px bg-border hidden sm:block" />
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
               <div className="flex items-center gap-1 flex-wrap">
-                <Badge
-                  variant={tagFilter === 'all' ? 'default' : 'outline'}
+                <button
                   className={cn(
-                    'cursor-pointer text-xs px-2.5 py-0.5 transition-colors',
-                    tagFilter === 'all' ? '' : 'hover:bg-accent'
+                    'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
+                    tagFilter === 'all'
+                      ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                   )}
                   onClick={() => { setTagFilter('all'); setPage(0) }}
                 >
                   전체 태그
-                </Badge>
+                </button>
                 {availableTags.map((t) => (
-                  <Badge
+                  <button
                     key={t}
-                    variant={tagFilter === t ? 'default' : 'outline'}
                     className={cn(
-                      'cursor-pointer text-xs px-2.5 py-0.5 transition-colors',
-                      tagFilter === t ? '' : 'hover:bg-accent'
+                      'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
+                      tagFilter === t
+                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     )}
                     onClick={() => { setTagFilter(t); setPage(0) }}
                   >
                     {t}
-                  </Badge>
+                  </button>
                 ))}
               </div>
             </>
           )}
 
-          <div className="h-4 w-px bg-border hidden sm:block" />
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
 
           {/* 정렬 */}
           <div className="flex items-center gap-1">
             <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
             {sortOptions.map((s) => (
-              <Badge
+              <button
                 key={s.key}
-                variant={sort === s.key ? 'secondary' : 'outline'}
                 className={cn(
-                  'cursor-pointer text-xs px-2 py-0.5 transition-colors',
-                  sort === s.key ? '' : 'hover:bg-accent'
+                  'text-xs px-2 py-1 rounded-lg font-medium transition-colors',
+                  sort === s.key
+                    ? 'bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 )}
                 onClick={() => setSort(s.key)}
               >
                 {s.label}
-              </Badge>
+              </button>
             ))}
           </div>
         </div>
       </div>
 
       {/* 테이블 */}
-      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-card">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/50 border-b border-border">
+            <TableRow className="bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200/60 dark:border-slate-700/50">
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">키워드</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 hidden sm:table-cell">태그</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">블로그 URL</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center">순위</TableHead>
-              <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center hidden sm:table-cell">추이</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center hidden sm:table-cell">7일 추이</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center">변동</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center">마지막 조회</TableHead>
               <TableHead className="py-3 w-20" />
@@ -289,7 +322,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
           </TableHeader>
           <TableBody>
             {paged.map((kw) => (
-              <TableRow key={kw.id} className="border-b border-border/50 hover:bg-accent/30 transition-colors">
+              <TableRow key={kw.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                 <TableCell className="font-medium text-card-foreground py-3.5">{kw.keyword}</TableCell>
                 <TableCell className="py-3.5 hidden sm:table-cell">
                   <EditableTag keyword={kw} onUpdated={onRefreshed} />
@@ -299,7 +332,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                     href={kw.blog_url.startsWith('http') ? kw.blog_url : `https://${kw.blog_url}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors truncate max-w-[200px]"
+                    className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors truncate max-w-[200px]"
                   >
                     {kw.blog_url.replace(/^https?:\/\//, '').slice(0, 30)}
                     <ExternalLink className="h-3 w-3 shrink-0" />
@@ -307,29 +340,17 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                 </TableCell>
                 <TableCell className="text-center py-3.5">
                   {kw.current_rank !== null ? (
-                    <span className={cn('inline-flex items-center justify-center h-7 min-w-[2rem] rounded-md px-2 text-sm', getRankColor(kw.current_rank))}>
+                    <span className={cn('inline-flex items-center justify-center h-7 min-w-[2rem] rounded-lg px-2 text-sm tabular-nums', getRankColor(kw.current_rank))}>
                       {kw.current_rank}
                     </span>
                   ) : (
                     <span className="text-sm text-muted-foreground">-</span>
                   )}
                 </TableCell>
-                {/* 순위 추이 미니차트 */}
+                {/* 7일 추이 SVG 스파크라인 */}
                 <TableCell className="text-center py-3.5 hidden sm:table-cell">
                   {kw.rank_histories && kw.rank_histories.length >= 2 ? (
-                    <div className="w-20 h-7 mx-auto">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={kw.rank_histories.map((h) => ({ value: 100 - h.rank }))}>
-                          <Line
-                            type="monotone"
-                            dataKey="value"
-                            stroke="hsl(var(--primary))"
-                            strokeWidth={1.5}
-                            dot={false}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <Sparkline data={kw.rank_histories} />
                   ) : (
                     <span className="text-xs text-muted-foreground">-</span>
                   )}
@@ -337,7 +358,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                 <TableCell className="text-center py-3.5">
                   <RankBadge current={kw.current_rank} previous={kw.previous_rank} />
                 </TableCell>
-                <TableCell className="text-center text-xs text-muted-foreground py-3.5">
+                <TableCell className="text-center text-xs text-muted-foreground py-3.5 tabular-nums">
                   {kw.last_checked_at
                     ? new Date(kw.last_checked_at).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
                     : '-'}
@@ -345,7 +366,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                 <TableCell className="py-3.5">
                   <div className="flex gap-0.5 justify-end">
                     <RefreshButton keywordId={kw.id} onRefreshed={onRefreshed} />
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(kw.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(kw.id)} className="h-8 w-8 text-muted-foreground hover:text-red-500">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -359,7 +380,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
       {/* 페이지네이션 */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>
+          <span className="tabular-nums">
             {page * PAGE_SIZE + 1}-{Math.min((page + 1) * PAGE_SIZE, filtered.length)} / {filtered.length}개
           </span>
           <div className="flex items-center gap-1">
@@ -372,7 +393,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
             >
               <ChevronLeft className="h-3 w-3" />
             </Button>
-            <span className="px-2 font-medium">{page + 1} / {totalPages}</span>
+            <span className="px-2 font-medium tabular-nums">{page + 1} / {totalPages}</span>
             <Button
               variant="outline"
               size="icon"

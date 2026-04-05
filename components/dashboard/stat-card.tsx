@@ -2,10 +2,6 @@
 
 import { type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LineChart, Line, ResponsiveContainer } from "recharts";
-
-// 스파크라인 데이터 포인트
-export type SparklinePoint = { value: number };
 
 interface StatCardProps {
   title: string;
@@ -16,9 +12,12 @@ interface StatCardProps {
     value: number;
     isPositive: boolean;
   };
-  // 미니 스파크라인 차트 데이터 (최근 추이)
-  sparkline?: SparklinePoint[];
-  sparklineColor?: string;
+  // 북극성 카드 (평균 순위)
+  variant?: 'default' | 'northstar';
+  // 배지 텍스트 ("TOP 3 유지" 등)
+  badge?: string;
+  // 아이콘 색상 클래스
+  iconClassName?: string;
 }
 
 export function StatCard({
@@ -27,48 +26,60 @@ export function StatCard({
   subtitle,
   icon: Icon,
   trend,
-  sparkline,
-  sparklineColor = "hsl(var(--primary))",
+  variant = 'default',
+  badge,
+  iconClassName,
 }: StatCardProps) {
+  const isNorthstar = variant === 'northstar';
+
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div
+      className={cn(
+        "rounded-xl border bg-card p-4 transition-colors",
+        isNorthstar
+          ? "border-blue-200 dark:border-blue-800/50 ring-1 ring-blue-500/10"
+          : "border-slate-200/60 dark:border-slate-700/50"
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="space-y-1 flex-1 min-w-0">
           <p className="text-xs font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold text-card-foreground">{value}</p>
+          <p
+            className={cn(
+              "text-2xl font-bold tabular-nums tracking-tight",
+              isNorthstar ? "text-blue-600 dark:text-blue-400" : "text-card-foreground"
+            )}
+          >
+            {value}
+          </p>
         </div>
-        {/* 스파크라인이 있으면 차트 표시, 없으면 아이콘 표시 */}
-        {sparkline && sparkline.length >= 2 ? (
-          <div className="w-20 h-10 flex-shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={sparkline}>
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke={sparklineColor}
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 text-primary flex-shrink-0">
-            <Icon className="h-5 w-5" />
-          </div>
-        )}
+        <div
+          className={cn(
+            "flex items-center justify-center h-10 w-10 rounded-lg flex-shrink-0",
+            iconClassName || (isNorthstar
+              ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+              : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")
+          )}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
       </div>
-      <div className="mt-2 flex items-center gap-2">
+      <div className="mt-2 flex items-center gap-2 flex-wrap">
         {trend && (
           <span
             className={cn(
-              "inline-flex items-center text-xs font-medium rounded-full px-1.5 py-0.5",
+              "inline-flex items-center text-xs font-medium rounded-md px-1.5 py-0.5 tabular-nums",
               trend.isPositive
-                ? "text-success bg-success/10"
-                : "text-destructive bg-destructive/10"
+                ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30"
+                : "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30"
             )}
           >
-            {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}
+            {trend.isPositive ? "▲" : "▼"} {Math.abs(trend.value)}
+          </span>
+        )}
+        {badge && (
+          <span className="text-[10px] bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-1.5 py-0.5 rounded-md font-medium">
+            {badge}
           </span>
         )}
         {subtitle && (

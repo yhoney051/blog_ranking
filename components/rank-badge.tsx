@@ -1,12 +1,11 @@
 import { RankDelta } from '@/types'
-import { ChevronUp, ChevronDown, Minus, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // 순위 변동(▲▼) 표시 뱃지
 function getRankDelta(current: number | null, previous: number | null): RankDelta {
   if (current === null) return 'new'
   if (previous === null) return 'new'
-  if (current < previous) return 'up'    // 숫자 작을수록 순위 높음
+  if (current < previous) return 'up'
   if (current > previous) return 'down'
   return 'same'
 }
@@ -18,34 +17,26 @@ export function RankBadge({ current, previous }: Props) {
   const diff = previous !== null && current !== null ? Math.abs(previous - current) : 0
 
   const styles = {
-    new: 'bg-primary/10 text-primary border-primary/20',
-    up: 'bg-success/10 text-success border-success/20',
-    down: 'bg-destructive/10 text-destructive border-destructive/20',
-    same: 'bg-muted text-muted-foreground border-border',
-  }
-
-  const icons = {
-    new: <Sparkles className="h-3 w-3" />,
-    up: <ChevronUp className="h-3 w-3" />,
-    down: <ChevronDown className="h-3 w-3" />,
-    same: <Minus className="h-3 w-3" />,
+    new: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
+    up: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+    down: 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400',
+    same: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
   }
 
   const labels = {
     new: 'NEW',
-    up: `${diff}`,
-    down: `${diff}`,
-    same: '0',
+    up: `▲ ${diff}`,
+    down: `▼ ${diff}`,
+    same: '-',
   }
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-full border px-2 py-0.5 text-xs font-semibold',
+        'inline-flex items-center gap-0.5 rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums',
         styles[delta]
       )}
     >
-      {icons[delta]}
       {labels[delta]}
     </span>
   )

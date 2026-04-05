@@ -1,61 +1,11 @@
 "use client";
 
 import { Keyword } from "@/types";
-import { StatCard, type SparklinePoint } from "./stat-card";
+import { StatCard } from "./stat-card";
 import { Search, TrendingUp, Trophy, ArrowUpCircle } from "lucide-react";
 
 interface StatsCardsProps {
   keywords: Keyword[];
-}
-
-// 키워드 목록에서 간단한 스파크라인 데이터 생성 (순위 → 역수로 변환: 순위 낮을수록 값 높게)
-function buildAvgRankSparkline(keywords: Keyword[]): SparklinePoint[] {
-  const ranked = keywords.filter(
-    (k) => k.current_rank !== null && k.previous_rank !== null
-  );
-  if (ranked.length === 0) return [];
-
-  const prevAvg =
-    ranked.reduce((s, k) => s + (k.previous_rank ?? 0), 0) / ranked.length;
-  const curAvg =
-    ranked.reduce((s, k) => s + (k.current_rank ?? 0), 0) / ranked.length;
-  // 중간값으로 3포인트 스파크라인 생성
-  const midAvg = (prevAvg + curAvg) / 2 + (Math.random() - 0.5) * 2;
-
-  // 순위는 낮을수록 좋으므로 역수 변환 (차트에서 위로 갈수록 좋게)
-  return [
-    { value: 100 - prevAvg },
-    { value: 100 - midAvg },
-    { value: 100 - curAvg },
-  ];
-}
-
-function buildTop10Sparkline(keywords: Keyword[]): SparklinePoint[] {
-  const ranked = keywords.filter((k) => k.current_rank !== null);
-  if (ranked.length === 0) return [];
-
-  const prevTop10 = keywords.filter(
-    (k) => k.previous_rank !== null && k.previous_rank <= 10
-  ).length;
-  const curTop10 = ranked.filter((k) => (k.current_rank ?? 999) <= 10).length;
-
-  return [{ value: prevTop10 }, { value: curTop10 }];
-}
-
-function buildUpCountSparkline(keywords: Keyword[]): SparklinePoint[] {
-  const withBoth = keywords.filter(
-    (k) => k.current_rank !== null && k.previous_rank !== null
-  );
-  if (withBoth.length === 0) return [];
-
-  const upCount = withBoth.filter(
-    (k) => k.current_rank! < k.previous_rank!
-  ).length;
-  const downCount = withBoth.filter(
-    (k) => k.current_rank! > k.previous_rank!
-  ).length;
-
-  return [{ value: downCount }, { value: upCount }];
 }
 
 export function StatsCards({ keywords }: StatsCardsProps) {
@@ -81,6 +31,12 @@ export function StatsCards({ keywords }: StatsCardsProps) {
     (k) => k.current_rank !== null && k.previous_rank !== null && k.current_rank > k.previous_rank
   ).length;
 
+  // 북극성 배지 결정
+  const northstarBadge = avgRank > 0 && avgRank <= 3 ? "TOP 3 유지"
+    : avgRank > 0 && avgRank <= 10 ? "TOP 10 유지"
+    : avgRank > 0 && avgRank <= 20 ? "TOP 20 이내"
+    : undefined;
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard
@@ -94,8 +50,8 @@ export function StatsCards({ keywords }: StatsCardsProps) {
         value={ranked.length > 0 ? `${avgRank}위` : "-"}
         subtitle={ranked.length > 0 ? `${ranked.length}개 키워드 기준` : "조회된 키워드 없음"}
         icon={TrendingUp}
-        sparkline={buildAvgRankSparkline(keywords)}
-        sparklineColor="hsl(var(--primary))"
+        variant="northstar"
+        badge={northstarBadge}
       />
       <StatCard
         title="TOP 10 진입"
@@ -106,8 +62,7 @@ export function StatsCards({ keywords }: StatsCardsProps) {
             : "조회된 키워드 없음"
         }
         icon={Trophy}
-        sparkline={buildTop10Sparkline(keywords)}
-        sparklineColor="hsl(var(--success))"
+        iconClassName="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
       />
       <StatCard
         title="순위 상승"
@@ -115,8 +70,7 @@ export function StatsCards({ keywords }: StatsCardsProps) {
         trend={downCount > 0 ? { value: downCount, isPositive: false } : undefined}
         subtitle={downCount > 0 ? "하락" : "하락 없음"}
         icon={ArrowUpCircle}
-        sparkline={buildUpCountSparkline(keywords)}
-        sparklineColor="hsl(var(--success))"
+        iconClassName="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
       />
     </div>
   );

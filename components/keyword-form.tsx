@@ -46,14 +46,14 @@ export function KeywordForm({ onAdded }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-card overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-accent/50 transition-colors"
       >
         <span className="flex items-center gap-2 text-sm font-semibold text-card-foreground">
-          <Plus className="h-4 w-4 text-primary" />
+          <Plus className="h-4 w-4 text-emerald-500" />
           키워드 등록
         </span>
         {open ? (

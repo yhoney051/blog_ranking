@@ -37,7 +37,7 @@ export function Sidebar() {
     >
       {/* 로고 */}
       <div className="flex items-center gap-2 px-4 h-14 border-b border-sidebar-border">
-        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary text-primary-foreground shrink-0">
+        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shrink-0">
           <BarChart3 className="h-4 w-4" />
         </div>
         {!collapsed && (
@@ -58,7 +58,7 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                item.label === "대시보드" && "bg-sidebar-accent text-sidebar-primary"
+                item.label === "대시보드" && "bg-sidebar-accent text-foreground font-semibold"
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -87,7 +87,7 @@ export function Sidebar() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <div className="mx-auto flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-xs font-bold cursor-default">
+                  <div className="mx-auto flex items-center justify-center h-8 w-8 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-xs font-bold cursor-default">
                     {profile.email.slice(0, 2).toUpperCase()}
                   </div>
                 }
@@ -98,7 +98,7 @@ export function Sidebar() {
             </Tooltip>
           ) : (
             <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0">
+              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-xs font-bold shrink-0">
                 {profile.email.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">

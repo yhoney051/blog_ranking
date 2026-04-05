@@ -25,6 +25,7 @@ const config: Config = {
         destructive: { DEFAULT: "var(--destructive)" },
         success: { DEFAULT: "var(--success)", foreground: "var(--success-foreground)" },
         warning: { DEFAULT: "var(--warning)", foreground: "var(--warning-foreground)" },
+        info: { DEFAULT: "var(--info)", foreground: "var(--info-foreground)" },
         muted: { DEFAULT: "var(--muted)", foreground: "var(--muted-foreground)" },
         accent: { DEFAULT: "var(--accent)", foreground: "var(--accent-foreground)" },
         card: { DEFAULT: "var(--card)", foreground: "var(--card-foreground)" },

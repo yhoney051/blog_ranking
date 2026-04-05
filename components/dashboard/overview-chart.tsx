@@ -9,7 +9,6 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
   CartesianGrid,
-  Legend,
 } from "recharts";
 
 interface OverviewChartProps {
@@ -22,7 +21,7 @@ export function OverviewChart({ keywords }: OverviewChartProps) {
 
   if (ranked.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-card p-6">
         <h3 className="text-sm font-semibold text-card-foreground mb-4">순위 분포</h3>
         <p className="text-center text-muted-foreground py-8 text-sm">
           조회된 키워드가 없습니다.
@@ -55,10 +54,20 @@ export function OverviewChart({ keywords }: OverviewChartProps) {
   }));
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+    <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-card p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-card-foreground">순위 분포</h3>
-        <span className="text-xs text-muted-foreground">{ranked.length}개 키워드</span>
+        {/* 커스텀 HTML 범례 */}
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+            현재
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-sm bg-slate-400" />
+            이전
+          </span>
+        </div>
       </div>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data} barGap={2}>
@@ -79,17 +88,12 @@ export function OverviewChart({ keywords }: OverviewChartProps) {
             contentStyle={{
               backgroundColor: "var(--card)",
               border: "1px solid var(--border)",
-              borderRadius: "8px",
+              borderRadius: "12px",
               fontSize: "12px",
             }}
           />
-          <Legend
-            wrapperStyle={{ fontSize: "11px" }}
-            iconType="circle"
-            iconSize={8}
-          />
-          <Bar dataKey="현재" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="이전" fill="var(--chart-2)" opacity={0.4} radius={[4, 4, 0, 0]} />
+          <Bar dataKey="현재" fill="#10b981" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="이전" fill="#94a3b8" opacity={0.5} radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

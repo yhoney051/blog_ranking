@@ -9,6 +9,7 @@ import { KeywordForm } from '@/components/keyword-form'
 import { KeywordTable } from '@/components/keyword-table'
 import { RefreshAllButton } from '@/components/refresh-all-button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
 
 // 메인 대시보드 — 인증된 사용자의 키워드 관리
 export default function Home() {
@@ -47,11 +48,14 @@ export default function Home() {
       </Header>
 
       <main className="flex-1 overflow-y-auto">
-        <div className="p-4 lg:p-6 space-y-6 max-w-[1400px] mx-auto">
+        <div className="p-4 lg:p-6 space-y-8 max-w-[1400px] mx-auto">
           {/* 에러 메시지 */}
           {error && (
-            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-              {error}
+            <div className="rounded-xl border border-red-200/60 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-4 flex items-center justify-between">
+              <span className="text-sm text-red-700 dark:text-red-400">{error}</span>
+              <Button variant="ghost" size="sm" onClick={fetchKeywords} className="text-red-600 hover:text-red-700 h-7 text-xs">
+                재시도
+              </Button>
             </div>
           )}
 
