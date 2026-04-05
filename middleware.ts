@@ -27,11 +27,14 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 미인증 사용자 → /login으로 리다이렉트 (대시보드만 보호)
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+  // 미인증 사용자 → /dashboard/billing, /dashboard/settings만 보호 (대시보드 메인은 비회원 허용)
+  if (!user && request.nextUrl.pathname.startsWith('/dashboard/')) {
+    const protectedPaths = ['/dashboard/billing', '/dashboard/settings']
+    if (protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
   }
 
   // 미인증 사용자 → API 요청 차단

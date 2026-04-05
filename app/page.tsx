@@ -110,13 +110,26 @@ export default function HomePage() {
     }
   }
 
-  const handleRetry = () => {
-    setStep(1)
-    setKeyword('')
-    setBlogUrl('')
-    setResult(null)
-    setLimitReached(false)
+  // localStorage에 비회원 키워드 저장 후 대시보드 이동
+  const handleGoToDashboard = () => {
+    if (result) {
+      const existing = JSON.parse(localStorage.getItem('guest_keywords') || '[]')
+      const guestKeyword = {
+        id: crypto.randomUUID(),
+        keyword: result.keyword,
+        blog_url: result.blog_url,
+        current_rank: result.rank,
+        previous_rank: null,
+        last_checked_at: new Date().toISOString(),
+        tag: null,
+        created_at: new Date().toISOString(),
+      }
+      existing.push(guestKeyword)
+      localStorage.setItem('guest_keywords', JSON.stringify(existing))
+    }
+    router.push('/dashboard')
   }
+
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
@@ -291,22 +304,9 @@ export default function HomePage() {
               </div>
 
               {/* CTA */}
-              {isLoggedIn ? (
-                <Button onClick={() => router.push('/dashboard')} className="w-full h-11 rounded-xl text-sm font-medium">
-                  대시보드에서 계속 추적하기
-                </Button>
-              ) : (
-                <div className="space-y-3">
-                  <Link href="/signup" className="block">
-                    <Button className="w-full h-11 rounded-xl text-sm font-medium">
-                      가입하고 계속 추적하기
-                    </Button>
-                  </Link>
-                  <Button variant="outline" onClick={handleRetry} className="w-full h-11 rounded-xl text-sm font-medium">
-                    다른 키워드 조회하기
-                  </Button>
-                </div>
-              )}
+              <Button onClick={handleGoToDashboard} className="w-full h-11 rounded-xl text-sm font-medium">
+                대시보드에서 계속 추적하기
+              </Button>
             </div>
           )}
 
