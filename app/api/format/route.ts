@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       contents: buildUserPrompt(text),
       config: {
         systemInstruction: SYSTEM_PROMPT,
-        maxOutputTokens: 16384,
+        maxOutputTokens: 65536,
         responseMimeType: 'application/json',
       },
     })
