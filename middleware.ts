@@ -50,5 +50,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/signup', '/api/((?!auth|cron).*)'],
+  matcher: ['/dashboard/:path*', '/login', '/signup', '/api/((?!auth|cron|webhooks).*)'],
 }

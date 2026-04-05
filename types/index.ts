@@ -38,3 +38,33 @@ export type KeywordFormInput = {
 
 // 순위 변동 방향
 export type RankDelta = 'up' | 'down' | 'same' | 'new'
+
+// 구독 정보
+export type Subscription = {
+  id: string
+  user_id: string
+  plan: string
+  status: string
+  billing_key: string | null
+  toss_customer_key: string | null
+  current_period_start: string | null
+  current_period_end: string | null
+  cancel_at_period_end: boolean
+  retry_count: number
+  created_at: string
+  updated_at: string
+}
+
+// 결제 이력
+export type Payment = {
+  id: string
+  user_id: string
+  subscription_id: string | null
+  toss_payment_key: string | null
+  toss_order_id: string
+  amount: number
+  status: string
+  paid_at: string | null
+  failed_reason: string | null
+  created_at: string
+}

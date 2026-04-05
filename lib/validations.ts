@@ -24,3 +24,14 @@ export const keywordCreateSchema = z.object({
 export const rankCheckSchema = z.object({
   id: z.string().uuid('유효하지 않은 키워드 ID입니다.'),
 })
+
+// 구독 시작 요청 검증
+export const subscribeSchema = z.object({
+  authKey: z.string().min(1, '인증 키가 필요합니다.'),
+  customerKey: z.string().min(1, '고객 키가 필요합니다.'),
+})
+
+// 구독 취소 요청 검증
+export const cancelSubscriptionSchema = z.object({
+  reason: z.string().max(200, '사유는 200자 이내로 입력해주세요.').optional(),
+})

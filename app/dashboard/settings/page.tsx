@@ -140,12 +140,15 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* 베타 안내 */}
+          {/* 플랜 안내 */}
           <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground text-center">
-                현재 무료 베타 기간입니다. 유료 플랜은 준비 중이며, 베타 기간 동안 무료로 이용하실 수 있습니다.
+            <CardContent className="pt-6 text-center space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Pro 플랜으로 업그레이드하면 키워드를 최대 100개까지 등록할 수 있습니다.
               </p>
+              <a href="/dashboard/billing">
+                <Button variant="outline">결제 관리로 이동</Button>
+              </a>
             </CardContent>
           </Card>
         </div>
