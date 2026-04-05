@@ -14,13 +14,21 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
     <div className="relative my-4">
       <ToolBadge toolName={toolName} />
 
-      {/* 따옴표: 큰 회색 따옴표 장식 + 인용문 */}
+      {/* 라인따옴표: 큰 따옴표 ❝ + 하단 실선 + 소제목용 */}
       {variant === 'quotemark' && (
-        <blockquote className="py-6 px-4">
-          <span className="block text-5xl text-slate-300 dark:text-slate-600 leading-none mb-3 font-serif">&ldquo;</span>
-          <p className="text-[15px] leading-relaxed text-foreground pl-2 whitespace-pre-wrap">
-            <InlineText segments={content} />
-          </p>
+        <blockquote className="py-6 px-4 border-b border-slate-300 dark:border-slate-600">
+          <span className="block text-5xl text-slate-400 dark:text-slate-500 leading-none mb-4 font-serif">&ldquo;</span>
+          <div className="pl-2 whitespace-pre-wrap">
+            {content.map((seg, i) => (
+              <span
+                key={i}
+                className={seg.bold ? 'block text-xl font-bold text-foreground leading-snug mt-1' : 'text-[15px] leading-relaxed text-foreground'}
+                style={seg.color ? { color: seg.color } : undefined}
+              >
+                {seg.text}
+              </span>
+            ))}
+          </div>
         </blockquote>
       )}
 
