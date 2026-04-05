@@ -8,10 +8,11 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { LayoutDashboard, Settings, CreditCard } from "lucide-react";
+import { LayoutDashboard, Settings, CreditCard, FileText } from "lucide-react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "대시보드", href: "/dashboard" },
+  { icon: FileText, label: "원고 포맷터", href: "/dashboard/formatter" },
   { icon: CreditCard, label: "결제", href: "/dashboard/billing" },
   { icon: Settings, label: "설정", href: "/dashboard/settings" },
 ];

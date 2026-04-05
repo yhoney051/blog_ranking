@@ -35,3 +35,8 @@ export const subscribeSchema = z.object({
 export const cancelSubscriptionSchema = z.object({
   reason: z.string().max(200, '사유는 200자 이내로 입력해주세요.').optional(),
 })
+
+// 블로그 원고 포맷 분석 요청 검증
+export const formatRequestSchema = z.object({
+  text: z.string().min(10, '최소 10자 이상의 원고를 입력해주세요.').max(10000, '원고는 10,000자 이내로 입력해주세요.'),
+})
