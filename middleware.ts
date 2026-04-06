@@ -42,8 +42,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
   }
 
-  // 이미 로그인한 사용자가 /login, /signup 접근 시 → /dashboard로
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
+  // 이미 로그인한 사용자가 /, /onboarding, /login, /signup 접근 시 → /dashboard로
+  if (user && ['/', '/onboarding', '/login', '/signup'].includes(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
@@ -53,5 +53,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/signup', '/api/((?!auth|cron|webhooks|guest-rank-check|format).*)'],
+  matcher: ['/', '/onboarding', '/dashboard/:path*', '/login', '/signup', '/api/((?!auth|cron|webhooks|guest-rank-check|format).*)'],
 }
