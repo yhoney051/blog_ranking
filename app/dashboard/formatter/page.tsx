@@ -86,40 +86,39 @@ export default function FormatterPage() {
                   <div className="space-y-2">
                     <span className="text-[10px] font-bold text-red-400 uppercase">Before</span>
                     <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                      오늘은 대구에서 유명한 피부과를 다녀왔어요. 요즘 피부 고민이 많아서 검색하다가 후기가 좋은 곳을 찾았거든요. 위치는 동성로 근처인데 주차가 편해서 좋았어요. 상담도 꼼꼼하게 해주시고 시술도 만족스러웠습니다. 가격도 합리적이라 재방문 의사 있어요.
+                      글이 읽히지 않는 가장 큰 이유는 가독성이 부족하기 때문이다. 문장을 길게 이어 쓰기보다 짧게 끊어서 쓰는 것이 중요하다. 또한 핵심 내용은 볼드 처리로 강조하고, 중요한 부분은 밑줄이나 기울임으로 시선을 잡아줘야 한다. 이런 작은 차이가 독자의 피로도를 줄이고, 글의 전달력을 크게 높여준다.
                     </div>
                   </div>
                   {/* After */}
                   <div className="space-y-2">
                     <span className="text-[10px] font-bold text-emerald-500 uppercase">After</span>
                     <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-xs leading-relaxed space-y-2.5">
-                      {/* 인용구 예시 */}
+                      {/* 인용구 */}
                       <div className="border-l-[3px] border-emerald-400 pl-2.5 py-1 text-slate-600 dark:text-slate-300">
-                        <span className="font-bold">대구 피부과</span> 솔직 후기
+                        글이 읽히지 않는 가장 큰 이유는
+                        <br /><span className="font-bold">가독성이 부족하기 때문이다.</span>
                       </div>
                       {/* 본문 + 볼드/하이라이트 */}
                       <p className="text-slate-500 dark:text-slate-400">
-                        오늘은 대구에서 유명한
-                        <br />피부과를 다녀왔어요.
-                      </p>
-                      <p className="text-slate-500 dark:text-slate-400">
-                        요즘 <span className="font-bold text-slate-700 dark:text-slate-200">피부 고민</span>이 많아서
-                        <br />검색하다가 <span className="bg-yellow-100 dark:bg-yellow-900/40 px-0.5">후기가 좋은 곳</span>을
-                        <br />찾았거든요.
+                        문장을 길게 이어 쓰기보다
+                        <br /><span className="font-bold text-slate-700 dark:text-slate-200">짧게 끊어서 쓰는 것</span>이 중요하다.
                       </p>
                       {/* 구분선 */}
                       <div className="flex items-center justify-center gap-1.5 text-slate-300 dark:text-slate-600 text-[10px]">
                         ◇&nbsp;◆&nbsp;◇
                       </div>
-                      {/* 본문 계속 */}
+                      {/* 본문 + 밑줄/기울임 */}
                       <p className="text-slate-500 dark:text-slate-400">
-                        상담도 <span className="font-bold text-slate-700 dark:text-slate-200">꼼꼼하게</span> 해주시고
-                        <br />시술도 만족스러웠습니다.
+                        또한 핵심 내용은
+                        <br /><span className="bg-yellow-100 dark:bg-yellow-900/40 px-0.5">볼드 처리로 강조</span>하고,
+                        <br />중요한 부분은 <span className="italic underline">밑줄이나 기울임</span>으로
+                        <br />시선을 잡아줘야 한다.
                       </p>
-                      {/* 포스트잇 예시 */}
+                      {/* 포스트잇 */}
                       <div className="relative rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-800/40 p-2.5 text-slate-600 dark:text-slate-300">
-                        가격도 합리적이라
-                        <br /><span className="font-bold">재방문 의사 있어요!</span>
+                        이런 작은 차이가
+                        <br />독자의 피로도를 줄이고,
+                        <br /><span className="font-bold">글의 전달력을 크게 높여준다.</span>
                       </div>
                     </div>
                   </div>
