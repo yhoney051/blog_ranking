@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient, getAuthUserId } from '@/lib/supabase/server'
 import { keywordCreateSchema } from '@/lib/validations'
+import { getSearchVolume, isNaverSearchAdConfigured } from '@/lib/naver-searchad'
 
 // GET /api/keywords — 로그인한 사용자의 키워드 목록 조회 (최근 7일 순위 히스토리 포함)
 export async function GET() {
@@ -81,5 +82,23 @@ export async function POST(req: Request) {
     console.error('[POST /api/keywords]', error.message)
     return NextResponse.json({ error: '키워드 등록에 실패했습니다.' }, { status: 500 })
   }
+
+  // 검색량 자동 조회 (비동기, 실패해도 키워드 등록은 성공)
+  if (isNaverSearchAdConfigured() && data) {
+    getSearchVolume([data.keyword])
+      .then(async (volumes) => {
+        if (volumes.length > 0) {
+          await supabase
+            .from('keywords')
+            .update({
+              monthly_search_volume: volumes[0].totalSearchVolume,
+              search_volume_updated_at: new Date().toISOString(),
+            })
+            .eq('id', data.id)
+        }
+      })
+      .catch((err) => console.error('[POST /api/keywords] 검색량 조회 실패:', err))
+  }
+
   return NextResponse.json(data, { status: 201 })
 }

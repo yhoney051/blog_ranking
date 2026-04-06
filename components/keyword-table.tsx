@@ -128,7 +128,7 @@ function EditableTag({ keyword, onUpdated }: { keyword: Keyword; onUpdated: () =
 }
 
 type RankFilter = 'all' | 'top10' | 'top30' | 'unranked'
-type SortOption = 'rank' | 'created' | 'change'
+type SortOption = 'rank' | 'created' | 'change' | 'volume'
 
 const rankFilters: { key: RankFilter; label: string }[] = [
   { key: 'all', label: '전체' },
@@ -141,6 +141,7 @@ const sortOptions: { key: SortOption; label: string }[] = [
   { key: 'rank', label: '순위순' },
   { key: 'created', label: '등록순' },
   { key: 'change', label: '변동순' },
+  { key: 'volume', label: '검색량순' },
 ]
 
 // 키워드 순위 목록 테이블
@@ -189,6 +190,11 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
       }
       if (sort === 'created') {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      }
+      if (sort === 'volume') {
+        const va = a.monthly_search_volume ?? -1
+        const vb = b.monthly_search_volume ?? -1
+        return vb - va
       }
       const da = a.current_rank !== null && a.previous_rank !== null ? a.previous_rank - a.current_rank : -9999
       const db = b.current_rank !== null && b.previous_rank !== null ? b.previous_rank - b.current_rank : -9999
@@ -313,6 +319,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">키워드</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 hidden sm:table-cell">태그</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">블로그 URL</TableHead>
+              <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center hidden md:table-cell">월간 검색량</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center">순위</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center hidden sm:table-cell">7일 추이</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center">변동</TableHead>
@@ -337,6 +344,15 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                     {kw.blog_url.replace(/^https?:\/\//, '').slice(0, 30)}
                     <ExternalLink className="h-3 w-3 shrink-0" />
                   </a>
+                </TableCell>
+                <TableCell className="text-center py-3.5 hidden md:table-cell">
+                  {kw.monthly_search_volume !== null && kw.monthly_search_volume !== undefined ? (
+                    <span className="text-sm tabular-nums text-card-foreground">
+                      {kw.monthly_search_volume.toLocaleString('ko-KR')}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">-</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-center py-3.5">
                   {kw.current_rank !== null ? (

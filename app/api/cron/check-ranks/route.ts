@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
 import { getNaverBlogRank } from '@/lib/serpapi'
+import { getSearchVolume, isNaverSearchAdConfigured } from '@/lib/naver-searchad'
 
 // Vercel 함수 타임아웃 설정 (Pro: 최대 300초)
 export const maxDuration = 300
@@ -76,12 +77,46 @@ export async function GET(request: Request) {
       console.warn(`[CRON] 타임아웃 방지로 ${skipped}개 키워드 건너뜀 (다음 실행에서 처리)`)
     }
 
+    // 검색량 갱신: 7일 이상 지난 키워드만 업데이트
+    let volumeUpdated = 0
+    if (isNaverSearchAdConfigured()) {
+      try {
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+        const staleKeywords = keywords.filter(
+          (kw) => !kw.search_volume_updated_at || kw.search_volume_updated_at < sevenDaysAgo
+        )
+
+        if (staleKeywords.length > 0) {
+          // 최대 50개씩 처리 (API 부하 방지)
+          const volumeBatch = staleKeywords.slice(0, 50)
+          const keywordTexts = volumeBatch.map((kw) => kw.keyword)
+          const volumes = await getSearchVolume(keywordTexts)
+          const volumeMap = new Map(volumes.map((v) => [v.keyword.toLowerCase().trim(), v.totalSearchVolume]))
+          const now = new Date().toISOString()
+
+          for (const kw of volumeBatch) {
+            const volume = volumeMap.get(kw.keyword.toLowerCase().trim())
+            if (volume !== undefined) {
+              await supabaseServer
+                .from('keywords')
+                .update({ monthly_search_volume: volume, search_volume_updated_at: now })
+                .eq('id', kw.id)
+              volumeUpdated++
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[CRON] 검색량 갱신 실패:', err)
+      }
+    }
+
     return NextResponse.json({
       total: keywords.length,
       processed: chunk.length,
       skipped,
       success,
       failed,
+      volumeUpdated,
       checked_at: new Date().toISOString(),
     })
   } catch (err) {

@@ -7,6 +7,8 @@ export type Keyword = {
   tag: string | null            // 분류 태그 (예: 맛집, 여행)
   current_rank: number | null   // 현재 순위 (null = 아직 조회 안 함)
   previous_rank: number | null  // 직전 순위 (변동 계산용)
+  monthly_search_volume: number | null  // 네이버 월간 검색량 (PC+모바일 합산)
+  search_volume_updated_at: string | null  // 검색량 마지막 조회 시각
   last_checked_at: string | null
   created_at: string
   rank_histories?: { rank: number; checked_at: string }[]  // 최근 7일 순위 히스토리
