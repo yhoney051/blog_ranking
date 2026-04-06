@@ -29,9 +29,9 @@
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.145 0.015 250);
 
-    /* primary — lime 브랜드 컬러 */
-    --primary: oklch(0.532 0.157 131.589);
-    --primary-foreground: oklch(0.985 0 0);
+    /* primary — lime 브랜드 컬러 (밝은 형광 라임) */
+    --primary: oklch(0.768 0.233 130);
+    --primary-foreground: oklch(0.205 0.02 130);
 
     /* secondary */
     --secondary: oklch(0.962 0.005 250);
@@ -57,7 +57,7 @@
     /* 테두리 — slate-200/60 */
     --border: oklch(0.922 0.004 250 / 60%);
     --input: oklch(0.922 0.004 250);
-    --ring: oklch(0.532 0.157 131.589);
+    --ring: oklch(0.768 0.233 130);
 
     /* 차트 — emerald(현재) / slate(이전) */
     --chart-1: oklch(0.596 0.145 163.225);
@@ -71,12 +71,12 @@
     /* 사이드바 */
     --sidebar: oklch(0.97 0.005 250);
     --sidebar-foreground: oklch(0.145 0.015 250);
-    --sidebar-primary: oklch(0.532 0.157 131.589);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.768 0.233 130);
+    --sidebar-primary-foreground: oklch(0.205 0.02 130);
     --sidebar-accent: oklch(0.958 0.04 131);
     --sidebar-accent-foreground: oklch(0.38 0.1 131);
     --sidebar-border: oklch(0.922 0.004 250 / 60%);
-    --sidebar-ring: oklch(0.532 0.157 131.589);
+    --sidebar-ring: oklch(0.768 0.233 130);
   }
 
   .dark {

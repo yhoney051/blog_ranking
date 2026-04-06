@@ -136,7 +136,7 @@ export default function HomePage() {
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-600 text-white dark:bg-lime-500 dark:text-white">
+          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-500 text-white dark:bg-lime-500 dark:text-white">
             <BarChart3 className="h-4 w-4" />
           </div>
           <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">수니</span>
@@ -159,12 +159,12 @@ export default function HomePage() {
             <div className="flex items-center justify-center gap-3">
               <div className={cn(
                 'flex items-center justify-center h-8 w-8 rounded-full text-sm font-semibold transition-colors',
-                step >= 1 ? 'bg-lime-600 text-white dark:bg-lime-500 dark:text-white' : 'bg-slate-200 text-slate-400'
+                step >= 1 ? 'bg-lime-500 text-white dark:bg-lime-500 dark:text-white' : 'bg-slate-200 text-slate-400'
               )}>1</div>
-              <div className={cn('h-px w-12 transition-colors', step >= 2 ? 'bg-lime-600 dark:bg-lime-500' : 'bg-slate-200 dark:bg-slate-700')} />
+              <div className={cn('h-px w-12 transition-colors', step >= 2 ? 'bg-lime-500 dark:bg-lime-500' : 'bg-slate-200 dark:bg-slate-700')} />
               <div className={cn(
                 'flex items-center justify-center h-8 w-8 rounded-full text-sm font-semibold transition-colors',
-                step >= 2 ? 'bg-lime-600 text-white dark:bg-lime-500 dark:text-white' : 'bg-slate-200 text-slate-400'
+                step >= 2 ? 'bg-lime-500 text-white dark:bg-lime-500 dark:text-white' : 'bg-slate-200 text-slate-400'
               )}>2</div>
             </div>
           )}
@@ -217,7 +217,7 @@ export default function HomePage() {
                       <svg width="48" height="20" className="inline-block"><path d="M2,16 L12,12 L24,14 L36,6 L46,3" fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="46" cy="3" r="2" fill="#10b981"/></svg>
                     </div>
                     <div className="text-center">
-                      <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-lime-50 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400">NEW</span>
+                      <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-lime-50 text-lime-500 dark:bg-lime-900/30 dark:text-lime-400">NEW</span>
                     </div>
                     <span className="text-[10px] text-slate-400 tabular-nums text-center">방금</span>
                   </div>
@@ -291,7 +291,7 @@ export default function HomePage() {
                   {result.rank !== null ? (
                     <p className={cn(
                       'text-4xl font-bold tabular-nums',
-                      result.rank <= 3 ? 'text-lime-600' :
+                      result.rank <= 3 ? 'text-lime-500' :
                       result.rank <= 10 ? 'text-emerald-600' :
                       result.rank <= 30 ? 'text-amber-600' : 'text-red-500'
                     )}>

@@ -238,7 +238,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                 className={cn(
                   'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                   rankFilter === f.key
-                    ? 'bg-lime-600 text-white dark:bg-lime-500 dark:text-white'
+                    ? 'bg-lime-500 text-white dark:bg-lime-500 dark:text-white'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 )}
                 onClick={() => { setRankFilter(f.key); setPage(0) }}
@@ -257,7 +257,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                   className={cn(
                     'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                     tagFilter === 'all'
-                      ? 'bg-lime-600 text-white dark:bg-lime-500 dark:text-white'
+                      ? 'bg-lime-500 text-white dark:bg-lime-500 dark:text-white'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                   )}
                   onClick={() => { setTagFilter('all'); setPage(0) }}
@@ -270,7 +270,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                     className={cn(
                       'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                       tagFilter === t
-                        ? 'bg-lime-600 text-white dark:bg-lime-500 dark:text-white'
+                        ? 'bg-lime-500 text-white dark:bg-lime-500 dark:text-white'
                         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     )}
                     onClick={() => { setTagFilter(t); setPage(0) }}
