@@ -14,11 +14,11 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
     <div className="relative my-4">
       <ToolBadge toolName={toolName} />
 
-      {/* 라인따옴표: 큰 따옴표 ❝ + 하단 실선 + 소제목용 */}
+      {/* 따옴표: 여는/닫는 큰따옴표 가운데 + 텍스트 가운데 정렬 */}
       {variant === 'quotemark' && (
-        <blockquote className="py-6 px-4 border-b border-slate-300 dark:border-slate-600">
-          <span className="block text-5xl text-slate-400 dark:text-slate-500 leading-none mb-4 font-serif">&ldquo;</span>
-          <div className="pl-2 whitespace-pre-wrap">
+        <blockquote className="py-6 px-4">
+          <span className="block text-5xl text-slate-300 dark:text-slate-500 leading-none mb-4 font-serif text-center">&ldquo;</span>
+          <div className="text-center whitespace-pre-wrap">
             {content.map((seg, i) => (
               <span
                 key={i}
@@ -29,6 +29,7 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
               </span>
             ))}
           </div>
+          <span className="block text-5xl text-slate-300 dark:text-slate-500 leading-none mt-4 font-serif text-center">&rdquo;</span>
         </blockquote>
       )}
 
@@ -57,7 +58,7 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
       {variant === 'line-quote' && (
         <blockquote className="relative py-8 px-8">
           <span className="absolute top-0 left-4 text-3xl text-slate-700 dark:text-slate-400 font-mono leading-none">&#x250C;</span>
-          <div className="text-center whitespace-pre-wrap">
+          <div className="text-center whitespace-normal">
             {content.map((seg, i) => (
               <span
                 key={i}
@@ -72,13 +73,20 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
         </blockquote>
       )}
 
-      {/* 포스트잇: 노란 배경, 넓은 패딩 */}
+      {/* 포스트잇: 흰 배경 + 회색 테두리 + 우하단 접힌 모서리 */}
       {variant === 'postit' && (
-        <blockquote className="bg-amber-50 dark:bg-amber-900/20 px-8 py-6 rounded-sm">
-          <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">
-            <InlineText segments={content} />
-          </p>
-        </blockquote>
+        <div className="relative">
+          <blockquote className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 px-8 py-8 text-center">
+            <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">
+              <InlineText segments={content} />
+            </p>
+          </blockquote>
+          {/* 접힌 모서리 (dog-ear) */}
+          <div className="absolute bottom-0 right-0 w-8 h-8 overflow-hidden">
+            <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[32px] border-t-[32px] border-l-slate-300 dark:border-l-slate-600 border-t-white dark:border-t-slate-900" />
+            <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[30px] border-t-[30px] border-l-slate-100 dark:border-l-slate-800 border-t-transparent" />
+          </div>
+        </div>
       )}
 
       {/* 프레임: 회색 배경 박스 + 약한 border */}
