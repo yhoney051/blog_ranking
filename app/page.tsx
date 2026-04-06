@@ -27,7 +27,7 @@ export default function HomePage() {
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-500 text-white dark:bg-lime-500">
+          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-400 text-white dark:bg-lime-400">
             <BarChart3 className="h-4 w-4" />
           </div>
           <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">수니</span>

@@ -59,7 +59,7 @@ export function Header({ title, children }: HeaderProps) {
           <SheetContent side="left" className="w-64 p-0">
             <SheetTitle className="sr-only">네비게이션 메뉴</SheetTitle>
             <div className="flex items-center gap-2 px-4 h-14 border-b">
-              <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-500 text-white dark:bg-lime-500 dark:text-white">
+              <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-400 text-white dark:bg-lime-400 dark:text-white">
                 <BarChart3 className="h-4 w-4" />
               </div>
               <span className="font-semibold text-sm">수니</span>

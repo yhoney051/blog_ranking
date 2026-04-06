@@ -136,7 +136,7 @@ export default function HomePage() {
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-500 text-white dark:bg-lime-500 dark:text-white">
+          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-400 text-white dark:bg-lime-400 dark:text-white">
             <BarChart3 className="h-4 w-4" />
           </div>
           <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">수니</span>
@@ -159,12 +159,12 @@ export default function HomePage() {
             <div className="flex items-center justify-center gap-3">
               <div className={cn(
                 'flex items-center justify-center h-8 w-8 rounded-full text-sm font-semibold transition-colors',
-                step >= 1 ? 'bg-lime-500 text-white dark:bg-lime-500 dark:text-white' : 'bg-slate-200 text-slate-400'
+                step >= 1 ? 'bg-lime-400 text-white dark:bg-lime-400 dark:text-white' : 'bg-slate-200 text-slate-400'
               )}>1</div>
-              <div className={cn('h-px w-12 transition-colors', step >= 2 ? 'bg-lime-500 dark:bg-lime-500' : 'bg-slate-200 dark:bg-slate-700')} />
+              <div className={cn('h-px w-12 transition-colors', step >= 2 ? 'bg-lime-400 dark:bg-lime-400' : 'bg-slate-200 dark:bg-slate-700')} />
               <div className={cn(
                 'flex items-center justify-center h-8 w-8 rounded-full text-sm font-semibold transition-colors',
-                step >= 2 ? 'bg-lime-500 text-white dark:bg-lime-500 dark:text-white' : 'bg-slate-200 text-slate-400'
+                step >= 2 ? 'bg-lime-400 text-white dark:bg-lime-400 dark:text-white' : 'bg-slate-200 text-slate-400'
               )}>2</div>
             </div>
           )}

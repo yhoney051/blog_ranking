@@ -50,7 +50,7 @@ export function Sidebar() {
     >
       {/* 로고 */}
       <div className="flex items-center gap-2.5 px-4 h-14 border-b border-sidebar-border">
-        <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-lime-500 text-white dark:bg-lime-500 dark:text-white shrink-0">
+        <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-lime-400 text-white dark:bg-lime-400 dark:text-white shrink-0">
           <BarChart3 className="h-5 w-5" />
         </div>
         {!collapsed && (
@@ -185,7 +185,7 @@ export function Sidebar() {
                     variant={isPro ? "default" : "secondary"}
                     className={cn(
                       "text-[10px] px-1.5 py-0 h-4",
-                      isPro && "bg-lime-500 hover:bg-lime-500"
+                      isPro && "bg-lime-400 hover:bg-lime-400"
                     )}
                   >
                     {isPro ? "Pro" : "무료"}
