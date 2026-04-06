@@ -58,7 +58,7 @@ export default function HomePage() {
                 <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 h-full flex flex-col gap-4 transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
                   <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${
                     service.color === 'lime'
-                      ? 'bg-lime-100 text-lime-500 dark:bg-lime-900/30 dark:text-lime-400'
+                      ? 'bg-lime-100 text-slate-700 dark:bg-lime-900/30 dark:text-slate-700'
                       : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                   }`}>
                     <service.icon className="h-6 w-6" />
@@ -72,7 +72,7 @@ export default function HomePage() {
                     </p>
                   </div>
                   <div className="mt-auto pt-2">
-                    <span className="inline-flex items-center text-sm font-medium text-lime-500 dark:text-lime-400 group-hover:gap-2 transition-all gap-1">
+                    <span className="inline-flex items-center text-sm font-medium text-slate-700 dark:text-slate-700 group-hover:gap-2 transition-all gap-1">
                       시작하기 <ArrowRight className="h-4 w-4" />
                     </span>
                   </div>

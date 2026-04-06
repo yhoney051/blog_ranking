@@ -47,7 +47,7 @@ export function StatCard({
           <p
             className={cn(
               "text-2xl font-bold tabular-nums tracking-tight",
-              isNorthstar ? "text-lime-500 dark:text-lime-400" : "text-card-foreground"
+              isNorthstar ? "text-slate-700 dark:text-slate-400" : "text-card-foreground"
             )}
           >
             {value}
@@ -57,7 +57,7 @@ export function StatCard({
           className={cn(
             "flex items-center justify-center h-10 w-10 rounded-lg flex-shrink-0",
             iconClassName || (isNorthstar
-              ? "bg-lime-100 text-lime-500 dark:bg-lime-900/30 dark:text-lime-400"
+              ? "bg-lime-100 text-slate-700 dark:bg-lime-900/30 dark:text-slate-400"
               : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")
           )}
         >
@@ -78,7 +78,7 @@ export function StatCard({
           </span>
         )}
         {badge && (
-          <span className="text-[10px] bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 px-1.5 py-0.5 rounded-md font-medium">
+          <span className="text-[10px] bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 px-1.5 py-0.5 rounded-md font-medium">
             {badge}
           </span>
         )}

@@ -72,11 +72,11 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors",
                 active
-                  ? "bg-lime-50 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300"
+                  ? "bg-lime-50 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300"
                   : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
-              <Icon className={cn("h-5 w-5 shrink-0", active && "text-lime-500 dark:text-lime-400")} />
+              <Icon className={cn("h-5 w-5 shrink-0", active && "text-slate-700 dark:text-slate-300")} />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </Link>
           );
@@ -104,11 +104,11 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors",
                   active
-                    ? "bg-lime-50 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300"
+                    ? "bg-lime-50 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300"
                     : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                 )}
               >
-                <Icon className={cn("h-5 w-5 shrink-0", active && "text-lime-500 dark:text-lime-400")} />
+                <Icon className={cn("h-5 w-5 shrink-0", active && "text-slate-700 dark:text-slate-300")} />
                 {!collapsed && <span className="truncate">{item.label}</span>}
               </Link>
             );
@@ -132,10 +132,10 @@ export function Sidebar() {
           {isPro ? (
             <div className="rounded-xl bg-lime-50 dark:bg-lime-900/20 border border-lime-200/60 dark:border-lime-800/40 p-3 text-center">
               <div className="flex items-center justify-center gap-1.5">
-                <Crown className="h-4 w-4 text-lime-500 dark:text-lime-400" />
-                <span className="text-sm font-bold text-lime-700 dark:text-lime-300">Pro 플랜</span>
+                <Crown className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+                <span className="text-sm font-bold text-slate-800 dark:text-slate-300">Pro 플랜</span>
               </div>
-              <p className="text-[11px] text-lime-500/80 mt-1">키워드 100개 · 우선 지원</p>
+              <p className="text-[11px] text-slate-700/80 mt-1">키워드 100개 · 우선 지원</p>
             </div>
           ) : (
             <Link href="/dashboard/billing">
@@ -162,7 +162,7 @@ export function Sidebar() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <div className="mx-auto flex items-center justify-center h-9 w-9 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 text-xs font-bold cursor-default">
+                  <div className="mx-auto flex items-center justify-center h-9 w-9 rounded-full bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 text-xs font-bold cursor-default">
                     {profile.email.slice(0, 2).toUpperCase()}
                   </div>
                 }
@@ -173,7 +173,7 @@ export function Sidebar() {
             </Tooltip>
           ) : (
             <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 text-xs font-bold shrink-0">
+              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 text-xs font-bold shrink-0">
                 {profile.email.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -185,7 +185,7 @@ export function Sidebar() {
                     variant={isPro ? "default" : "secondary"}
                     className={cn(
                       "text-[10px] px-1.5 py-0 h-4",
-                      isPro && "bg-lime-400/25 text-lime-700 hover:bg-lime-400/25 dark:bg-lime-400/15 dark:text-lime-300"
+                      isPro && "bg-lime-400/25 text-slate-800 hover:bg-lime-400/25 dark:bg-lime-400/15 dark:text-slate-300"
                     )}
                   >
                     {isPro ? "Pro" : "무료"}

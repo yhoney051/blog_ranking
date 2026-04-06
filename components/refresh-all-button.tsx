@@ -34,7 +34,7 @@ export function RefreshAllButton({ keywordIds, onRefreshed }: Props) {
   }
 
   return (
-    <Button onClick={handleClick} disabled={loading || keywordIds.length === 0} size="sm" className="bg-lime-300 text-lime-900 hover:bg-lime-400 dark:bg-lime-400 dark:text-lime-950 dark:hover:bg-lime-300">
+    <Button onClick={handleClick} disabled={loading || keywordIds.length === 0} size="sm" className="bg-[#c8e600] text-slate-900 hover:bg-[#d4ed2d] dark:bg-[#c8e600] dark:text-slate-900 dark:hover:bg-[#d4ed2d]">
       <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
       {loading ? '조회 중...' : '전체 새로고침'}
     </Button>

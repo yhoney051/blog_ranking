@@ -31,7 +31,7 @@
 
     /* primary — lime 브랜드 컬러 (밝고 부드러운 라임) */
     --primary: oklch(0.87 0.2 110);
-    --primary-foreground: oklch(0.205 0.02 110);
+    --primary-foreground: oklch(0.145 0.005 250);
 
     /* secondary */
     --secondary: oklch(0.962 0.005 250);
@@ -72,7 +72,7 @@
     --sidebar: oklch(0.97 0.005 250);
     --sidebar-foreground: oklch(0.145 0.015 250);
     --sidebar-primary: oklch(0.87 0.2 110);
-    --sidebar-primary-foreground: oklch(0.205 0.02 110);
+    --sidebar-primary-foreground: oklch(0.145 0.005 250);
     --sidebar-accent: oklch(0.958 0.04 110);
     --sidebar-accent-foreground: oklch(0.38 0.1 110);
     --sidebar-border: oklch(0.922 0.004 250 / 60%);

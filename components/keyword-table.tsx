@@ -20,7 +20,7 @@ const PAGE_SIZE = 10
 // 순위에 따른 색상 위계 (blue → emerald → amber → red)
 function getRankColor(rank: number | null) {
   if (rank === null) return 'text-muted-foreground'
-  if (rank <= 3) return 'bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 font-bold'
+  if (rank <= 3) return 'bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 font-bold'
   if (rank <= 10) return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-semibold'
   if (rank <= 30) return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-semibold'
   return 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
@@ -238,7 +238,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                 className={cn(
                   'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                   rankFilter === f.key
-                    ? 'bg-lime-400/20 text-lime-700 dark:bg-lime-400/15 dark:text-lime-300'
+                    ? 'bg-lime-400/20 text-slate-800 dark:bg-lime-400/15 dark:text-slate-300'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 )}
                 onClick={() => { setRankFilter(f.key); setPage(0) }}
@@ -257,7 +257,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                   className={cn(
                     'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                     tagFilter === 'all'
-                      ? 'bg-lime-400/20 text-lime-700 dark:bg-lime-400/15 dark:text-lime-300'
+                      ? 'bg-lime-400/20 text-slate-800 dark:bg-lime-400/15 dark:text-slate-300'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                   )}
                   onClick={() => { setTagFilter('all'); setPage(0) }}
@@ -270,7 +270,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                     className={cn(
                       'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                       tagFilter === t
-                        ? 'bg-lime-400/20 text-lime-700 dark:bg-lime-400/15 dark:text-lime-300'
+                        ? 'bg-lime-400/20 text-slate-800 dark:bg-lime-400/15 dark:text-slate-300'
                         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     )}
                     onClick={() => { setTagFilter(t); setPage(0) }}

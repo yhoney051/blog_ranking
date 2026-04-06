@@ -113,7 +113,7 @@ export default function Home() {
           {/* 비회원 배너 */}
           {isLoggedIn === false && (
             <div className="rounded-xl border border-lime-200/60 dark:border-lime-800/50 bg-lime-50 dark:bg-lime-900/20 p-4 flex items-center justify-between">
-              <span className="text-sm text-lime-700 dark:text-lime-400">
+              <span className="text-sm text-slate-800 dark:text-slate-400">
                 가입하면 키워드가 영구 저장되고, 매일 자동으로 순위를 추적해요
               </span>
               <Link href="/signup">
