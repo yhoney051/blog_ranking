@@ -18,7 +18,6 @@ export type QuoteVariant =
   | 'speech-bubble'  // 말풍선
   | 'line-quote'     // 라인&따옴표
   | 'postit'         // 포스트잇
-  | 'frame'          // 프레임
 
 // 네이버 블로그 구분선 7종
 export type DividerVariant =

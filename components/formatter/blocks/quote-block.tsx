@@ -54,11 +54,11 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
         </div>
       )}
 
-      {/* 라인&따옴표: 꺾쇠 ┌ ┘ + 가운데 정렬 + 소제목용 */}
+      {/* 라인따옴표: 큰따옴표 ❝ + 하단 실선 + 왼쪽 정렬 + 소제목용 */}
       {variant === 'line-quote' && (
-        <blockquote className="relative py-8 px-8">
-          <span className="absolute top-0 left-4 text-3xl text-slate-700 dark:text-slate-400 font-mono leading-none">&#x250C;</span>
-          <div className="text-center whitespace-normal">
+        <blockquote className="py-6 px-4 border-b border-slate-300 dark:border-slate-600">
+          <span className="block text-5xl text-slate-400 dark:text-slate-500 leading-none mb-4 font-serif">&ldquo;</span>
+          <div className="pl-2 whitespace-normal">
             {content.map((seg, i) => (
               <span
                 key={i}
@@ -69,7 +69,6 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
               </span>
             ))}
           </div>
-          <span className="absolute bottom-0 right-4 text-3xl text-slate-700 dark:text-slate-400 font-mono leading-none">&#x2518;</span>
         </blockquote>
       )}
 
@@ -87,15 +86,6 @@ export function QuoteBlock({ variant, content, toolName }: QuoteBlockProps) {
             <div className="absolute bottom-0 right-0 w-0 h-0 border-l-[30px] border-t-[30px] border-l-slate-100 dark:border-l-slate-800 border-t-transparent" />
           </div>
         </div>
-      )}
-
-      {/* 프레임: 회색 배경 박스 + 약한 border */}
-      {variant === 'frame' && (
-        <blockquote className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-6 py-5 rounded-md">
-          <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">
-            <InlineText segments={content} />
-          </p>
-        </blockquote>
       )}
     </div>
   )
