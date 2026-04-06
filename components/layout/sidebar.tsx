@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, BarChart3, CreditCard, FileText, Plus, HelpCircle, Crown } from "lucide-react";
+import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, BarChart3, CreditCard, FileText, Plus, Crown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
