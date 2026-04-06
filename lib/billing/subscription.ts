@@ -36,7 +36,7 @@ export async function activateSubscription(
     billingKey,
     paymentId,
     amount,
-    `블로그 순위 체커 ${PLANS.pro.label} 플랜`,
+    `수니 ${PLANS.pro.label} 플랜`,
     customerKey
   )
 
@@ -148,7 +148,7 @@ export async function processRenewal(subscriptionId: string): Promise<ActivateRe
     sub.billing_key,
     paymentId,
     amount,
-    `블로그 순위 체커 ${PLANS.pro.label} 플랜 갱신`,
+    `수니 ${PLANS.pro.label} 플랜 갱신`,
     sub.toss_customer_key
   )
 

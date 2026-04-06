@@ -6,7 +6,7 @@ import { Footer } from '@/components/layout/footer'
 
 const services = [
   {
-    title: '블로그 순위 체커',
+    title: '수니 — 블로그 순위 체커',
     description: '네이버 블로그탭에서 내 글의 검색 순위를 추적하고 변동을 확인하세요.',
     icon: BarChart3,
     href: '/onboarding',
@@ -30,7 +30,7 @@ export default function HomePage() {
           <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-violet-600 text-white dark:bg-violet-500">
             <BarChart3 className="h-4 w-4" />
           </div>
-          <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">블로그 도구</span>
+          <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">수니</span>
         </div>
         <Link href="/login">
           <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
@@ -45,7 +45,7 @@ export default function HomePage() {
         <div className="w-full max-w-2xl mx-auto space-y-12 py-8">
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              무엇을 도와드릴까요?
+              내 블로그는 몇 순위인진 궁금할 땐 ? 수니!
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               사용할 도구를 선택하세요

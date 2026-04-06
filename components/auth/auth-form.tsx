@@ -87,7 +87,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </CardTitle>
           <CardDescription>
             {isLogin
-              ? '블로그 순위 체커에 로그인하세요'
+              ? '수니에 로그인하세요'
               : '무료로 시작하세요 — 키워드 3개까지 무료'}
           </CardDescription>
         </CardHeader>

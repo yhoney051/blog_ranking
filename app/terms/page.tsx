@@ -12,7 +12,7 @@ export default function TermsPage() {
     <div className="min-h-screen bg-background">
       <nav className="border-b">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center">
-          <Link href="/" className="text-lg font-bold">블로그 순위 체커</Link>
+          <Link href="/" className="text-lg font-bold">수니</Link>
         </div>
       </nav>
 
@@ -24,7 +24,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">제1조 (목적)</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              본 약관은 블로그 순위 체커(이하 &quot;서비스&quot;)의 이용 조건 및 절차,
+              본 약관은 수니(이하 &quot;서비스&quot;)의 이용 조건 및 절차,
               회사와 이용자 간의 권리와 의무를 규정함을 목적으로 합니다.
             </p>
           </section>

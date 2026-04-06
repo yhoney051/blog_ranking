@@ -43,7 +43,7 @@ export function Sidebar() {
         </div>
         {!collapsed && (
           <span className="font-semibold text-sm text-sidebar-foreground truncate">
-            블로그 순위 체커
+            수니
           </span>
         )}
       </div>

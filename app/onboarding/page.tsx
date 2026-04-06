@@ -139,7 +139,7 @@ export default function HomePage() {
           <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-violet-600 text-white dark:bg-violet-500 dark:text-white">
             <BarChart3 className="h-4 w-4" />
           </div>
-          <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">블로그 순위 체커</span>
+          <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">수니</span>
         </div>
         {!isLoggedIn && (
           <Link href="/login">

@@ -25,7 +25,7 @@ export function Footer() {
         </div>
 
         <p className="text-xs text-muted-foreground/60 text-center">
-          &copy; 2026 블로그 순위 체커. All rights reserved.
+          &copy; 2026 수니. All rights reserved.
         </p>
       </div>
     </footer>

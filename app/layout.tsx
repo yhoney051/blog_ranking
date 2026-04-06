@@ -15,21 +15,21 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: '블로그 순위 체커 — 네이버 블로그 키워드 순위 추적',
-    template: '%s | 블로그 순위 체커',
+    default: '수니 — 네이버 블로그 키워드 순위 추적',
+    template: '%s | 수니',
   },
   description: '네이버 블로그 키워드 순위를 자동으로 추적하세요. 실시간 순위 조회, 변동 알림, 일일 자동 체크까지.',
   keywords: ['네이버 블로그', '블로그 순위', '키워드 순위', 'SEO', '블로그 최적화', '네이버 검색 순위'],
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    siteName: '블로그 순위 체커',
-    title: '블로그 순위 체커 — 네이버 블로그 키워드 순위 추적',
+    siteName: '수니',
+    title: '수니 — 네이버 블로그 키워드 순위 추적',
     description: '키워드를 등록하면 네이버 블로그 탭의 실제 순위를 매일 자동 추적합니다.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '블로그 순위 체커',
+    title: '수니',
     description: '네이버 블로그 키워드 순위를 자동으로 추적하세요.',
   },
   robots: {

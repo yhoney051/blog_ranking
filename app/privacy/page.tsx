@@ -12,7 +12,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-background">
       <nav className="border-b">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center">
-          <Link href="/" className="text-lg font-bold">블로그 순위 체커</Link>
+          <Link href="/" className="text-lg font-bold">수니</Link>
         </div>
       </nav>
 
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-semibold">1. 수집하는 개인정보 항목</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              블로그 순위 체커(이하 &quot;서비스&quot;)는 회원가입 및 서비스 이용 과정에서 아래의 개인정보를 수집합니다.
+              수니(이하 &quot;서비스&quot;)는 회원가입 및 서비스 이용 과정에서 아래의 개인정보를 수집합니다.
             </p>
             <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
               <li><strong>필수 수집 항목:</strong> 이메일 주소, 비밀번호(암호화 저장)</li>

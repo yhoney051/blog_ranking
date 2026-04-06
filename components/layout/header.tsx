@@ -40,7 +40,7 @@ export function Header({ title, children }: HeaderProps) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/login");
+    router.push("/");
     router.refresh();
   };
 
@@ -62,7 +62,7 @@ export function Header({ title, children }: HeaderProps) {
               <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-violet-600 text-white dark:bg-violet-500 dark:text-white">
                 <BarChart3 className="h-4 w-4" />
               </div>
-              <span className="font-semibold text-sm">블로그 순위 체커</span>
+              <span className="font-semibold text-sm">수니</span>
             </div>
             <nav className="py-4 px-2 space-y-1">
               {navItems.map((item) => {
