@@ -2,16 +2,21 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, BarChart3, CreditCard, FileText } from "lucide-react";
+import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, BarChart3, CreditCard, FileText, Plus, HelpCircle, Crown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { icon: LayoutDashboard, label: "대시보드", href: "/dashboard" },
   { icon: FileText, label: "가독성King", href: "/dashboard/formatter" },
+];
+
+const bottomNavItems = [
   { icon: CreditCard, label: "결제", href: "/dashboard/billing" },
   { icon: Settings, label: "설정", href: "/dashboard/settings" },
 ];
@@ -19,6 +24,7 @@ const navItems = [
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [profile, setProfile] = useState<{ email: string; plan: string } | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     fetch("/api/profile")
@@ -29,40 +35,61 @@ export function Sidebar() {
       .catch(() => {});
   }, []);
 
+  const isActive = (href: string) => {
+    if (href === "/dashboard") return pathname === "/dashboard";
+    return pathname.startsWith(href);
+  };
+
+  const isPro = profile?.plan === "pro";
+
   return (
     <aside
       className={cn(
         "hidden lg:flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300",
-        collapsed ? "w-16" : "w-56"
+        collapsed ? "w-16" : "w-60"
       )}
     >
       {/* 로고 */}
-      <div className="flex items-center gap-2 px-4 h-14 border-b border-sidebar-border">
-        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-violet-600 text-white dark:bg-violet-500 dark:text-white shrink-0">
-          <BarChart3 className="h-4 w-4" />
+      <div className="flex items-center gap-2.5 px-4 h-14 border-b border-sidebar-border">
+        <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-violet-600 text-white dark:bg-violet-500 dark:text-white shrink-0">
+          <BarChart3 className="h-5 w-5" />
         </div>
         {!collapsed && (
-          <span className="font-semibold text-sm text-sidebar-foreground truncate">
+          <span className="font-bold text-base text-sidebar-foreground truncate">
             수니
           </span>
         )}
       </div>
 
-      {/* 네비게이션 */}
-      <nav className="flex-1 py-4 px-2 space-y-1">
+      {/* 상단 퀵 액션 */}
+      {!collapsed && (
+        <div className="px-3 pt-4 pb-2">
+          <Link href="/dashboard">
+            <Button variant="outline" className="w-full h-10 rounded-xl text-sm font-semibold border-slate-200/60 dark:border-slate-700/50 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+              <Plus className="h-4 w-4 mr-2 text-violet-500" />
+              키워드 추가하기
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {/* 메인 네비게이션 */}
+      <nav className="flex-1 py-3 px-2.5 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
+          const active = isActive(item.href);
           const linkContent = (
             <Link
               key={item.label}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                item.label === "대시보드" && "bg-sidebar-accent text-foreground font-semibold"
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors",
+                active
+                  ? "bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className={cn("h-5 w-5 shrink-0", active && "text-violet-600 dark:text-violet-400")} />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </Link>
           );
@@ -77,7 +104,58 @@ export function Sidebar() {
           }
           return <div key={item.label}>{linkContent}</div>;
         })}
+
+        {/* 보조 네비게이션 */}
+        <div className="pt-4">
+          <Separator className="mb-3" />
+          {bottomNavItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
+            const linkContent = (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors",
+                  active
+                    ? "bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+                    : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                )}
+              >
+                <Icon className={cn("h-5 w-5 shrink-0", active && "text-violet-600 dark:text-violet-400")} />
+                {!collapsed && <span className="truncate">{item.label}</span>}
+              </Link>
+            );
+
+            if (collapsed) {
+              return (
+                <Tooltip key={item.label}>
+                  <TooltipTrigger render={linkContent} />
+                  <TooltipContent side="right">{item.label}</TooltipContent>
+                </Tooltip>
+              );
+            }
+            return <div key={item.label}>{linkContent}</div>;
+          })}
+        </div>
       </nav>
+
+      {/* 업그레이드 CTA — 무료 사용자만 */}
+      {profile && !isPro && !collapsed && (
+        <div className="px-3 pb-2">
+          <Link href="/dashboard/billing">
+            <div className="rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 p-3.5 text-white cursor-pointer hover:opacity-90 transition-opacity">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Crown className="h-4 w-4" />
+                <span className="text-sm font-bold">Pro로 업그레이드</span>
+              </div>
+              <p className="text-[11px] text-white/80 leading-relaxed">
+                키워드 100개 + 우선 지원
+              </p>
+            </div>
+          </Link>
+        </div>
+      )}
 
       <Separator />
 
@@ -88,7 +166,7 @@ export function Sidebar() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <div className="mx-auto flex items-center justify-center h-8 w-8 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-xs font-bold cursor-default">
+                  <div className="mx-auto flex items-center justify-center h-9 w-9 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 text-xs font-bold cursor-default">
                     {profile.email.slice(0, 2).toUpperCase()}
                   </div>
                 }
@@ -99,16 +177,24 @@ export function Sidebar() {
             </Tooltip>
           ) : (
             <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-xs font-bold shrink-0">
+              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 text-xs font-bold shrink-0">
                 {profile.email.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-sidebar-foreground truncate">
-                  {profile.email}
+                <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                  {profile.email.split("@")[0]}
                 </p>
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 mt-0.5">
-                  {profile.plan}
-                </Badge>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <Badge
+                    variant={isPro ? "default" : "secondary"}
+                    className={cn(
+                      "text-[10px] px-1.5 py-0 h-4",
+                      isPro && "bg-violet-600 hover:bg-violet-600"
+                    )}
+                  >
+                    {isPro ? "Pro" : "무료"}
+                  </Badge>
+                </div>
               </div>
             </div>
           )}
