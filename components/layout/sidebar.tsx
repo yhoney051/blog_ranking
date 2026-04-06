@@ -50,7 +50,7 @@ export function Sidebar() {
     >
       {/* 로고 */}
       <div className="flex items-center gap-2.5 px-4 h-14 border-b border-sidebar-border">
-        <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-violet-600 text-white dark:bg-violet-500 dark:text-white shrink-0">
+        <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-lime-600 text-white dark:bg-lime-500 dark:text-white shrink-0">
           <BarChart3 className="h-5 w-5" />
         </div>
         {!collapsed && (
@@ -72,11 +72,11 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors",
                 active
-                  ? "bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+                  ? "bg-lime-50 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300"
                   : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
-              <Icon className={cn("h-5 w-5 shrink-0", active && "text-violet-600 dark:text-violet-400")} />
+              <Icon className={cn("h-5 w-5 shrink-0", active && "text-lime-600 dark:text-lime-400")} />
               {!collapsed && <span className="truncate">{item.label}</span>}
             </Link>
           );
@@ -104,11 +104,11 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors",
                   active
-                    ? "bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+                    ? "bg-lime-50 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300"
                     : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                 )}
               >
-                <Icon className={cn("h-5 w-5 shrink-0", active && "text-violet-600 dark:text-violet-400")} />
+                <Icon className={cn("h-5 w-5 shrink-0", active && "text-lime-600 dark:text-lime-400")} />
                 {!collapsed && <span className="truncate">{item.label}</span>}
               </Link>
             );
@@ -130,16 +130,16 @@ export function Sidebar() {
       {profile && !collapsed && (
         <div className="px-3 pb-2">
           {isPro ? (
-            <div className="rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-200/60 dark:border-violet-800/40 p-3 text-center">
+            <div className="rounded-xl bg-lime-50 dark:bg-lime-900/20 border border-lime-200/60 dark:border-lime-800/40 p-3 text-center">
               <div className="flex items-center justify-center gap-1.5">
-                <Crown className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                <span className="text-sm font-bold text-violet-700 dark:text-violet-300">Pro 플랜</span>
+                <Crown className="h-4 w-4 text-lime-600 dark:text-lime-400" />
+                <span className="text-sm font-bold text-lime-700 dark:text-lime-300">Pro 플랜</span>
               </div>
-              <p className="text-[11px] text-violet-500/80 mt-1">키워드 100개 · 우선 지원</p>
+              <p className="text-[11px] text-lime-500/80 mt-1">키워드 100개 · 우선 지원</p>
             </div>
           ) : (
             <Link href="/dashboard/billing">
-              <div className="rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 p-3.5 text-white cursor-pointer hover:opacity-90 transition-opacity">
+              <div className="rounded-xl bg-gradient-to-r from-lime-500 to-lime-600 p-3.5 text-white cursor-pointer hover:opacity-90 transition-opacity">
                 <div className="flex items-center gap-2 mb-1.5">
                   <Crown className="h-4 w-4" />
                   <span className="text-sm font-bold">Pro로 업그레이드</span>
@@ -162,7 +162,7 @@ export function Sidebar() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <div className="mx-auto flex items-center justify-center h-9 w-9 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 text-xs font-bold cursor-default">
+                  <div className="mx-auto flex items-center justify-center h-9 w-9 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 text-xs font-bold cursor-default">
                     {profile.email.slice(0, 2).toUpperCase()}
                   </div>
                 }
@@ -173,7 +173,7 @@ export function Sidebar() {
             </Tooltip>
           ) : (
             <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 text-xs font-bold shrink-0">
+              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 text-xs font-bold shrink-0">
                 {profile.email.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -185,7 +185,7 @@ export function Sidebar() {
                     variant={isPro ? "default" : "secondary"}
                     className={cn(
                       "text-[10px] px-1.5 py-0 h-4",
-                      isPro && "bg-violet-600 hover:bg-violet-600"
+                      isPro && "bg-lime-600 hover:bg-lime-600"
                     )}
                   >
                     {isPro ? "Pro" : "무료"}
