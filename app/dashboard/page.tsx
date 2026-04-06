@@ -121,7 +121,7 @@ export default function Home() {
     <>
       <Header title="대시보드">
         {isLoggedIn && (
-          <RefreshAllButton keywordIds={keywords.map((kw) => kw.id)} onRefreshed={fetchKeywords} />
+          <RefreshAllButton keywords={keywords} onRefreshed={fetchKeywords} />
         )}
       </Header>
 

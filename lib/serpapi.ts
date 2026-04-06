@@ -54,10 +54,8 @@ async function getBrightDataBlogRank(
   // HTML 파싱하여 블로그 결과 추출
   const blogResults = parseBlogResults(html)
 
-  // 디버그 로그 (원인 파악용, 프로덕션에서도 출력)
   const target = normalizeUrl(blogUrl)
-  console.log('[BrightData] 키워드:', keyword, '| HTML 길이:', html.length, '| 결과 수:', blogResults.length, '| 타겟:', target)
-  console.log('[BrightData] 파싱 결과:', blogResults.map((r, i) => `${i + 1}위: ${r.blogId}`).join(', '))
+  console.log('[BrightData] 키워드:', keyword, '| 결과 수:', blogResults.length)
 
   // blogUrl 매칭
   const index = blogResults.findIndex((item) => {
@@ -67,7 +65,7 @@ async function getBrightDataBlogRank(
   })
 
   if (index === -1) {
-    console.log('[BrightData] 매칭 실패! 타겟:', target, '| 결과 blogId 목록:', blogResults.map(r => r.blogId))
+    console.warn('[BrightData] 매칭 실패:', keyword, '| 타겟:', target)
   }
 
   return index === -1 ? null : index + 1

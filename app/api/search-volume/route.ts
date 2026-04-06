@@ -19,10 +19,10 @@ export async function POST(req: Request) {
 
   const supabase = await createSupabaseServerClient()
 
-  // 해당 사용자의 키워드만 조회
+  // 해당 사용자의 키워드만 조회 (search_volume_updated_at 포함)
   const { data: keywords, error } = await supabase
     .from('keywords')
-    .select('id, keyword')
+    .select('id, keyword, search_volume_updated_at')
     .eq('user_id', userId)
     .in('id', ids)
 
@@ -34,8 +34,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: '유효한 키워드가 없습니다.' }, { status: 404 })
   }
 
+  // 7일 이내 조회된 키워드는 스킵 (불필요한 API 호출 방지)
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const staleKeywords = keywords.filter(
+    (kw) => !kw.search_volume_updated_at || kw.search_volume_updated_at < sevenDaysAgo
+  )
+
+  if (staleKeywords.length === 0) {
+    return NextResponse.json({ updated: 0, total: keywords.length, skipped: keywords.length })
+  }
+
   try {
-    const keywordTexts = keywords.map((kw) => kw.keyword)
+    const keywordTexts = staleKeywords.map((kw) => kw.keyword)
     const volumes = await getSearchVolume(keywordTexts)
 
     // 키워드 텍스트 → 검색량 매핑
@@ -44,7 +54,7 @@ export async function POST(req: Request) {
     const now = new Date().toISOString()
     let updated = 0
 
-    for (const kw of keywords) {
+    for (const kw of staleKeywords) {
       const volume = volumeMap.get(kw.keyword.toLowerCase().trim())
       if (volume !== undefined) {
         await supabase
@@ -58,7 +68,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ updated, total: keywords.length })
+    return NextResponse.json({ updated, total: keywords.length, skipped: keywords.length - staleKeywords.length })
   } catch (err) {
     console.error('[POST /api/search-volume]', err)
     return NextResponse.json({ error: '검색량 조회 중 오류가 발생했습니다.' }, { status: 500 })
