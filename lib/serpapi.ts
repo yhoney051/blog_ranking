@@ -54,10 +54,8 @@ async function getBrightDataBlogRank(
   // HTML 파싱하여 블로그 결과 추출
   const blogResults = parseBlogResults(html)
 
-  // 디버그 로그 (프로덕션에서는 환경변수로 제어)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[BrightData] 키워드:', keyword, '| 결과 수:', blogResults.length)
-  }
+  // 디버그 로그 (원인 파악용, 프로덕션에서도 출력)
+  console.log('[BrightData] 키워드:', keyword, '| HTML 길이:', html.length, '| 결과 수:', blogResults.length)
 
   // blogUrl 매칭
   const target = normalizeUrl(blogUrl)
@@ -81,18 +79,40 @@ function parseBlogResults(html: string): Array<{ link: string; blogId: string }>
   for (let i = 1; i < blocks.length; i++) {
     const block = blocks[i]
 
-    // 포스트 링크: m.blog.naver.com/아이디/글번호 (모바일)
-    const linkMatch = block.match(
+    // 패턴 1: 포스트 링크 m.blog.naver.com/아이디/글번호
+    let linkMatch = block.match(
       /href="(https?:\/\/m\.blog\.naver\.com\/([^/"]+)\/(\d+))"/i
     )
+
+    // 패턴 2: 프로필 링크 m.blog.naver.com/아이디 (글번호 없음, Bright Data HTML에서 발생)
+    if (!linkMatch) {
+      linkMatch = block.match(
+        /href="(https?:\/\/m\.blog\.naver\.com\/([^/"]+))"/i
+      )
+    }
+
+    // 패턴 3: PC 블로그 링크 blog.naver.com/아이디/글번호
+    if (!linkMatch) {
+      linkMatch = block.match(
+        /href="(https?:\/\/blog\.naver\.com\/([^/"]+)\/(\d+))"/i
+      )
+    }
+
+    // 패턴 4: PC 프로필 링크 blog.naver.com/아이디
+    if (!linkMatch) {
+      linkMatch = block.match(
+        /href="(https?:\/\/blog\.naver\.com\/([^/"]+))"/i
+      )
+    }
+
     if (!linkMatch) continue
 
     const link = linkMatch[1]
     const blogId = linkMatch[2]
 
-    // 중복 제거
-    if (seen.has(link)) continue
-    seen.add(link)
+    // 중복 제거 (같은 blogId는 첫 번째만 카운트)
+    if (seen.has(blogId)) continue
+    seen.add(blogId)
 
     // 광고 블록 제외 (블로그 링크 앞에 ad_section이 있는 경우만 광고로 판별)
     const beforeLink = block.substring(0, block.indexOf(link))
