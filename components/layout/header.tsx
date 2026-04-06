@@ -13,7 +13,7 @@ import { LayoutDashboard, Settings, CreditCard, FileText } from "lucide-react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "대시보드", href: "/dashboard" },
-  { icon: FileText, label: "원고 포맷터", href: "/dashboard/formatter" },
+  { icon: FileText, label: "가독성King", href: "/dashboard/formatter" },
   { icon: CreditCard, label: "결제", href: "/dashboard/billing" },
   { icon: Settings, label: "설정", href: "/dashboard/settings" },
 ];

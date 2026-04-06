@@ -40,8 +40,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           ? '이메일 또는 비밀번호가 올바르지 않습니다.'
           : error.message)
       } else {
-        router.push('/dashboard')
-        router.refresh()
+        window.location.href = '/dashboard'
       }
     } else {
       const { error } = await supabase.auth.signUp({

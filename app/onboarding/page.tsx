@@ -177,7 +177,7 @@ export default function HomePage() {
                   어떤 키워드를 추적할까요?
                 </h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  네이버 블로그탭에서 검색되는 키워드를 입력하세요
+                  N사 통합검색에서 검색되는 키워드를 입력하세요
                 </p>
               </div>
 
@@ -287,7 +287,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="border-t border-slate-100 dark:border-slate-700 pt-4 text-center">
-                  <p className="text-xs text-slate-400 mb-1">네이버 블로그탭 순위</p>
+                  <p className="text-xs text-slate-400 mb-1">N사 통합검색 순위</p>
                   {result.rank !== null ? (
                     <p className={cn(
                       'text-4xl font-bold tabular-nums',

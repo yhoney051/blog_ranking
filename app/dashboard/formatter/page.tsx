@@ -46,7 +46,7 @@ export default function FormatterPage() {
 
   return (
     <>
-      <Header title="원고 포맷터" />
+      <Header title="가독성King" />
       <main className="flex-1 overflow-hidden p-4 md:p-6">
         <div className="h-full flex flex-col md:flex-row gap-4 md:gap-6">
           {/* 좌측: 원고 입력 */}

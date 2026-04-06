@@ -7,14 +7,14 @@ import { Footer } from '@/components/layout/footer'
 const services = [
   {
     title: '수니 — 블로그 순위 체커',
-    description: '네이버 블로그탭에서 내 글의 검색 순위를 추적하고 변동을 확인하세요.',
+    description: 'N사 통합검색에서 내 글의 검색 순위를 추적하고 변동을 확인하세요.',
     icon: BarChart3,
     href: '/onboarding',
     color: 'violet',
   },
   {
-    title: '원고 자동 포맷터',
-    description: '블로그 원고를 붙여넣으면 AI가 인용구·구분선 배치를 자동으로 분석해줍니다.',
+    title: '가독성King',
+    description: '당신의 블로그가 안 읽히는 이유,\n가독성을 개선해보세요.',
     icon: FileText,
     href: '/dashboard/formatter',
     color: 'emerald',
@@ -67,7 +67,7 @@ export default function HomePage() {
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                       {service.title}
                     </h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-line">
                       {service.description}
                     </p>
                   </div>
@@ -96,7 +96,7 @@ export default function HomePage() {
                 <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />키워드 10개</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />일 1회 자동 순위 체크</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />원고 포맷터 무제한</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />가독성King 무제한</li>
                 </ul>
               </div>
               {/* Pro 플랜 */}
