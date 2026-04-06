@@ -103,10 +103,6 @@ export default function FormatterPage() {
                         문장을 길게 이어 쓰기보다
                         <br /><span className="font-bold text-slate-700 dark:text-slate-200">짧게 끊어서 쓰는 것</span>이 중요하다.
                       </p>
-                      {/* 구분선 */}
-                      <div className="flex items-center justify-center gap-1.5 text-slate-300 dark:text-slate-600 text-[10px]">
-                        ◇&nbsp;◆&nbsp;◇
-                      </div>
                       {/* 본문 + 밑줄/기울임 */}
                       <p className="text-slate-500 dark:text-slate-400">
                         또한 핵심 내용은

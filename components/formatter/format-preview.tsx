@@ -1,10 +1,7 @@
 // 포맷 분석 결과 프리뷰 — 모바일 네이버 블로그 스타일
 import type { FormatResponse } from '@/types/formatter'
 import { ParagraphBlock } from '@/components/formatter/blocks/paragraph-block'
-import { HeadingBlock } from '@/components/formatter/blocks/heading-block'
 import { QuoteBlock } from '@/components/formatter/blocks/quote-block'
-import { DividerBlock } from '@/components/formatter/blocks/divider-block'
-import { ListBlock } from '@/components/formatter/blocks/list-block'
 import { Heart, MessageCircle, Share2 } from 'lucide-react'
 
 interface FormatPreviewProps {
@@ -40,15 +37,9 @@ export function FormatPreview({ result }: FormatPreviewProps) {
           {result.blocks.map((block, i) => {
             switch (block.type) {
               case 'paragraph':
-                return <ParagraphBlock key={i} content={block.content} align={block.align} />
-              case 'heading':
-                return <HeadingBlock key={i} level={block.level} content={block.content} align={block.align} />
+                return <ParagraphBlock key={i} content={block.content} />
               case 'quote':
                 return <QuoteBlock key={i} variant={block.variant} content={block.content} toolName={block.toolName} />
-              case 'divider':
-                return <DividerBlock key={i} variant={block.variant} toolName={block.toolName} />
-              case 'list':
-                return <ListBlock key={i} style={block.style} items={block.items} />
               default:
                 return null
             }
