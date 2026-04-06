@@ -4,18 +4,23 @@ import { getAuthUserId } from '@/lib/supabase/server'
 import { cancelSubscription } from '@/lib/billing/subscription'
 
 export async function POST() {
-  const userId = await getAuthUserId()
-  if (!userId) {
-    return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
+  try {
+    const userId = await getAuthUserId()
+    if (!userId) {
+      return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
+    }
+
+    const result = await cancelSubscription(userId)
+
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      message: '구독 취소가 예약되었습니다. 현재 결제 기간이 끝나면 무료 플랜으로 전환됩니다.',
+    })
+  } catch (err) {
+    console.error('[POST /api/billing/cancel] 예상치 못한 에러:', err)
+    return NextResponse.json({ error: '구독 취소 처리 중 오류가 발생했습니다.' }, { status: 500 })
   }
-
-  const result = await cancelSubscription(userId)
-
-  if (!result.success) {
-    return NextResponse.json({ error: result.error }, { status: 500 })
-  }
-
-  return NextResponse.json({
-    message: '구독 취소가 예약되었습니다. 현재 결제 기간이 끝나면 무료 플랜으로 전환됩니다.',
-  })
 }

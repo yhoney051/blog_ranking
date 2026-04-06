@@ -3,11 +3,11 @@
 
 import { supabaseServer } from '@/lib/supabase/server'
 import { PLANS } from './constants'
-import { issueBillingKey, requestBillingPayment, cancelPayment } from './toss'
+import { requestBillingKeyPayment, cancelPayment } from './portone'
 
-// 고유 주문 ID 생성
-function generateOrderId(userId: string): string {
-  return `order_${userId.slice(0, 8)}_${Date.now()}`
+// 고유 결제 ID 생성 (포트원은 paymentId를 가맹점에서 생성)
+function generatePaymentId(userId: string): string {
+  return `payment_${userId.slice(0, 8)}_${Date.now()}`
 }
 
 // 현재 시점에서 30일 후 날짜
@@ -21,30 +21,23 @@ type ActivateResult =
   | { success: true }
   | { success: false; error: string }
 
-// Pro 구독 활성화: 빌링키 발급 → 즉시 결제 → DB 업데이트
+// Pro 구독 활성화: 빌링키로 즉시 결제 → DB 업데이트
+// 포트원에서는 프론트엔드에서 빌링키를 직접 발급받아서 전달
 export async function activateSubscription(
   userId: string,
-  authKey: string,
+  billingKey: string,
   customerKey: string
 ): Promise<ActivateResult> {
-  // 1. 빌링키 발급
-  const billingResult = await issueBillingKey(authKey, customerKey)
-  if (!billingResult.success) {
-    console.error('[activateSubscription] 빌링키 발급 실패:', billingResult.error)
-    return { success: false, error: billingResult.error.message }
-  }
-
-  const { billingKey } = billingResult.data
-  const orderId = generateOrderId(userId)
+  const paymentId = generatePaymentId(userId)
   const amount = PLANS.pro.price
 
-  // 2. 즉시 결제
-  const paymentResult = await requestBillingPayment(
+  // 1. 빌링키로 즉시 결제
+  const paymentResult = await requestBillingKeyPayment(
     billingKey,
-    customerKey,
-    orderId,
+    paymentId,
     amount,
-    `블로그 순위 체커 ${PLANS.pro.label} 플랜`
+    `블로그 순위 체커 ${PLANS.pro.label} 플랜`,
+    customerKey
   )
 
   if (!paymentResult.success) {
@@ -52,11 +45,11 @@ export async function activateSubscription(
     return { success: false, error: paymentResult.error.message }
   }
 
-  const { paymentKey, approvedAt } = paymentResult.data
+  const { paidAt } = paymentResult.data
   const now = new Date().toISOString()
   const periodEnd = getNextPeriodEnd()
 
-  // 3. DB 업데이트 (subscriptions + payments + profiles)
+  // 2. DB 업데이트 (subscriptions + payments + profiles)
   try {
     // subscriptions upsert
     const { data: subscription, error: subError } = await supabaseServer
@@ -87,11 +80,11 @@ export async function activateSubscription(
       .insert({
         user_id: userId,
         subscription_id: subscription.id,
-        toss_payment_key: paymentKey,
-        toss_order_id: orderId,
+        toss_payment_key: paymentId,
+        toss_order_id: paymentId,
         amount,
         status: 'paid',
-        paid_at: approvedAt,
+        paid_at: paidAt,
       })
 
     if (payError) throw payError
@@ -108,7 +101,7 @@ export async function activateSubscription(
   } catch (dbError) {
     // DB 실패 시 결제 환불
     console.error('[activateSubscription] DB 업데이트 실패, 환불 처리:', dbError)
-    await cancelPayment(paymentKey, 'DB 업데이트 실패로 인한 자동 환불')
+    await cancelPayment(paymentId, 'DB 업데이트 실패로 인한 자동 환불')
     return { success: false, error: '결제는 성공했으나 처리 중 오류가 발생하여 환불되었습니다.' }
   }
 }
@@ -148,15 +141,15 @@ export async function processRenewal(subscriptionId: string): Promise<ActivateRe
     return { success: false, error: '빌링 정보가 없습니다.' }
   }
 
-  const orderId = generateOrderId(sub.user_id)
+  const paymentId = generatePaymentId(sub.user_id)
   const amount = PLANS.pro.price
 
-  const paymentResult = await requestBillingPayment(
+  const paymentResult = await requestBillingKeyPayment(
     sub.billing_key,
-    sub.toss_customer_key,
-    orderId,
+    paymentId,
     amount,
-    `블로그 순위 체커 ${PLANS.pro.label} 플랜 갱신`
+    `블로그 순위 체커 ${PLANS.pro.label} 플랜 갱신`,
+    sub.toss_customer_key
   )
 
   if (!paymentResult.success) {
@@ -164,35 +157,44 @@ export async function processRenewal(subscriptionId: string): Promise<ActivateRe
     return { success: false, error: paymentResult.error.message }
   }
 
-  const { paymentKey, approvedAt } = paymentResult.data
+  const { paidAt } = paymentResult.data
   const now = new Date().toISOString()
   const periodEnd = getNextPeriodEnd()
 
-  // 구독 기간 갱신
-  await supabaseServer
-    .from('subscriptions')
-    .update({
-      current_period_start: now,
-      current_period_end: periodEnd,
-      retry_count: 0,
-      updated_at: now,
-    })
-    .eq('id', subscriptionId)
+  // 구독 기간 갱신 + 결제 이력 저장 (에러 처리 포함)
+  try {
+    const { error: updateError } = await supabaseServer
+      .from('subscriptions')
+      .update({
+        current_period_start: now,
+        current_period_end: periodEnd,
+        retry_count: 0,
+        updated_at: now,
+      })
+      .eq('id', subscriptionId)
 
-  // 결제 이력 저장
-  await supabaseServer
-    .from('payments')
-    .insert({
-      user_id: sub.user_id,
-      subscription_id: subscriptionId,
-      toss_payment_key: paymentKey,
-      toss_order_id: orderId,
-      amount,
-      status: 'paid',
-      paid_at: approvedAt,
-    })
+    if (updateError) throw updateError
 
-  return { success: true }
+    const { error: payError } = await supabaseServer
+      .from('payments')
+      .insert({
+        user_id: sub.user_id,
+        subscription_id: subscriptionId,
+        toss_payment_key: paymentId,
+        toss_order_id: paymentId,
+        amount,
+        status: 'paid',
+        paid_at: paidAt,
+      })
+
+    if (payError) throw payError
+
+    return { success: true }
+  } catch (dbError) {
+    console.error('[processRenewal] DB 업데이트 실패, 환불 처리:', dbError)
+    await cancelPayment(paymentId, '갱신 DB 업데이트 실패로 인한 자동 환불')
+    return { success: false, error: '갱신 결제 처리 중 오류가 발생했습니다.' }
+  }
 }
 
 // 결제 실패 처리: retry_count 증가, 3회 초과 시 구독 정지

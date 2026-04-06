@@ -1,6 +1,7 @@
 // 서비스 이용약관 페이지
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { Footer } from '@/components/layout/footer'
 
 export const metadata: Metadata = {
   title: '서비스 이용약관',
@@ -110,9 +111,7 @@ export default function TermsPage() {
         </div>
       </main>
 
-      <footer className="py-8 px-4 text-center text-sm text-muted-foreground border-t">
-        &copy; 2026 블로그 순위 체커. All rights reserved.
-      </footer>
+      <Footer />
     </div>
   )
 }

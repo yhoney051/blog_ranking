@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getNaverBlogRank } from '@/lib/serpapi'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
 const GUEST_LIMIT = 3
 const COOKIE_NAME = 'guest_rank_checks'
@@ -16,6 +17,16 @@ export async function POST(req: Request) {
 
     if (!keyword || !blog_url) {
       return NextResponse.json({ error: '키워드와 블로그 URL을 입력해주세요.' }, { status: 400 })
+    }
+
+    // IP 기반 rate limit: 시간당 5회 (쿠키 우회 방어)
+    const ip = getClientIp(req)
+    const limiter = rateLimit(`guest-rank:${ip}`, 5, 60 * 60 * 1000)
+    if (!limiter.success) {
+      return NextResponse.json(
+        { error: `요청 한도를 초과했습니다. ${limiter.retryAfterSeconds}초 후 다시 시도해주세요.`, code: 'RATE_LIMITED' },
+        { status: 429 }
+      )
     }
 
     // 쿠키에서 조회 횟수 확인

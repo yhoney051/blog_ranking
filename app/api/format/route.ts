@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
 import { formatRequestSchema } from '@/lib/validations'
 import { SYSTEM_PROMPT, buildUserPrompt } from '@/lib/formatter/prompt'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
 import type { FormatResponse } from '@/types/formatter'
 
 // 불완전한 JSON에서 마지막 완전한 블록까지만 추출
@@ -39,6 +40,16 @@ function repairJson(raw: string): string {
 
 export async function POST(req: Request) {
   try {
+    // IP 기반 rate limit: 시간당 10회
+    const ip = getClientIp(req)
+    const limiter = rateLimit(`format:${ip}`, 10, 60 * 60 * 1000)
+    if (!limiter.success) {
+      return NextResponse.json(
+        { error: `요청 한도를 초과했습니다. ${limiter.retryAfterSeconds}초 후 다시 시도해주세요.` },
+        { status: 429 }
+      )
+    }
+
     const body = await req.json()
     const parsed = formatRequestSchema.safeParse(body)
 

@@ -41,12 +41,11 @@ export default function BillingPage() {
   const isPro = subscription?.plan === 'pro' && subscription?.status === 'active'
   const isCancelScheduled = isPro && subscription?.cancel_at_period_end
 
-  // 업그레이드: 토스 SDK로 빌링 인증 요청
+  // 업그레이드: 포트원 SDK로 빌링키 발급 → 즉시 구독 활성화
   const handleUpgrade = async () => {
     setUpgrading(true)
     try {
-      const { getTossPayments } = await import('@/lib/billing/toss-client')
-      const toss = await getTossPayments()
+      const { requestIssueBillingKey } = await import('@/lib/billing/portone-client')
 
       // 사용자 프로필에서 customerKey 생성 (user_id 기반)
       const profileRes = await fetch('/api/profile')
@@ -54,16 +53,36 @@ export default function BillingPage() {
       const profile = await profileRes.json()
 
       const customerKey = `cust_${profile.email.replace(/[^a-zA-Z0-9]/g, '_')}`
-      const payment = toss.payment({ customerKey })
 
-      await payment.requestBillingAuth({
-        method: 'CARD',
-        successUrl: `${window.location.origin}/dashboard/billing/success?customerKey=${customerKey}`,
-        failUrl: `${window.location.origin}/dashboard/billing/fail`,
+      // 포트원 빌링키 발급 (카드 등록 결제창)
+      const billingResult = await requestIssueBillingKey(customerKey)
+
+      if (!billingResult.success) {
+        toast.error(billingResult.error)
+        return
+      }
+
+      // 빌링키로 구독 활성화 API 호출
+      const res = await fetch('/api/billing/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          billingKey: billingResult.billingKey,
+          customerKey,
+        }),
       })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        toast.success('Pro 플랜이 활성화되었습니다!')
+        fetchBillingStatus()
+      } else {
+        toast.error(data.error || '구독 활성화에 실패했습니다.')
+      }
     } catch (err) {
       console.error('[Upgrade] 오류:', err)
-      toast.error('결제 페이지를 열 수 없습니다.')
+      toast.error('결제 처리 중 오류가 발생했습니다.')
     } finally {
       setUpgrading(false)
     }

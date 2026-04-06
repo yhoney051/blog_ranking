@@ -25,9 +25,9 @@ export const rankCheckSchema = z.object({
   id: z.string().uuid('유효하지 않은 키워드 ID입니다.'),
 })
 
-// 구독 시작 요청 검증
+// 구독 시작 요청 검증 (포트원: 프론트에서 빌링키 직접 발급)
 export const subscribeSchema = z.object({
-  authKey: z.string().min(1, '인증 키가 필요합니다.'),
+  billingKey: z.string().min(1, '빌링키가 필요합니다.'),
   customerKey: z.string().min(1, '고객 키가 필요합니다.'),
 })
 

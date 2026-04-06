@@ -1,7 +1,8 @@
 // 허브 랜딩페이지 — 순위체커 / 원고 포맷터 선택
 import Link from 'next/link'
-import { BarChart3, FileText, ArrowRight, LogIn } from 'lucide-react'
+import { BarChart3, FileText, ArrowRight, LogIn, Check, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Footer } from '@/components/layout/footer'
 
 const services = [
   {
@@ -40,8 +41,8 @@ export default function HomePage() {
       </header>
 
       {/* 메인 */}
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-2xl space-y-8">
+      <main className="flex-1 p-4">
+        <div className="w-full max-w-2xl mx-auto space-y-12 py-8">
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               무엇을 도와드릴까요?
@@ -79,16 +80,45 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
+
+          {/* 요금제 안내 */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-center text-slate-900 dark:text-slate-100">
+              요금제
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* 무료 플랜 */}
+              <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 space-y-4">
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100">무료</h3>
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  0<span className="text-sm font-normal text-slate-500">원/월</span>
+                </p>
+                <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />키워드 10개</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />일 1회 자동 순위 체크</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />원고 포맷터 무제한</li>
+                </ul>
+              </div>
+              {/* Pro 플랜 */}
+              <div className="rounded-xl border-2 border-violet-500 bg-white dark:bg-slate-800 p-6 space-y-4">
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <Crown className="h-4 w-4 text-yellow-500" />Pro
+                </h3>
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  9,900<span className="text-sm font-normal text-slate-500">원/월</span>
+                </p>
+                <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />키워드 100개</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />일 1회 자동 순위 체크</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />우선 고객 지원</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
-      {/* 푸터 */}
-      <footer className="py-4 px-6 border-t border-slate-200/60 dark:border-slate-700/50">
-        <div className="flex items-center justify-center gap-4 text-xs text-slate-400">
-          <Link href="/terms" className="hover:text-slate-600 transition-colors">이용약관</Link>
-          <Link href="/privacy" className="hover:text-slate-600 transition-colors">개인정보 처리방침</Link>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
