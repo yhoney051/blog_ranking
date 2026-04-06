@@ -17,9 +17,9 @@ export function RankBadge({ current, previous }: Props) {
   const diff = previous !== null && current !== null ? Math.abs(previous - current) : 0
 
   const styles = {
-    new: 'bg-[#c8e600]/20 text-slate-700 dark:bg-[#c8e600]/10 dark:text-slate-400',
-    up: 'bg-[#c8e600]/15 text-slate-700 dark:bg-[#c8e600]/10 dark:text-slate-400',
-    down: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+    new: 'bg-lime-100 text-slate-700 dark:bg-lime-900/30 dark:text-slate-300',
+    up: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+    down: 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400',
     same: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
   }
 

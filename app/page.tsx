@@ -27,7 +27,7 @@ export default function HomePage() {
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-[#c8e600] text-slate-900 dark:bg-[#c8e600]">
+          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-400 text-white dark:bg-lime-400">
             <BarChart3 className="h-4 w-4" />
           </div>
           <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">수니</span>
@@ -58,7 +58,7 @@ export default function HomePage() {
                 <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 h-full flex flex-col gap-4 transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
                   <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${
                     service.color === 'lime'
-                      ? 'bg-[#c8e600]/15 text-slate-700 dark:bg-[#c8e600]/10 dark:text-slate-400'
+                      ? 'bg-lime-100 text-slate-700 dark:bg-lime-900/30 dark:text-slate-700'
                       : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                   }`}>
                     <service.icon className="h-6 w-6" />
@@ -100,7 +100,7 @@ export default function HomePage() {
                 </ul>
               </div>
               {/* Pro 플랜 */}
-              <div className="rounded-xl border-2 border-[#c8e600] bg-white dark:bg-slate-800 p-6 space-y-4">
+              <div className="rounded-xl border-2 border-lime-500 bg-white dark:bg-slate-800 p-6 space-y-4">
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                   <Crown className="h-4 w-4 text-yellow-500" />Pro
                 </h3>

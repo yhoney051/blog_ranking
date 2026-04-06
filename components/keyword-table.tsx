@@ -20,10 +20,10 @@ const PAGE_SIZE = 10
 // 순위에 따른 색상 위계 (blue → emerald → amber → red)
 function getRankColor(rank: number | null) {
   if (rank === null) return 'text-muted-foreground'
-  if (rank <= 3) return 'bg-[#c8e600]/25 text-slate-800 dark:bg-[#c8e600]/15 dark:text-slate-300 font-bold'
-  if (rank <= 10) return 'bg-[#c8e600]/15 text-slate-800 dark:bg-[#c8e600]/10 dark:text-slate-300 font-semibold'
-  if (rank <= 30) return 'bg-[#c8e600]/10 text-slate-700 dark:bg-[#c8e600]/5 dark:text-slate-400 font-semibold'
-  return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+  if (rank <= 3) return 'bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 font-bold'
+  if (rank <= 10) return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-semibold'
+  if (rank <= 30) return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-semibold'
+  return 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
 }
 
 // 인라인 SVG 스파크라인 (64x24px, 끝점 dot 강조)
@@ -238,7 +238,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                 className={cn(
                   'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                   rankFilter === f.key
-                    ? 'bg-[#c8e600]/25 text-slate-800 dark:bg-[#c8e600]/15 dark:text-slate-300'
+                    ? 'bg-lime-400/20 text-slate-800 dark:bg-lime-400/15 dark:text-slate-300'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 )}
                 onClick={() => { setRankFilter(f.key); setPage(0) }}
@@ -257,7 +257,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                   className={cn(
                     'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                     tagFilter === 'all'
-                      ? 'bg-[#c8e600]/25 text-slate-800 dark:bg-[#c8e600]/15 dark:text-slate-300'
+                      ? 'bg-lime-400/20 text-slate-800 dark:bg-lime-400/15 dark:text-slate-300'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                   )}
                   onClick={() => { setTagFilter('all'); setPage(0) }}
@@ -270,7 +270,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                     className={cn(
                       'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                       tagFilter === t
-                        ? 'bg-[#c8e600]/25 text-slate-800 dark:bg-[#c8e600]/15 dark:text-slate-300'
+                        ? 'bg-lime-400/20 text-slate-800 dark:bg-lime-400/15 dark:text-slate-300'
                         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     )}
                     onClick={() => { setTagFilter(t); setPage(0) }}

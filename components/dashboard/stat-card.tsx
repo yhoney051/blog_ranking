@@ -37,7 +37,7 @@ export function StatCard({
       className={cn(
         "rounded-xl border bg-card p-4 transition-colors",
         isNorthstar
-          ? "border-[#c8e600]/30 dark:border-[#c8e600]/20 ring-1 ring-[#c8e600]/10"
+          ? "border-lime-300 dark:border-lime-800/50 ring-1 ring-lime-500/10"
           : "border-slate-200/60 dark:border-slate-700/50"
       )}
     >
@@ -57,7 +57,7 @@ export function StatCard({
           className={cn(
             "flex items-center justify-center h-10 w-10 rounded-lg flex-shrink-0",
             iconClassName || (isNorthstar
-              ? "bg-[#c8e600]/15 text-slate-700 dark:bg-[#c8e600]/10 dark:text-slate-400"
+              ? "bg-lime-100 text-slate-700 dark:bg-lime-900/30 dark:text-slate-400"
               : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")
           )}
         >
@@ -70,15 +70,15 @@ export function StatCard({
             className={cn(
               "inline-flex items-center text-xs font-medium rounded-md px-1.5 py-0.5 tabular-nums",
               trend.isPositive
-                ? "text-slate-700 bg-[#c8e600]/15 dark:text-slate-400 dark:bg-[#c8e600]/10"
-                : "text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-800"
+                ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30"
+                : "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30"
             )}
           >
             {trend.isPositive ? "▲" : "▼"} {Math.abs(trend.value)}
           </span>
         )}
         {badge && (
-          <span className="text-[10px] bg-[#c8e600]/20 text-slate-800 dark:bg-[#c8e600]/10 dark:text-slate-300 px-1.5 py-0.5 rounded-md font-medium">
+          <span className="text-[10px] bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 px-1.5 py-0.5 rounded-md font-medium">
             {badge}
           </span>
         )}
