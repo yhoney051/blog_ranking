@@ -185,7 +185,7 @@ export function Sidebar() {
                     variant={isPro ? "default" : "secondary"}
                     className={cn(
                       "text-[10px] px-1.5 py-0 h-4",
-                      isPro && "bg-lime-400 hover:bg-lime-400"
+                      isPro && "bg-lime-400/25 text-lime-700 hover:bg-lime-400/25 dark:bg-lime-400/15 dark:text-lime-300"
                     )}
                   >
                     {isPro ? "Pro" : "무료"}

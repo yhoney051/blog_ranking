@@ -37,7 +37,7 @@ export function StatCard({
       className={cn(
         "rounded-xl border bg-card p-4 transition-colors",
         isNorthstar
-          ? "border-lime-200 dark:border-lime-800/50 ring-1 ring-lime-500/10"
+          ? "border-lime-300 dark:border-lime-800/50 ring-1 ring-lime-500/10"
           : "border-slate-200/60 dark:border-slate-700/50"
       )}
     >
@@ -57,7 +57,7 @@ export function StatCard({
           className={cn(
             "flex items-center justify-center h-10 w-10 rounded-lg flex-shrink-0",
             iconClassName || (isNorthstar
-              ? "bg-lime-50 text-lime-500 dark:bg-lime-900/30 dark:text-lime-400"
+              ? "bg-lime-100 text-lime-500 dark:bg-lime-900/30 dark:text-lime-400"
               : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")
           )}
         >
@@ -78,7 +78,7 @@ export function StatCard({
           </span>
         )}
         {badge && (
-          <span className="text-[10px] bg-lime-50 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 px-1.5 py-0.5 rounded-md font-medium">
+          <span className="text-[10px] bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 px-1.5 py-0.5 rounded-md font-medium">
             {badge}
           </span>
         )}

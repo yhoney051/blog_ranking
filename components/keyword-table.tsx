@@ -20,7 +20,7 @@ const PAGE_SIZE = 10
 // 순위에 따른 색상 위계 (blue → emerald → amber → red)
 function getRankColor(rank: number | null) {
   if (rank === null) return 'text-muted-foreground'
-  if (rank <= 3) return 'bg-lime-50 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 font-bold'
+  if (rank <= 3) return 'bg-lime-100 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300 font-bold'
   if (rank <= 10) return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-semibold'
   if (rank <= 30) return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-semibold'
   return 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
