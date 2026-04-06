@@ -4,12 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, BarChart3, CreditCard, FileText, Plus, Crown } from "lucide-react";
+import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, BarChart3, CreditCard, FileText, Crown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 
 const navItems = [
   { icon: LayoutDashboard, label: "대시보드", href: "/dashboard" },
@@ -61,18 +60,6 @@ export function Sidebar() {
         )}
       </div>
 
-      {/* 상단 퀵 액션 */}
-      {!collapsed && (
-        <div className="px-3 pt-4 pb-2">
-          <Link href="/dashboard">
-            <Button variant="outline" className="w-full h-10 rounded-xl text-sm font-semibold border-slate-200/60 dark:border-slate-700/50 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
-              <Plus className="h-4 w-4 mr-2 text-violet-500" />
-              키워드 추가하기
-            </Button>
-          </Link>
-        </div>
-      )}
-
       {/* 메인 네비게이션 */}
       <nav className="flex-1 py-3 px-2.5 space-y-1">
         {navItems.map((item) => {
@@ -106,8 +93,7 @@ export function Sidebar() {
         })}
 
         {/* 보조 네비게이션 */}
-        <div className="pt-4">
-          <Separator className="mb-3" />
+        <div className="pt-3 mt-3 border-t border-sidebar-border">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -140,20 +126,30 @@ export function Sidebar() {
         </div>
       </nav>
 
-      {/* 업그레이드 CTA — 무료 사용자만 */}
-      {profile && !isPro && !collapsed && (
+      {/* 업그레이드 CTA */}
+      {profile && !collapsed && (
         <div className="px-3 pb-2">
-          <Link href="/dashboard/billing">
-            <div className="rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 p-3.5 text-white cursor-pointer hover:opacity-90 transition-opacity">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Crown className="h-4 w-4" />
-                <span className="text-sm font-bold">Pro로 업그레이드</span>
+          {isPro ? (
+            <div className="rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-200/60 dark:border-violet-800/40 p-3 text-center">
+              <div className="flex items-center justify-center gap-1.5">
+                <Crown className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                <span className="text-sm font-bold text-violet-700 dark:text-violet-300">Pro 플랜</span>
               </div>
-              <p className="text-[11px] text-white/80 leading-relaxed">
-                키워드 100개 + 우선 지원
-              </p>
+              <p className="text-[11px] text-violet-500/80 mt-1">키워드 100개 · 우선 지원</p>
             </div>
-          </Link>
+          ) : (
+            <Link href="/dashboard/billing">
+              <div className="rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 p-3.5 text-white cursor-pointer hover:opacity-90 transition-opacity">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Crown className="h-4 w-4" />
+                  <span className="text-sm font-bold">Pro로 업그레이드</span>
+                </div>
+                <p className="text-[11px] text-white/80 leading-relaxed">
+                  키워드 100개 + 우선 지원
+                </p>
+              </div>
+            </Link>
+          )}
         </div>
       )}
 
