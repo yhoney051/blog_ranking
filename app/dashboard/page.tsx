@@ -22,6 +22,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
+  const [volumeFetched, setVolumeFetched] = useState(false)
 
   // localStorage에서 비회원 키워드 로드
   const loadGuestKeywords = useCallback(() => {
@@ -76,8 +77,24 @@ export default function Home() {
         return
       }
       const data = await res.json()
-      setKeywords(Array.isArray(data) ? data : [])
+      const kwList: Keyword[] = Array.isArray(data) ? data : []
+      setKeywords(kwList)
       setIsLoggedIn(true)
+
+      // 검색량이 없는 키워드 자동 조회 (최초 1회만)
+      if (!volumeFetched) {
+        const noVolume = kwList.filter((kw) => kw.monthly_search_volume == null)
+        if (noVolume.length > 0) {
+          setVolumeFetched(true)
+          fetch('/api/search-volume', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: noVolume.map((kw) => kw.id) }),
+          })
+            .then((r) => { if (r.ok) fetchKeywords() })
+            .catch(() => {})
+        }
+      }
     } catch {
       setError('네트워크 오류가 발생했습니다.')
     } finally {
