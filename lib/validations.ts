@@ -10,9 +10,12 @@ export const keywordCreateSchema = z.object({
     .max(500, 'URL은 500자 이내로 입력해주세요.')
     .refine(
       (url) => {
+        // 위험한 프로토콜 차단 (javascript:, data:, vbscript: 등)
+        const dangerous = /^(javascript|data|vbscript|blob):/i
+        if (dangerous.test(url)) return false
         // http/https 프로토콜이 있으면 검증, 없으면 도메인만 있는 것으로 허용
         if (url.startsWith('http://') || url.startsWith('https://')) return true
-        if (url.includes('://')) return false // javascript: 등 차단
+        if (url.includes('://')) return false // 기타 미지원 프로토콜 차단
         return true // blog.naver.com/xxx 형태 허용
       },
       { message: '유효하지 않은 URL 형식입니다.' }

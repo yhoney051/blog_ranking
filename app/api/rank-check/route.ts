@@ -3,6 +3,7 @@ import { createSupabaseServerClient, getAuthUserId } from '@/lib/supabase/server
 import { getNaverBlogRank } from '@/lib/serpapi'
 import { rankCheckSchema } from '@/lib/validations'
 import { rateLimit } from '@/lib/rate-limit'
+import { RATE_LIMITS } from '@/lib/constants'
 
 // POST /api/rank-check — 특정 키워드의 순위 조회 후 저장
 // body: { id: string }
@@ -12,7 +13,7 @@ export async function POST(req: Request) {
     if (!userId) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
 
     // 사용자별 rate limit: 시간당 30회
-    const limiter = rateLimit(`rank-check:${userId}`, 30, 60 * 60 * 1000)
+    const limiter = rateLimit(`rank-check:${userId}`, RATE_LIMITS.RANK_CHECK_PER_HOUR, RATE_LIMITS.ONE_HOUR_MS)
     if (!limiter.success) {
       return NextResponse.json(
         { error: `순위 조회 한도를 초과했습니다. ${limiter.retryAfterSeconds}초 후 다시 시도해주세요.` },

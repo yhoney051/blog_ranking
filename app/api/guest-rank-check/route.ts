@@ -5,8 +5,9 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getNaverBlogRank } from '@/lib/serpapi'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
+import { RATE_LIMITS } from '@/lib/constants'
 
-const GUEST_LIMIT = 3
+const GUEST_LIMIT = RATE_LIMITS.GUEST_RANK_CHECK_PER_DAY
 const COOKIE_NAME = 'guest_rank_checks'
 const COOKIE_MAX_AGE = 60 * 60 * 24 // 24시간
 
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
 
     // IP 기반 rate limit: 시간당 5회 (쿠키 우회 방어)
     const ip = getClientIp(req)
-    const limiter = rateLimit(`guest-rank:${ip}`, 5, 60 * 60 * 1000)
+    const limiter = rateLimit(`guest-rank:${ip}`, RATE_LIMITS.GUEST_RANK_CHECK_PER_HOUR, RATE_LIMITS.ONE_HOUR_MS)
     if (!limiter.success) {
       return NextResponse.json(
         { error: `요청 한도를 초과했습니다. ${limiter.retryAfterSeconds}초 후 다시 시도해주세요.`, code: 'RATE_LIMITED' },

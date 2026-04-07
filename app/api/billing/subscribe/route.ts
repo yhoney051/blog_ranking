@@ -38,7 +38,8 @@ export async function POST(request: Request) {
     const result = await activateSubscription(userId, parsed.data.billingKey, parsed.data.customerKey)
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 500 })
+      console.error('[POST /api/billing/subscribe] 구독 활성화 실패:', result.error)
+      return NextResponse.json({ error: '결제 처리에 실패했습니다. 잠시 후 다시 시도해주세요.' }, { status: 500 })
     }
 
     return NextResponse.json({ message: 'Pro 플랜이 활성화되었습니다.' })

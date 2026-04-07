@@ -13,7 +13,7 @@ export function Footer() {
             주소: 경상남도 양산시 물금읍 가촌서로 11, 104동 1801호(양산물금한신더휴)
           </p>
           <p>
-            이메일: support@blogrank.kr | 업태: 도소매 | 종목: 전자상거래
+            전화: 070-7954-1459 | 이메일: support@blogrank.kr | 업태: 도소매 | 종목: 전자상거래
           </p>
         </div>
 
@@ -22,6 +22,8 @@ export function Footer() {
           <Link href="/terms" className="hover:text-foreground transition-colors">이용약관</Link>
           <span>·</span>
           <Link href="/privacy" className="hover:text-foreground transition-colors">개인정보처리방침</Link>
+          <span>·</span>
+          <Link href="/refund" className="hover:text-foreground transition-colors">환불정책</Link>
         </div>
 
         <p className="text-xs text-muted-foreground/60 text-center">

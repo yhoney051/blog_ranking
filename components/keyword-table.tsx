@@ -12,10 +12,11 @@ import { Trash2, Search, ExternalLink, ChevronLeft, ChevronRight, ArrowUpDown } 
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { PAGINATION } from '@/lib/constants'
 
 type Props = { keywords: Keyword[]; onRefreshed: () => void; onDeleted: () => void }
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = PAGINATION.KEYWORD_TABLE_PAGE_SIZE
 
 // 순위에 따른 색상 위계 (blue → emerald → amber → red)
 function getRankColor(rank: number | null) {

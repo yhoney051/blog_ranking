@@ -2,13 +2,10 @@ import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
 import { getNaverBlogRank } from '@/lib/serpapi'
 import { getSearchVolume, isNaverSearchAdConfigured } from '@/lib/naver-searchad'
+import { CRON } from '@/lib/constants'
 
 // Vercel 함수 타임아웃 설정 (Pro: 최대 300초)
 export const maxDuration = 300
-
-// 청크 크기: 한 번에 처리할 키워드 수
-// 키워드당 약 2~3초 소요 → 80개 = ~240초 (300초 타임아웃 내 안전)
-const CHUNK_SIZE = 80
 
 // GET /api/cron/check-ranks — 모든 키워드의 순위를 자동 체크 (Vercel Cron)
 export async function GET(request: Request) {
@@ -31,14 +28,15 @@ export async function GET(request: Request) {
       .select('*')
 
     if (kwError || !keywords) {
-      return NextResponse.json({ error: kwError?.message ?? '키워드 조회 실패' }, { status: 500 })
+      console.error('[GET /api/cron/check-ranks] 키워드 조회 실패:', kwError?.message)
+      return NextResponse.json({ error: '키워드 조회 실패' }, { status: 500 })
     }
 
     let success = 0
     let failed = 0
 
     // 청크 단위로 처리 (타임아웃 방지)
-    const chunk = keywords.slice(0, CHUNK_SIZE)
+    const chunk = keywords.slice(0, CRON.RANK_CHECK_CHUNK_SIZE)
     const skipped = keywords.length - chunk.length
 
     for (const kw of chunk) {
@@ -70,7 +68,7 @@ export async function GET(request: Request) {
       }
 
       // IP 차단 방지 딜레이 (2초)
-      await new Promise((r) => setTimeout(r, 2000))
+      await new Promise((r) => setTimeout(r, CRON.RANK_CHECK_DELAY_MS))
     }
 
     if (skipped > 0) {
