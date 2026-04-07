@@ -38,10 +38,17 @@ export async function GET(request: NextRequest) {
 
   // 비밀번호 재설정 요청인 경우 재설정 페이지로 이동
   const type = searchParams.get('type')
-  if (type === 'recovery') {
-    return NextResponse.redirect(new URL('/reset-password', request.url))
-  }
+  const redirectPath = type === 'recovery' ? '/reset-password' : '/dashboard'
 
-  // 항상 대시보드로 이동 (localStorage 키워드 자동 이전은 대시보드에서 처리)
-  return NextResponse.redirect(new URL('/dashboard', request.url))
+  // 리다이렉트 응답에 인증 쿠키를 명시적으로 포함 (OAuth 후 세션 유실 방지)
+  const response = NextResponse.redirect(new URL(redirectPath, request.url))
+  cookieStore.getAll().forEach((cookie) => {
+    response.cookies.set(cookie.name, cookie.value, {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    })
+  })
+  return response
 }
