@@ -245,7 +245,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                 className={cn(
                   'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                   rankFilter === f.key
-                    ? 'bg-brand-300/20 text-slate-800 dark:bg-brand-300/15 dark:text-slate-300'
+                    ? 'bg-brand-100 text-slate-800 dark:bg-brand-900 dark:text-slate-300'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 )}
                 onClick={() => { setRankFilter(f.key); setPage(0) }}
@@ -264,7 +264,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                   className={cn(
                     'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                     tagFilter === 'all'
-                      ? 'bg-brand-300/20 text-slate-800 dark:bg-brand-300/15 dark:text-slate-300'
+                      ? 'bg-brand-100 text-slate-800 dark:bg-brand-900 dark:text-slate-300'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                   )}
                   onClick={() => { setTagFilter('all'); setPage(0) }}
@@ -277,7 +277,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                     className={cn(
                       'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                       tagFilter === t
-                        ? 'bg-brand-300/20 text-slate-800 dark:bg-brand-300/15 dark:text-slate-300'
+                        ? 'bg-brand-100 text-slate-800 dark:bg-brand-900 dark:text-slate-300'
                         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     )}
                     onClick={() => { setTagFilter(t); setPage(0) }}
@@ -315,7 +315,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
       {/* 텔레그램 알림 CTA */}
       <a
         href="/dashboard/settings"
-        className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-brand-200/60 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 text-sm hover:bg-brand-100 dark:hover:bg-brand-900/40 transition-colors"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-900 text-brand-700 dark:text-brand-300 text-sm hover:bg-brand-100 dark:hover:bg-brand-800 transition-colors"
       >
         <span>📱</span>
         <span>폰으로 매일 순위 알림 받기</span>

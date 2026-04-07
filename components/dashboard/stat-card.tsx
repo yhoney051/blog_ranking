@@ -37,7 +37,7 @@ export function StatCard({
       className={cn(
         "rounded-xl border bg-card p-4 transition-colors",
         isNorthstar
-          ? "border-brand-400 dark:border-brand-800/50 ring-1 ring-brand-500/10"
+          ? "border-brand-400 dark:border-brand-800 ring-1 ring-brand-500"
           : "border-slate-200/60 dark:border-slate-700/50"
       )}
     >
