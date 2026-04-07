@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, BarChart3, CreditCard, FileText, Crown } from "lucide-react";
+import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, CreditCard, FileText, Crown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
@@ -50,11 +50,9 @@ export function Sidebar() {
     >
       {/* 로고 */}
       <div className="flex items-center gap-2.5 px-4 h-14 border-b border-sidebar-border">
-        <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-brand-300 text-white dark:bg-brand-300 dark:text-white shrink-0">
-          <BarChart3 className="h-5 w-5" />
-        </div>
+        <img src="/logo.png" alt="수니" className="h-9 w-9 rounded-lg shrink-0 object-cover" />
         {!collapsed && (
-          <span className="font-bold text-base text-sidebar-foreground truncate">
+          <span className="font-extrabold text-xl text-sidebar-foreground truncate">
             수니
           </span>
         )}

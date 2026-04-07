@@ -27,10 +27,8 @@ export default function HomePage() {
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-brand-300 text-white dark:bg-brand-300">
-            <BarChart3 className="h-4 w-4" />
-          </div>
-          <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">수니</span>
+          <img src="/logo.png" alt="수니" className="h-8 w-8 rounded-lg object-cover" />
+          <span className="font-extrabold text-xl text-slate-900 dark:text-slate-100">수니</span>
         </div>
         <Link href="/login">
           <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
