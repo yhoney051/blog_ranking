@@ -53,9 +53,10 @@ export default function BillingPage() {
       const profile = await profileRes.json()
 
       const customerKey = `cust_${profile.email.replace(/[^a-zA-Z0-9]/g, '_')}`
+      const customerName = profile.name || profile.email.split('@')[0]
 
       // 포트원 빌링키 발급 (카드 등록 결제창)
-      const billingResult = await requestIssueBillingKey(customerKey)
+      const billingResult = await requestIssueBillingKey(customerKey, customerName)
 
       if (!billingResult.success) {
         toast.error(billingResult.error)

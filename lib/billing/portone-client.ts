@@ -10,7 +10,8 @@ type IssueBillingKeyResult =
 
 // 빌링키 발급 요청 (카드 등록 결제창 표시)
 export async function requestIssueBillingKey(
-  customerKey: string
+  customerKey: string,
+  customerName?: string
 ): Promise<IssueBillingKeyResult> {
   const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID
   const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY
@@ -25,6 +26,7 @@ export async function requestIssueBillingKey(
     billingKeyMethod: 'CARD',
     customer: {
       customerId: customerKey,
+      fullName: customerName || '고객',
     },
   })
 
