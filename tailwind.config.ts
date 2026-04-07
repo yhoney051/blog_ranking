@@ -15,6 +15,19 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
+        // 브랜드 메인 컬러 (#E4FD60 기반)
+        brand: {
+          50: '#FAFFE6',
+          100: '#F3FEBD',
+          200: '#ECFD94',
+          300: '#E4FD60',
+          400: '#D4ED4E',
+          500: '#B8D435',
+          600: '#9AB82A',
+          700: '#7A9421',
+          800: '#5C7019',
+          900: '#3D4B11',
+        },
         background: "var(--background)",
         foreground: "var(--foreground)",
         border: "var(--border)",

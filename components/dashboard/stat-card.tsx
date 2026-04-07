@@ -37,7 +37,7 @@ export function StatCard({
       className={cn(
         "rounded-xl border bg-card p-4 transition-colors",
         isNorthstar
-          ? "border-lime-300 dark:border-lime-800/50 ring-1 ring-lime-500/10"
+          ? "border-brand-400 dark:border-brand-800/50 ring-1 ring-brand-500/10"
           : "border-slate-200/60 dark:border-slate-700/50"
       )}
     >
@@ -57,7 +57,7 @@ export function StatCard({
           className={cn(
             "flex items-center justify-center h-10 w-10 rounded-lg flex-shrink-0",
             iconClassName || (isNorthstar
-              ? "bg-lime-100 text-slate-700 dark:bg-lime-900/30 dark:text-slate-400"
+              ? "bg-brand-100 text-slate-700 dark:bg-brand-900/30 dark:text-slate-400"
               : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400")
           )}
         >
@@ -70,7 +70,7 @@ export function StatCard({
             className={cn(
               "inline-flex items-center text-xs font-medium rounded-md px-1.5 py-0.5 tabular-nums",
               trend.isPositive
-                ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30"
+                ? "text-brand-700 bg-brand-50 dark:text-brand-400 dark:bg-brand-900/30"
                 : "text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30"
             )}
           >
@@ -78,7 +78,7 @@ export function StatCard({
           </span>
         )}
         {badge && (
-          <span className="text-[10px] bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 px-1.5 py-0.5 rounded-md font-medium">
+          <span className="text-[10px] bg-brand-100 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 px-1.5 py-0.5 rounded-md font-medium">
             {badge}
           </span>
         )}

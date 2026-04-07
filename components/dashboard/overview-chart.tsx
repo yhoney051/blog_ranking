@@ -60,7 +60,7 @@ export function OverviewChart({ keywords }: OverviewChartProps) {
         {/* 커스텀 HTML 범례 */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+            <span className="h-2.5 w-2.5 rounded-sm bg-brand-500" />
             현재
           </span>
           <span className="flex items-center gap-1.5">

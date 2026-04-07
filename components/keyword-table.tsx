@@ -21,8 +21,8 @@ const PAGE_SIZE = PAGINATION.KEYWORD_TABLE_PAGE_SIZE
 // 순위에 따른 색상 위계 (blue → emerald → amber → red)
 function getRankColor(rank: number | null) {
   if (rank === null) return 'text-muted-foreground'
-  if (rank <= 3) return 'bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 font-bold'
-  if (rank <= 10) return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 font-semibold'
+  if (rank <= 3) return 'bg-brand-100 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 font-bold'
+  if (rank <= 10) return 'bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300 font-semibold'
   if (rank <= 30) return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-semibold'
   return 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400'
 }
@@ -245,7 +245,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                 className={cn(
                   'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                   rankFilter === f.key
-                    ? 'bg-lime-400/20 text-slate-800 dark:bg-lime-400/15 dark:text-slate-300'
+                    ? 'bg-brand-300/20 text-slate-800 dark:bg-brand-300/15 dark:text-slate-300'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 )}
                 onClick={() => { setRankFilter(f.key); setPage(0) }}
@@ -264,7 +264,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                   className={cn(
                     'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                     tagFilter === 'all'
-                      ? 'bg-lime-400/20 text-slate-800 dark:bg-lime-400/15 dark:text-slate-300'
+                      ? 'bg-brand-300/20 text-slate-800 dark:bg-brand-300/15 dark:text-slate-300'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                   )}
                   onClick={() => { setTagFilter('all'); setPage(0) }}
@@ -277,7 +277,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                     className={cn(
                       'text-xs px-2.5 py-1 rounded-lg font-medium transition-colors',
                       tagFilter === t
-                        ? 'bg-lime-400/20 text-slate-800 dark:bg-lime-400/15 dark:text-slate-300'
+                        ? 'bg-brand-300/20 text-slate-800 dark:bg-brand-300/15 dark:text-slate-300'
                         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                     )}
                     onClick={() => { setTagFilter(t); setPage(0) }}
@@ -315,11 +315,11 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
       {/* 텔레그램 알림 CTA */}
       <a
         href="/dashboard/settings"
-        className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-blue-200/60 dark:border-blue-800/50 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-brand-200/60 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 text-sm hover:bg-brand-100 dark:hover:bg-brand-900/40 transition-colors"
       >
         <span>📱</span>
         <span>폰으로 매일 순위 알림 받기</span>
-        <span className="text-blue-400 dark:text-blue-500 ml-auto">→</span>
+        <span className="text-brand-400 dark:text-brand-500 ml-auto">→</span>
       </a>
 
       {/* 테이블 */}

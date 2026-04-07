@@ -91,10 +91,10 @@ export default function FormatterPage() {
                   </div>
                   {/* After */}
                   <div className="space-y-2">
-                    <span className="text-[10px] font-bold text-emerald-500 uppercase">After</span>
+                    <span className="text-[10px] font-bold text-brand-500 uppercase">After</span>
                     <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-xs leading-relaxed space-y-2.5">
                       {/* 인용구 */}
-                      <div className="border-l-[3px] border-emerald-400 pl-2.5 py-1 text-slate-600 dark:text-slate-300">
+                      <div className="border-l-[3px] border-brand-400 pl-2.5 py-1 text-slate-600 dark:text-slate-300">
                         글이 읽히지 않는 가장 큰 이유는
                         <br /><span className="font-bold">가독성이 부족하기 때문이다.</span>
                       </div>

@@ -27,7 +27,7 @@ export default function HomePage() {
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-lime-400 text-white dark:bg-lime-400">
+          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-brand-300 text-white dark:bg-brand-300">
             <BarChart3 className="h-4 w-4" />
           </div>
           <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">수니</span>
@@ -58,8 +58,8 @@ export default function HomePage() {
                 <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 h-full flex flex-col gap-4 transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
                   <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${
                     service.color === 'lime'
-                      ? 'bg-lime-100 text-slate-700 dark:bg-lime-900/30 dark:text-slate-700'
-                      : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+                      ? 'bg-brand-100 text-slate-700 dark:bg-brand-900/30 dark:text-slate-700'
+                      : 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
                   }`}>
                     <service.icon className="h-6 w-6" />
                   </div>
@@ -94,13 +94,13 @@ export default function HomePage() {
                   0<span className="text-sm font-normal text-slate-500">원/월</span>
                 </p>
                 <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />키워드 10개</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />일 1회 자동 순위 체크</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />가독성King 무제한</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />키워드 10개</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />일 1회 자동 순위 체크</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />가독성King 무제한</li>
                 </ul>
               </div>
               {/* Pro 플랜 */}
-              <div className="rounded-xl border-2 border-lime-500 bg-white dark:bg-slate-800 p-6 space-y-4">
+              <div className="rounded-xl border-2 border-brand-500 bg-white dark:bg-slate-800 p-6 space-y-4">
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                   <Crown className="h-4 w-4 text-yellow-500" />Pro
                 </h3>
@@ -108,9 +108,9 @@ export default function HomePage() {
                   9,900<span className="text-sm font-normal text-slate-500">원/월</span>
                 </p>
                 <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />키워드 100개</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />일 1회 자동 순위 체크</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" />우선 고객 지원</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />키워드 100개</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />일 1회 자동 순위 체크</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />우선 고객 지원</li>
                 </ul>
               </div>
             </div>

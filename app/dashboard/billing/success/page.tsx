@@ -20,7 +20,7 @@ export default function BillingSuccessPage() {
         <div className="p-4 lg:p-6 max-w-md mx-auto mt-12">
           <Card>
             <CardContent className="pt-6 text-center space-y-4">
-              <CheckCircle2 className="h-12 w-12 mx-auto text-green-500" />
+              <CheckCircle2 className="h-12 w-12 mx-auto text-brand-500" />
               <p className="text-lg font-semibold">결제가 완료되었습니다</p>
               <p className="text-sm text-muted-foreground">
                 결제 관리 페이지에서 구독 상태를 확인할 수 있습니다.

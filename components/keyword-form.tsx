@@ -53,7 +53,7 @@ export function KeywordForm({ onAdded }: Props) {
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-accent/50 transition-colors"
       >
         <span className="flex items-center gap-2 text-sm font-semibold text-card-foreground">
-          <Plus className="h-4 w-4 text-emerald-500" />
+          <Plus className="h-4 w-4 text-brand-500" />
           키워드 등록
         </span>
         {open ? (

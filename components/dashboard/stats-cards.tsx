@@ -62,7 +62,7 @@ export function StatsCards({ keywords }: StatsCardsProps) {
             : "조회된 키워드 없음"
         }
         icon={Trophy}
-        iconClassName="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+        iconClassName="bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400"
       />
       <StatCard
         title="순위 상승"
@@ -70,7 +70,7 @@ export function StatsCards({ keywords }: StatsCardsProps) {
         trend={downCount > 0 ? { value: downCount, isPositive: false } : undefined}
         subtitle={downCount > 0 ? "하락" : "하락 없음"}
         icon={ArrowUpCircle}
-        iconClassName="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+        iconClassName="bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400"
       />
     </div>
   );

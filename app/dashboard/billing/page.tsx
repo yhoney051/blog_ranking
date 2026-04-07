@@ -203,11 +203,11 @@ export default function BillingPage() {
                   <p className="text-2xl font-bold">0<span className="text-sm font-normal text-muted-foreground">원/월</span></p>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-brand-500" />
                       키워드 {PLANS.free.keywordLimit}개
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-brand-500" />
                       일 1회 자동 순위 체크
                     </li>
                   </ul>
@@ -245,15 +245,15 @@ export default function BillingPage() {
                   </p>
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-brand-500" />
                       키워드 {PLANS.pro.keywordLimit}개
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-brand-500" />
                       일 1회 자동 순위 체크
                     </li>
                     <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-4 w-4 text-brand-500" />
                       우선 고객 지원
                     </li>
                   </ul>

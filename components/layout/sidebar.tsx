@@ -50,7 +50,7 @@ export function Sidebar() {
     >
       {/* 로고 */}
       <div className="flex items-center gap-2.5 px-4 h-14 border-b border-sidebar-border">
-        <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-lime-400 text-white dark:bg-lime-400 dark:text-white shrink-0">
+        <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-brand-300 text-white dark:bg-brand-300 dark:text-white shrink-0">
           <BarChart3 className="h-5 w-5" />
         </div>
         {!collapsed && (
@@ -72,7 +72,7 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors",
                 active
-                  ? "bg-lime-50 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300"
+                  ? "bg-brand-50 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300"
                   : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
@@ -104,7 +104,7 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors",
                   active
-                    ? "bg-lime-50 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300"
+                    ? "bg-brand-50 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300"
                     : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                 )}
               >
@@ -130,7 +130,7 @@ export function Sidebar() {
       {profile && !collapsed && (
         <div className="px-3 pb-2">
           {isPro ? (
-            <div className="rounded-xl bg-lime-50 dark:bg-lime-900/20 border border-lime-200/60 dark:border-lime-800/40 p-3 text-center">
+            <div className="rounded-xl bg-brand-50 dark:bg-brand-900/20 border border-brand-200/60 dark:border-brand-800/40 p-3 text-center">
               <div className="flex items-center justify-center gap-1.5">
                 <Crown className="h-4 w-4 text-slate-700 dark:text-slate-300" />
                 <span className="text-sm font-bold text-slate-800 dark:text-slate-300">Pro 플랜</span>
@@ -139,7 +139,7 @@ export function Sidebar() {
             </div>
           ) : (
             <Link href="/dashboard/billing">
-              <div className="rounded-xl bg-gradient-to-r from-lime-500 to-lime-500 p-3.5 text-white cursor-pointer hover:opacity-90 transition-opacity">
+              <div className="rounded-xl bg-gradient-to-r from-brand-500 to-brand-500 p-3.5 text-white cursor-pointer hover:opacity-90 transition-opacity">
                 <div className="flex items-center gap-2 mb-1.5">
                   <Crown className="h-4 w-4" />
                   <span className="text-sm font-bold">Pro로 업그레이드</span>
@@ -162,7 +162,7 @@ export function Sidebar() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <div className="mx-auto flex items-center justify-center h-9 w-9 rounded-full bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 text-xs font-bold cursor-default">
+                  <div className="mx-auto flex items-center justify-center h-9 w-9 rounded-full bg-brand-100 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 text-xs font-bold cursor-default">
                     {profile.email.slice(0, 2).toUpperCase()}
                   </div>
                 }
@@ -173,7 +173,7 @@ export function Sidebar() {
             </Tooltip>
           ) : (
             <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-lime-100 text-slate-800 dark:bg-lime-900/30 dark:text-slate-300 text-xs font-bold shrink-0">
+              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-brand-100 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 text-xs font-bold shrink-0">
                 {profile.email.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
@@ -185,7 +185,7 @@ export function Sidebar() {
                     variant={isPro ? "default" : "secondary"}
                     className={cn(
                       "text-[10px] px-1.5 py-0 h-4",
-                      isPro && "bg-lime-400/25 text-slate-800 hover:bg-lime-400/25 dark:bg-lime-400/15 dark:text-slate-300"
+                      isPro && "bg-brand-300/25 text-slate-800 hover:bg-brand-300/25 dark:bg-brand-300/15 dark:text-slate-300"
                     )}
                   >
                     {isPro ? "Pro" : "무료"}

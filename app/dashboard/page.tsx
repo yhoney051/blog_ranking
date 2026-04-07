@@ -129,7 +129,7 @@ export default function Home() {
         <div className="p-4 lg:p-6 space-y-8 max-w-[1400px] mx-auto">
           {/* 비회원 배너 */}
           {isLoggedIn === false && (
-            <div className="rounded-xl border border-lime-200/60 dark:border-lime-800/50 bg-lime-50 dark:bg-lime-900/20 p-4 flex items-center justify-between">
+            <div className="rounded-xl border border-brand-200/60 dark:border-brand-800/50 bg-brand-50 dark:bg-brand-900/20 p-4 flex items-center justify-between">
               <span className="text-sm text-slate-800 dark:text-slate-400">
                 가입하면 키워드가 영구 저장되고, 매일 자동으로 순위를 추적해요
               </span>
@@ -176,7 +176,7 @@ export default function Home() {
               onClick={() => router.push('/')}
               className="w-full h-11 rounded-xl text-sm font-medium border-slate-200/60 dark:border-slate-700/50"
             >
-              <Plus className="h-4 w-4 mr-1.5 text-emerald-500" />
+              <Plus className="h-4 w-4 mr-1.5 text-brand-500" />
               키워드 추가하기
             </Button>
           )}
