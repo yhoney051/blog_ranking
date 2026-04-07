@@ -55,7 +55,7 @@ function Sparkline({ data, width = 64, height = 24 }: {
   const lastPoint = invertedPoints[invertedPoints.length - 1]
   const isImproving = ranks[ranks.length - 1] < ranks[0]
   const isSame = ranks[ranks.length - 1] === ranks[0]
-  const color = isSame ? '#94a3b8' : isImproving ? '#10b981' : '#ef4444'
+  const color = isSame ? '#94a3b8' : isImproving ? '#E4FD60' : '#ef4444'
 
   return (
     <svg width={width} height={height} className="inline-block">

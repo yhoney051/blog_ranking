@@ -214,7 +214,7 @@ export default function HomePage() {
                       <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-brand-50 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 font-bold">1</span>
                     </div>
                     <div className="text-center">
-                      <svg width="48" height="20" className="inline-block"><path d="M2,16 L12,12 L24,14 L36,6 L46,3" fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="46" cy="3" r="2" fill="#10b981"/></svg>
+                      <svg width="48" height="20" className="inline-block"><path d="M2,16 L12,12 L24,14 L36,6 L46,3" fill="none" stroke="#E4FD60" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="46" cy="3" r="2" fill="#E4FD60"/></svg>
                     </div>
                     <div className="text-center">
                       <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-brand-50 text-brand-500 dark:bg-brand-900/30 dark:text-brand-300">NEW</span>
