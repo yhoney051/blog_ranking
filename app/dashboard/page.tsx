@@ -170,6 +170,13 @@ export default function Home() {
           {/* 키워드 등록: 회원은 폼, 비회원은 루트로 이동 */}
           {isLoggedIn ? (
             <KeywordForm onAdded={fetchKeywords} />
+          ) : keywords.length >= 3 ? (
+            <Button
+              onClick={() => router.push('/signup')}
+              className="w-full h-11 rounded-xl text-sm font-medium"
+            >
+              가입하고 더 추가하기
+            </Button>
           ) : (
             <Button
               variant="outline"
