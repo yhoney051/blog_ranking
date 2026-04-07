@@ -106,6 +106,32 @@ export function formatRankSummary(results: RankResult[], date: string): string {
   return lines.join('\n')
 }
 
+// 현재 순위 현황 메시지 포맷팅 (/rank 명령어용)
+export function formatCurrentRanks(
+  keywords: { keyword: string; current_rank: number | null }[]
+): string {
+  if (keywords.length === 0) {
+    return '등록된 키워드가 없습니다.\n대시보드에서 키워드를 추가해주세요.'
+  }
+
+  const ranked = keywords
+    .filter((k) => k.current_rank !== null)
+    .sort((a, b) => a.current_rank! - b.current_rank!)
+  const unranked = keywords.filter((k) => k.current_rank === null)
+
+  const lines: string[] = ['📋 <b>현재 순위 현황</b>\n']
+
+  for (const k of ranked) {
+    lines.push(`${k.current_rank}위 — "${escapeHtml(k.keyword)}"`)
+  }
+  for (const k of unranked) {
+    lines.push(`❌ — "${escapeHtml(k.keyword)}" (순위권 밖)`)
+  }
+
+  lines.push(`\n총 ${keywords.length}개 키워드`)
+  return lines.join('\n')
+}
+
 // HTML 특수문자 이스케이프 (텔레그램 HTML parse_mode용)
 function escapeHtml(text: string): string {
   return text

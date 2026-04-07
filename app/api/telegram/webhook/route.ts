@@ -1,7 +1,7 @@
 // POST /api/telegram/webhook — 텔레그램 봇 업데이트 수신
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { sendTelegramMessage, formatCurrentRanks } from '@/lib/telegram'
 
 export async function POST(request: Request) {
   // 웹훅 시크릿 검증
@@ -60,6 +60,32 @@ export async function POST(request: Request) {
         chatId,
         '✅ <b>연동 완료!</b>\n\n매일 아침 순위 변동 리포트를 이 채팅방으로 보내드립니다.\n설정 페이지에서 알림 옵션을 변경할 수 있습니다.',
       )
+    }
+
+    // /rank 명령 처리 (현재 순위 조회)
+    if (text === '/rank') {
+      // chat_id로 사용자 찾기
+      const { data: setting } = await supabaseServer
+        .from('notification_settings')
+        .select('user_id')
+        .eq('telegram_chat_id', chatId)
+        .single()
+
+      if (!setting) {
+        await sendTelegramMessage(chatId, '먼저 설정 페이지에서 텔레그램을 연동해주세요.')
+        return NextResponse.json({ ok: true })
+      }
+
+      // 사용자 키워드 조회
+      const { data: keywords } = await supabaseServer
+        .from('keywords')
+        .select('keyword, current_rank')
+        .eq('user_id', setting.user_id)
+        .order('current_rank', { ascending: true, nullsFirst: false })
+
+      const message = formatCurrentRanks(keywords || [])
+      await sendTelegramMessage(chatId, message)
+      return NextResponse.json({ ok: true })
     }
 
     return NextResponse.json({ ok: true })
