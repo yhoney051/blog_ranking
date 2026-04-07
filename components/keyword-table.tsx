@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { PAGINATION } from '@/lib/constants'
 
-type Props = { keywords: Keyword[]; onRefreshed: () => void; onDeleted: () => void }
+type Props = { keywords: Keyword[]; onRefreshed: () => void; onDeleted: () => void; isGuest?: boolean }
 
 const PAGE_SIZE = PAGINATION.KEYWORD_TABLE_PAGE_SIZE
 
@@ -146,7 +146,7 @@ const sortOptions: { key: SortOption; label: string }[] = [
 ]
 
 // 키워드 순위 목록 테이블
-export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
+export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false }: Props) {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const [rankFilter, setRankFilter] = useState<RankFilter>('all')
@@ -392,12 +392,14 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
                     : '-'}
                 </TableCell>
                 <TableCell className="py-3.5">
-                  <div className="flex gap-0.5 justify-end">
-                    <RefreshButton keywordId={kw.id} onRefreshed={onRefreshed} />
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(kw.id)} className="h-8 w-8 text-muted-foreground hover:text-red-500">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {!isGuest && (
+                    <div className="flex gap-0.5 justify-end">
+                      <RefreshButton keywordId={kw.id} onRefreshed={onRefreshed} />
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(kw.id)} className="h-8 w-8 text-muted-foreground hover:text-red-500">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

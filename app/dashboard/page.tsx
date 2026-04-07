@@ -177,7 +177,7 @@ export default function Home() {
               className="w-full h-11 rounded-xl text-sm font-medium border-slate-200/60 dark:border-slate-700/50"
             >
               <Plus className="h-4 w-4 mr-1.5 text-brand-500" />
-              키워드 추가하기
+              다음
             </Button>
           )}
 
@@ -190,7 +190,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <KeywordTable keywords={keywords} onRefreshed={fetchKeywords} onDeleted={fetchKeywords} />
+            <KeywordTable keywords={keywords} onRefreshed={fetchKeywords} onDeleted={fetchKeywords} isGuest={isLoggedIn === false} />
           )}
         </div>
       </main>
