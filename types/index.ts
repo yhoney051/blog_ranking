@@ -57,6 +57,23 @@ export type Subscription = {
   updated_at: string
 }
 
+// 알림 설정
+export type NotificationSettings = {
+  id: string
+  user_id: string
+  telegram_chat_id: string | null
+  telegram_username: string | null
+  enabled: boolean
+  notify_rank_up: boolean
+  notify_rank_down: boolean
+  notify_new_entry: boolean
+  notify_dropped_out: boolean
+  connect_token: string | null
+  connect_token_expires_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 // 결제 이력
 export type Payment = {
   id: string

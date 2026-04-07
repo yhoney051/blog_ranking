@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
+import { NotificationSettings } from '@/components/notification-settings'
 
 interface ProfileData {
   email: string
@@ -100,6 +101,9 @@ export default function SettingsPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* 알림 설정 */}
+          <NotificationSettings />
 
           {/* 비밀번호 변경 */}
           <Card>
