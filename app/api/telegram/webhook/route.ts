@@ -62,6 +62,15 @@ export async function POST(request: Request) {
       )
     }
 
+    // /help 명령 처리 (사용법 안내)
+    if (text === '/help') {
+      await sendTelegramMessage(
+        chatId,
+        '📋 <b>사용 가능한 명령어</b>\n\n/rank — 현재 키워드 순위 조회\n/help — 이 도움말 보기\n\n매일 아침 자동으로 순위 변동 리포트도 보내드려요!'
+      )
+      return NextResponse.json({ ok: true })
+    }
+
     // /rank 명령 처리 (현재 순위 조회)
     if (text === '/rank') {
       // chat_id로 사용자 찾기

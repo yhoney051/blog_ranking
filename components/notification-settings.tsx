@@ -268,6 +268,9 @@ export function NotificationSettings() {
                 <Button variant="outline" size="sm" onClick={handleTest} disabled={testing}>
                   {testing ? '발송 중...' : '테스트 알림 보내기'}
                 </Button>
+                <p className="text-xs text-muted-foreground mt-3">
+                  💡 텔레그램에서 <b>/rank</b> 명령어로 현재 순위를 바로 확인할 수 있습니다
+                </p>
               </>
             )}
           </>
