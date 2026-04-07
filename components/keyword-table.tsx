@@ -318,7 +318,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
         className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-900 text-brand-700 dark:text-brand-300 text-sm hover:bg-brand-100 dark:hover:bg-brand-800 transition-colors"
       >
         <span>📱</span>
-        <span>폰으로 매일 순위 알림 받기</span>
+        <span className="font-bold text-slate-900 dark:text-slate-900">폰으로 매일 순위 알림 받기</span>
         <span className="text-brand-400 dark:text-brand-500 ml-auto">→</span>
       </a>
 

@@ -60,7 +60,7 @@ export function OverviewChart({ keywords }: OverviewChartProps) {
         {/* 커스텀 HTML 범례 */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-brand-500" />
+            <span className="h-2.5 w-2.5 rounded-sm bg-brand-300" />
             현재
           </span>
           <span className="flex items-center gap-1.5">
@@ -92,7 +92,7 @@ export function OverviewChart({ keywords }: OverviewChartProps) {
               fontSize: "12px",
             }}
           />
-          <Bar dataKey="현재" fill="#10b981" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="현재" fill="#E4FD60" radius={[4, 4, 0, 0]} />
           <Bar dataKey="이전" fill="#94a3b8" opacity={0.5} radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
