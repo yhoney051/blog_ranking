@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   // 미인증 사용자 → /dashboard 및 하위 경로 보호 (/dashboard/formatter만 비회원 허용)
   if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
     const publicDashboardPaths = ['/dashboard/formatter']
-    const isPublic = publicDashboardPaths.some(p => request.nextUrl.pathname.startsWith(p))
+    const isPublic = request.nextUrl.pathname === '/dashboard' || publicDashboardPaths.some(p => request.nextUrl.pathname.startsWith(p))
     if (!isPublic) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
