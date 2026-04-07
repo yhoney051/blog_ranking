@@ -41,9 +41,10 @@ export default function HomePage() {
       {/* 메인 */}
       <main className="flex-1 p-4">
         <div className="w-full max-w-2xl mx-auto space-y-12 py-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <div className="text-center space-y-3">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center justify-center gap-1">
               내 블로그는 몇 순위인진 궁금할 땐 ? 수니!
+              <img src="/logo.png" alt="수니" className="h-7 w-7 rounded-lg object-cover" />
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               사용할 도구를 선택하세요
