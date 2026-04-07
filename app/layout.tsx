@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ChannelTalk } from "@/components/channel-talk";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -44,7 +36,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={cn("font-sans", inter.variable)} suppressHydrationWarning>
+    <html lang="ko" className="font-sans" suppressHydrationWarning>
+      <head>
+        <link
+          rel="stylesheet"
+          as="style"
+          crossOrigin="anonymous"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+        />
+      </head>
       <body className="antialiased">
         {children}
         <Toaster richColors position="bottom-right" />
