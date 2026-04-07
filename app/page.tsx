@@ -58,8 +58,8 @@ export default function HomePage() {
                 <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 h-full flex flex-col gap-4 transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
                   <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${
                     service.color === 'lime'
-                      ? 'bg-brand-100 text-slate-700 dark:bg-brand-900/30 dark:text-slate-700'
-                      : 'bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
+                      ? 'bg-brand-300 text-slate-700 dark:bg-brand-900/30 dark:text-slate-700'
+                      : 'bg-brand-300 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400'
                   }`}>
                     <service.icon className="h-6 w-6" />
                   </div>

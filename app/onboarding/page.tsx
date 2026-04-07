@@ -211,13 +211,13 @@ export default function HomePage() {
                   <div className="grid grid-cols-[1fr_80px_60px_64px_60px] gap-2 px-4 py-3 items-center">
                     <span className="text-sm font-medium text-slate-900 dark:text-slate-100">대구지방분해주사</span>
                     <div className="text-center">
-                      <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-brand-50 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 font-bold">1</span>
+                      <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-brand-300 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 font-bold">1</span>
                     </div>
                     <div className="text-center">
                       <svg width="48" height="20" className="inline-block"><path d="M2,16 L12,12 L24,14 L36,6 L46,3" fill="none" stroke="#E4FD60" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><circle cx="46" cy="3" r="2" fill="#E4FD60"/></svg>
                     </div>
                     <div className="text-center">
-                      <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-brand-50 text-brand-500 dark:bg-brand-900/30 dark:text-brand-300">NEW</span>
+                      <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-brand-300 text-brand-500 dark:bg-brand-900/30 dark:text-brand-300">NEW</span>
                     </div>
                     <span className="text-[10px] text-slate-400 tabular-nums text-center">방금</span>
                   </div>

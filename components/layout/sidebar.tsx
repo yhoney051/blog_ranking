@@ -72,7 +72,7 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-semibold transition-colors",
                 active
-                  ? "bg-brand-50 text-slate-800 dark:bg-brand-900 dark:text-slate-300"
+                  ? "bg-brand-300 text-slate-800 dark:bg-brand-900 dark:text-slate-300"
                   : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
             >
@@ -104,7 +104,7 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors",
                   active
-                    ? "bg-brand-50 text-slate-800 dark:bg-brand-900 dark:text-slate-300"
+                    ? "bg-brand-300 text-slate-800 dark:bg-brand-900 dark:text-slate-300"
                     : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                 )}
               >
@@ -130,7 +130,7 @@ export function Sidebar() {
       {profile && !collapsed && (
         <div className="px-3 pb-2">
           {isPro ? (
-            <div className="rounded-xl bg-brand-50 dark:bg-brand-900 border border-brand-200 dark:border-brand-800 p-3 text-center">
+            <div className="rounded-xl bg-brand-300 dark:bg-brand-900 border border-brand-200 dark:border-brand-800 p-3 text-center">
               <div className="flex items-center justify-center gap-1.5">
                 <Crown className="h-4 w-4 text-slate-700 dark:text-slate-300" />
                 <span className="text-sm font-bold text-slate-800 dark:text-slate-300">Pro 플랜</span>
@@ -162,7 +162,7 @@ export function Sidebar() {
             <Tooltip>
               <TooltipTrigger
                 render={
-                  <div className="mx-auto flex items-center justify-center h-9 w-9 rounded-full bg-brand-100 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 text-xs font-bold cursor-default">
+                  <div className="mx-auto flex items-center justify-center h-9 w-9 rounded-full bg-brand-300 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 text-xs font-bold cursor-default">
                     {profile.email.slice(0, 2).toUpperCase()}
                   </div>
                 }
@@ -173,7 +173,7 @@ export function Sidebar() {
             </Tooltip>
           ) : (
             <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-brand-100 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 text-xs font-bold shrink-0">
+              <div className="flex items-center justify-center h-9 w-9 rounded-full bg-brand-300 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 text-xs font-bold shrink-0">
                 {profile.email.slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">

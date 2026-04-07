@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
         <CardContent>
           {sent ? (
             <div className="space-y-4">
-              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm text-foreground">
+              <div className="rounded-lg border border-primary/30 bg-primary p-4 text-sm text-foreground">
                 비밀번호 재설정 링크가 이메일로 발송되었습니다.
                 받은편지함(또는 스팸함)을 확인해주세요.
               </div>

@@ -92,7 +92,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           {/* 회원가입 성공 시 안내 메시지만 표시 */}
           {message ? (
             <div className="space-y-4">
-              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm text-foreground">
+              <div className="rounded-lg border border-primary/30 bg-primary p-4 text-sm text-foreground">
                 {message}
               </div>
               <p className="text-center text-sm text-muted-foreground">

@@ -198,7 +198,7 @@ export default function BillingPage() {
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 {/* 무료 플랜 */}
-                <div className={`rounded-lg border p-4 space-y-3 ${!isPro ? 'border-primary bg-primary/5' : ''}`}>
+                <div className={`rounded-lg border p-4 space-y-3 ${!isPro ? 'border-primary bg-primary' : ''}`}>
                   <h3 className="font-semibold">{PLANS.free.label}</h3>
                   <p className="text-2xl font-bold">0<span className="text-sm font-normal text-muted-foreground">원/월</span></p>
                   <ul className="space-y-2 text-sm">
@@ -234,7 +234,7 @@ export default function BillingPage() {
                 </div>
 
                 {/* Pro 플랜 */}
-                <div className={`rounded-lg border p-4 space-y-3 ${isPro ? 'border-primary bg-primary/5' : ''}`}>
+                <div className={`rounded-lg border p-4 space-y-3 ${isPro ? 'border-primary bg-primary' : ''}`}>
                   <h3 className="font-semibold flex items-center gap-1.5">
                     <Crown className="h-4 w-4 text-yellow-500" />
                     {PLANS.pro.label}
