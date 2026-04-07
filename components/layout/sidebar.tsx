@@ -49,10 +49,10 @@ export function Sidebar() {
       )}
     >
       {/* 로고 */}
-      <div className="flex items-center gap-2.5 px-4 h-14 border-b border-sidebar-border">
+      <div className="flex items-center gap-1 px-4 h-14 border-b border-sidebar-border">
         <img src="/logo.png" alt="수니" className="h-9 w-9 rounded-lg shrink-0 object-cover" />
         {!collapsed && (
-          <span className="font-extrabold text-xl text-sidebar-foreground truncate">
+          <span className="font-extrabold text-2xl text-sidebar-foreground truncate">
             수니
           </span>
         )}

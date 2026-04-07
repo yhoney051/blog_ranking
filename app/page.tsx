@@ -26,9 +26,9 @@ export default function HomePage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <img src="/logo.png" alt="수니" className="h-8 w-8 rounded-lg object-cover" />
-          <span className="font-extrabold text-xl text-slate-900 dark:text-slate-100">수니</span>
+          <span className="font-extrabold text-2xl text-slate-900 dark:text-slate-100">수니</span>
         </div>
         <Link href="/login">
           <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
