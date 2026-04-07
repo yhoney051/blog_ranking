@@ -313,14 +313,15 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted }: Props) {
       </div>
 
       {/* 텔레그램 알림 CTA */}
-      <a
-        href="/dashboard/settings"
-        className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-brand-200 dark:border-brand-800 bg-brand-300 dark:bg-brand-900 text-brand-700 dark:text-brand-300 text-sm hover:bg-brand-300 dark:hover:bg-brand-800 transition-colors"
-      >
-        <span>📱</span>
-        <span className="font-bold text-slate-900 dark:text-slate-900">폰으로 매일 순위 알림 받기</span>
-        <span className="text-brand-400 dark:text-brand-500 ml-auto">→</span>
-      </a>
+      <div>
+        <a
+          href="/dashboard/settings"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors"
+        >
+          <span>📱</span>
+          폰으로 매일 순위 알림 받기
+        </a>
+      </div>
 
       {/* 테이블 */}
       <div className="overflow-x-auto rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-card">
