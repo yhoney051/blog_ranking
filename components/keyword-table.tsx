@@ -40,19 +40,17 @@ function Sparkline({ data, width = 64, height = 24 }: {
   const max = Math.max(...ranks)
   const range = max - min || 1
 
-  // 순위는 낮을수록 좋으므로 y축 반전 (낮은 순위 = 높은 위치)
+  // 순위는 낮을수록 좋으므로: 순위 1위 → y 작음(위쪽), 순위 큰 값 → y 큼(아래쪽)
   const points = ranks.map((r, i) => ({
     x: (i / (ranks.length - 1)) * (width - 4) + 2,
     y: ((r - min) / range) * (height - 6) + 3,
   }))
-  // 반전: 순위 낮을수록 위쪽
-  const invertedPoints = points.map(p => ({ x: p.x, y: height - p.y }))
 
-  const pathD = invertedPoints
+  const pathD = points
     .map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
     .join(' ')
 
-  const lastPoint = invertedPoints[invertedPoints.length - 1]
+  const lastPoint = points[points.length - 1]
   const isImproving = ranks[ranks.length - 1] < ranks[0]
   const isSame = ranks[ranks.length - 1] === ranks[0]
   const color = isSame ? '#94a3b8' : isImproving ? '#E4FD60' : '#ef4444'
