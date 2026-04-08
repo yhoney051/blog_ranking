@@ -52,9 +52,7 @@ export function Sidebar() {
       <div className="flex items-center gap-1 px-4 h-14 border-b border-sidebar-border">
         <img src="/logo.png" alt="수니" className="h-9 w-9 rounded-lg shrink-0 object-cover" />
         {!collapsed && (
-          <span className="font-extrabold text-2xl truncate" style={{ color: '#F39090' }}>
-            수니 Sooni !
-          </span>
+          <img src="/sooni-logo.png" alt="수니 Sooni" className="h-8 object-contain" />
         )}
       </div>
 

@@ -28,7 +28,7 @@ export default function HomePage() {
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="flex items-center gap-1">
           <img src="/logo.png" alt="수니" className="h-8 w-8 rounded-lg object-cover" />
-          <span className="font-extrabold text-2xl" style={{ color: '#F39090' }}>수니 Sooni !</span>
+          <img src="/sooni-logo.png" alt="수니 Sooni" className="h-8 object-contain" />
         </div>
         <Link href="/login">
           <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
