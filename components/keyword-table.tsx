@@ -394,7 +394,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
                 <TableCell className="py-3.5">
                   {!isGuest && (
                     <div className="flex gap-0.5 justify-end">
-                      <RefreshButton keywordId={kw.id} onRefreshed={onRefreshed} />
+                      <RefreshButton keywordId={kw.id} lastCheckedAt={kw.last_checked_at} onRefreshed={onRefreshed} />
                       <Button variant="ghost" size="icon" onClick={() => handleDelete(kw.id)} className="h-8 w-8 text-muted-foreground hover:text-red-500">
                         <Trash2 className="h-4 w-4" />
                       </Button>

@@ -67,6 +67,11 @@ export async function sendDailyNotifications(): Promise<{
     }
 
     const message = formatRankSummary(filtered, today)
+    // 진입/이탈 모두 없으면 알림 발송하지 않음
+    if (!message) {
+      skipped++
+      continue
+    }
     const result = await sendTelegramMessage(setting.telegram_chat_id!, message)
 
     if (result.ok) {

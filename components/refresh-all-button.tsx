@@ -8,34 +8,35 @@ import { Keyword } from '@/types'
 
 type Props = { keywords: Keyword[]; onRefreshed: () => void }
 
+// 오늘 날짜(KST) 기준으로 이미 조회되었는지 확인
+function isCheckedToday(lastCheckedAt: string | null): boolean {
+  if (!lastCheckedAt) return false
+  const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000)
+  const kstChecked = new Date(new Date(lastCheckedAt).getTime() + 9 * 60 * 60 * 1000)
+  return kstNow.toISOString().slice(0, 10) === kstChecked.toISOString().slice(0, 10)
+}
+
 // 모든 키워드를 한 번에 순위 조회하는 버튼
-// 1시간 이내 조회된 키워드는 자동 스킵하여 Bright Data 비용 절감
+// 오늘 이미 조회된 키워드가 있으면 확인 후 진행
 export function RefreshAllButton({ keywords, onRefreshed }: Props) {
   const [loading, setLoading] = useState(false)
 
   async function handleClick() {
-    // 1시간 이내 조회된 키워드 필터링
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-    const staleKeywords = keywords.filter(
-      (kw) => !kw.last_checked_at || kw.last_checked_at < oneHourAgo
-    )
-    const skipped = keywords.length - staleKeywords.length
+    // 오늘 이미 조회된 키워드 확인
+    const alreadyChecked = keywords.filter((kw) => isCheckedToday(kw.last_checked_at))
 
-    if (staleKeywords.length === 0) {
-      toast.info('모든 키워드가 최근 1시간 이내 조회되었습니다')
-      return
+    if (alreadyChecked.length === keywords.length) {
+      // 모든 키워드가 오늘 조회됨
+      if (!window.confirm('오늘 이미 모든 키워드의 순위가 반영되었습니다. 전체를 다시 새로고침 하시겠습니까?')) return
+    } else if (alreadyChecked.length > 0) {
+      // 일부만 오늘 조회됨
+      if (!window.confirm(`오늘 이미 순위가 반영된 키워드가 ${alreadyChecked.length}개 있습니다. 전체를 다시 새로고침 하시겠습니까?`)) return
     }
-
-    // 확인 다이얼로그
-    const msg = skipped > 0
-      ? `${staleKeywords.length}개 키워드를 조회합니다 (${skipped}개는 최근 조회로 스킵). 계속할까요?`
-      : `${staleKeywords.length}개 키워드를 조회합니다. 계속할까요?`
-    if (!window.confirm(msg)) return
 
     setLoading(true)
     try {
       const results = await Promise.allSettled(
-        staleKeywords.map((kw) =>
+        keywords.map((kw) =>
           fetch('/api/rank-check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -44,7 +45,7 @@ export function RefreshAllButton({ keywords, onRefreshed }: Props) {
         )
       )
       const succeeded = results.filter((r) => r.status === 'fulfilled').length
-      toast.success(`${succeeded}/${staleKeywords.length}개 키워드 조회 완료${skipped > 0 ? ` (${skipped}개 스킵)` : ''}`)
+      toast.success(`${succeeded}/${keywords.length}개 키워드 조회 완료`)
       onRefreshed()
     } catch {
       toast.error('순위 조회에 실패했습니다')
