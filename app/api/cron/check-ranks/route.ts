@@ -23,9 +23,11 @@ export async function GET(request: Request) {
     }
 
     // 모든 키워드 조회
+    // 오래된 키워드부터 우선 처리 (특정 키워드가 영원히 밀리는 문제 방지)
     const { data: keywords, error: kwError } = await supabaseServer
       .from('keywords')
       .select('*')
+      .order('last_checked_at', { ascending: true, nullsFirst: true })
 
     if (kwError || !keywords) {
       console.error('[GET /api/cron/check-ranks] 키워드 조회 실패:', kwError?.message)

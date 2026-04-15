@@ -28,7 +28,7 @@ export const PAGINATION = {
 // Cron 작업 설정
 export const CRON = {
   /** 순위 체크 배치 크기 (한 번에 처리할 키워드 수) */
-  RANK_CHECK_CHUNK_SIZE: 80,
+  RANK_CHECK_CHUNK_SIZE: 110,
   /** 요청 간 딜레이 (밀리초) — IP 차단 방지 */
   RANK_CHECK_DELAY_MS: 2000,
   /** 검색량 갱신 주기 (일) — 이 기간 이내면 스킵 */
