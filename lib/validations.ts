@@ -1,6 +1,70 @@
 // API 요청 입력값 검증 스키마
 import { z } from 'zod'
 
+// SSRF 방지 — 내부 네트워크 주소 차단
+const BLOCKED_HOSTNAMES = [
+  'localhost',
+  '127.0.0.1',
+  '0.0.0.0',
+  '::1',
+  '[::1]',
+]
+
+// 내부 IP 대역 (10.x, 172.16-31.x, 192.168.x, 169.254.x)
+function isPrivateIp(hostname: string): boolean {
+  const parts = hostname.split('.')
+  if (parts.length !== 4) return false
+  const [a, b] = parts.map(Number)
+  if (a === 10) return true                              // 10.0.0.0/8
+  if (a === 172 && b >= 16 && b <= 31) return true       // 172.16.0.0/12
+  if (a === 192 && b === 168) return true                // 192.168.0.0/16
+  if (a === 169 && b === 254) return true                // 링크-로컬
+  if (a === 0) return true                               // 0.0.0.0/8
+  return false
+}
+
+function isSafeUrl(url: string): boolean {
+  // 위험한 프로토콜 차단 (javascript:, data:, vbscript: 등)
+  const dangerous = /^(javascript|data|vbscript|blob):/i
+  if (dangerous.test(url)) return false
+
+  // http/https 프로토콜이 있으면 호스트 검증
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    try {
+      const parsed = new URL(url)
+      const hostname = parsed.hostname.toLowerCase()
+      if (BLOCKED_HOSTNAMES.includes(hostname)) return false
+      if (isPrivateIp(hostname)) return false
+    } catch {
+      return false
+    }
+    return true
+  }
+
+  // 기타 미지원 프로토콜 차단
+  if (url.includes('://')) return false
+
+  // 도메인만 있는 경우 (blog.naver.com/xxx)에도 내부 주소 차단
+  const hostPart = url.split('/')[0].split(':')[0].toLowerCase()
+  if (BLOCKED_HOSTNAMES.includes(hostPart)) return false
+  if (isPrivateIp(hostPart)) return false
+
+  return true
+}
+
+// 블로그 URL 정규화 — 중복 비교를 위해 프로토콜/trailing slash/대소문자/쿼리 제거
+// 예: "https://BLOG.naver.com/abc/?ref=1" → "blog.naver.com/abc"
+export function normalizeBlogUrl(url: string): string {
+  let s = url.trim()
+  s = s.replace(/^https?:\/\//i, '')
+  s = s.split('?')[0].split('#')[0]
+  s = s.replace(/\/+$/, '')
+  // 호스트 부분만 lowercase (경로는 대소문자 구분될 수 있음)
+  const slashIdx = s.indexOf('/')
+  if (slashIdx === -1) return s.toLowerCase()
+  return s.slice(0, slashIdx).toLowerCase() + s.slice(slashIdx)
+}
+
 // 키워드 등록 요청 검증
 export const keywordCreateSchema = z.object({
   keyword: z.string().min(1, '키워드를 입력해주세요.').max(100, '키워드는 100자 이내로 입력해주세요.'),
@@ -8,18 +72,7 @@ export const keywordCreateSchema = z.object({
     .string()
     .min(1, 'URL을 입력해주세요.')
     .max(500, 'URL은 500자 이내로 입력해주세요.')
-    .refine(
-      (url) => {
-        // 위험한 프로토콜 차단 (javascript:, data:, vbscript: 등)
-        const dangerous = /^(javascript|data|vbscript|blob):/i
-        if (dangerous.test(url)) return false
-        // http/https 프로토콜이 있으면 검증, 없으면 도메인만 있는 것으로 허용
-        if (url.startsWith('http://') || url.startsWith('https://')) return true
-        if (url.includes('://')) return false // 기타 미지원 프로토콜 차단
-        return true // blog.naver.com/xxx 형태 허용
-      },
-      { message: '유효하지 않은 URL 형식입니다.' }
-    ),
+    .refine(isSafeUrl, { message: '유효하지 않은 URL 형식입니다.' }),
   tag: z.string().max(50, '태그는 50자 이내로 입력해주세요.').optional(),
 })
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient, getAuthUserId } from '@/lib/supabase/server'
-import { keywordCreateSchema } from '@/lib/validations'
+import { keywordCreateSchema, normalizeBlogUrl } from '@/lib/validations'
 import { getSearchVolume, isNaverSearchAdConfigured } from '@/lib/naver-searchad'
 
 // GET /api/keywords — 로그인한 사용자의 키워드 목록 조회 (최근 7일 순위 히스토리 포함)
@@ -67,11 +67,28 @@ export async function POST(req: Request) {
     )
   }
 
+  // 중복 체크: 같은 사용자 + 같은 키워드 + 같은 블로그 URL(정규화) 조합
+  const normalizedUrl = normalizeBlogUrl(parsed.data.blog_url)
+  const { data: existing } = await supabase
+    .from('keywords')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('keyword', parsed.data.keyword)
+    .eq('blog_url', normalizedUrl)
+    .maybeSingle()
+
+  if (existing) {
+    return NextResponse.json(
+      { error: '이미 등록된 키워드입니다.', code: 'DUPLICATE_KEYWORD' },
+      { status: 409 }
+    )
+  }
+
   const { data, error } = await supabase
     .from('keywords')
     .insert({
       keyword: parsed.data.keyword,
-      blog_url: parsed.data.blog_url,
+      blog_url: normalizedUrl,
       tag: parsed.data.tag || null,
       user_id: userId,
     })
@@ -79,6 +96,13 @@ export async function POST(req: Request) {
     .single()
 
   if (error) {
+    // DB unique 제약 위반 (race condition 방어)
+    if (error.code === '23505') {
+      return NextResponse.json(
+        { error: '이미 등록된 키워드입니다.', code: 'DUPLICATE_KEYWORD' },
+        { status: 409 }
+      )
+    }
     console.error('[POST /api/keywords]', error.message)
     return NextResponse.json({ error: '키워드 등록에 실패했습니다.' }, { status: 500 })
   }

@@ -58,7 +58,9 @@ export function KeywordForm({ onAdded }: Props) {
           }).then(async (res) => {
             if (!res.ok) {
               const body = await res.json().catch(() => ({}))
-              throw new Error(body.error || '등록 실패')
+              // 에러 코드를 message prefix로 전달해 분류에 사용
+              const code = body.code || 'ERROR'
+              throw new Error(`[${code}] ${body.error || '등록 실패'}`)
             }
             return res.json()
           })
@@ -66,31 +68,43 @@ export function KeywordForm({ onAdded }: Props) {
       )
 
       const successCount = results.filter((r) => r.status === 'fulfilled').length
-      const failCount = results.length - successCount
+      // 중복(DUPLICATE_KEYWORD)과 기타 실패를 분리
+      const dupCount = results.filter(
+        (r) => r.status === 'rejected' && /\[DUPLICATE_KEYWORD\]/.test((r as PromiseRejectedResult).reason?.message || '')
+      ).length
+      const failCount = results.length - successCount - dupCount
 
-      // 한도 초과 에러 감지 (첫 실패 메시지에 "한도" 포함 시 우선 표시)
-      const firstFail = results.find((r) => r.status === 'rejected') as
-        | PromiseRejectedResult
-        | undefined
-      const limitReached = firstFail?.reason?.message?.includes('한도')
+      // 한도 초과 에러 감지
+      const firstLimitFail = results.find(
+        (r) => r.status === 'rejected' && /한도/.test((r as PromiseRejectedResult).reason?.message || '')
+      ) as PromiseRejectedResult | undefined
 
       if (successCount > 0) {
-        toast.success(`${successCount}개 키워드가 등록되었습니다`)
+        const parts = [`${successCount}개 등록`]
+        if (dupCount > 0) parts.push(`${dupCount}개 이미 등록됨`)
+        toast.success(parts.join(', '))
         onAdded()
+      } else if (dupCount > 0 && failCount === 0) {
+        toast.error(dupCount === 1 ? '이미 등록된 키워드입니다' : `${dupCount}개 모두 이미 등록됨`)
       }
+
       if (failCount > 0) {
-        if (limitReached) {
-          toast.error(firstFail!.reason.message)
+        if (firstLimitFail) {
+          toast.error(firstLimitFail.reason.message.replace(/^\[[^\]]+\]\s*/, ''))
         } else {
           toast.error(`${failCount}개 등록 실패`)
         }
-        // 실패한 행만 남기기
-        const failedRows = validRows.filter((_, i) => results[i].status === 'rejected')
-        setRows(failedRows.length > 0 ? failedRows : [emptyRow()])
-      } else {
-        // 전부 성공 → 초기화 및 닫기
+      }
+
+      const remaining = successCount === validRows.length
+        ? []
+        : validRows.filter((_, i) => results[i].status === 'rejected')
+
+      if (remaining.length === 0) {
         setRows([emptyRow()])
         setOpen(false)
+      } else {
+        setRows(remaining)
       }
     } catch {
       toast.error('키워드 등록에 실패했습니다')
