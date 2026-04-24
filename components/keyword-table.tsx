@@ -372,6 +372,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200/60 dark:border-slate-700/50">
+              <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 text-center w-12">#</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">키워드</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3 hidden sm:table-cell">태그</TableHead>
               <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wider py-3">블로그 URL</TableHead>
@@ -384,8 +385,9 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paged.map((kw) => (
+            {paged.map((kw, idx) => (
               <TableRow key={kw.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                <TableCell className="py-3.5 text-center text-muted-foreground tabular-nums text-sm">{page * pageSize + idx + 1}</TableCell>
                 <TableCell className="font-medium text-card-foreground py-3.5">{kw.keyword}</TableCell>
                 <TableCell className="py-3.5 hidden sm:table-cell">
                   <EditableTag keyword={kw} onUpdated={onRefreshed} />
