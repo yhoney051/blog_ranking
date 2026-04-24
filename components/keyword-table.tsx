@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Keyword } from '@/types'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,8 @@ import { PAGINATION } from '@/lib/constants'
 
 type Props = { keywords: Keyword[]; onRefreshed: () => void; onDeleted: () => void; isGuest?: boolean }
 
-const PAGE_SIZE = PAGINATION.KEYWORD_TABLE_PAGE_SIZE
+const DEFAULT_PAGE_SIZE = PAGINATION.KEYWORD_TABLE_PAGE_SIZE
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
 
 // 순위에 따른 색상 위계 (blue → emerald → amber → red)
 function getRankColor(rank: number | null) {
@@ -150,6 +151,19 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
   const [rankFilter, setRankFilter] = useState<RankFilter>('all')
   const [tagFilter, setTagFilter] = useState<string>('all')
   const [sort, setSort] = useState<SortOption>('rank')
+  // 페이지당 표시 행 수 (사용자 선택, localStorage 영구 저장)
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE)
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? window.localStorage.getItem('keyword_page_size') : null
+    const parsed = saved ? parseInt(saved, 10) : NaN
+    if (PAGE_SIZE_OPTIONS.includes(parsed)) setPageSize(parsed)
+  }, [])
+
+  function changePageSize(n: number) {
+    setPageSize(n)
+    setPage(0)
+    if (typeof window !== 'undefined') window.localStorage.setItem('keyword_page_size', String(n))
+  }
   // 정렬 방향: asc(오름차순) / desc(내림차순). 각 옵션별 기본값 다름
   const defaultDir: Record<SortOption, 'asc' | 'desc'> = {
     rank: 'asc',      // 1위부터
@@ -226,8 +240,8 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
     return result
   }, [keywords, search, rankFilter, tagFilter, sort, sortDir])
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
-  const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const totalPages = Math.ceil(filtered.length / pageSize)
+  const paged = filtered.slice(page * pageSize, (page + 1) * pageSize)
 
   async function handleDelete(id: string) {
     await fetch(`/api/keywords/${id}`, { method: 'DELETE' })
@@ -437,12 +451,33 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
         </Table>
       </div>
 
-      {/* 페이지네이션 */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+      {/* 페이지네이션 + 페이지 크기 선택 */}
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
           <span className="tabular-nums">
-            {page * PAGE_SIZE + 1}-{Math.min((page + 1) * PAGE_SIZE, filtered.length)} / {filtered.length}개
+            {filtered.length === 0
+              ? '0개'
+              : `${page * pageSize + 1}-${Math.min((page + 1) * pageSize, filtered.length)} / ${filtered.length}개`}
           </span>
+          <div className="flex items-center gap-1">
+            <span className="hidden sm:inline">페이지당</span>
+            {PAGE_SIZE_OPTIONS.map((n) => (
+              <button
+                key={n}
+                className={cn(
+                  'px-2 py-0.5 rounded-md font-medium transition-colors',
+                  pageSize === n
+                    ? 'bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                )}
+                onClick={() => changePageSize(n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+        {totalPages > 1 && (
           <div className="flex items-center gap-1">
             <Button
               variant="outline"
@@ -466,8 +501,8 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
               <ChevronRight className="h-3 w-3" />
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
