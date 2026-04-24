@@ -36,7 +36,7 @@ export function KeywordForm({ onAdded }: Props) {
     e.preventDefault()
 
     // 빈 행 제외 (키워드와 URL 둘 다 비어있으면 스킵)
-    const validRows = rows.filter((r) => r.keyword.trim() && r.blogUrl.trim())
+    const validRows = rows.filter((r) => r.keyword.replace(/\s+/g, '') && r.blogUrl.trim())
     if (validRows.length === 0) {
       toast.error('등록할 키워드를 입력해주세요')
       return
@@ -50,7 +50,8 @@ export function KeywordForm({ onAdded }: Props) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              keyword: r.keyword.trim(),
+              // 키워드 내부 공백까지 모두 제거 ("강남 맛집" → "강남맛집")
+              keyword: r.keyword.replace(/\s+/g, ''),
               blog_url: r.blogUrl.trim(),
               tag: r.tag.trim() || undefined,
             }),
@@ -98,7 +99,7 @@ export function KeywordForm({ onAdded }: Props) {
     }
   }
 
-  const validCount = rows.filter((r) => r.keyword.trim() && r.blogUrl.trim()).length
+  const validCount = rows.filter((r) => r.keyword.replace(/\s+/g, '') && r.blogUrl.trim()).length
   const canAddMore = rows.length < MAX_ROWS
 
   return (

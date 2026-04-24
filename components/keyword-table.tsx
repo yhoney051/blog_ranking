@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { RankBadge } from './rank-badge'
 import { RefreshButton } from './refresh-button'
 import { EmptyState } from './empty-state'
-import { Trash2, Search, ExternalLink, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react'
+import { Trash2, Search, ExternalLink, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -150,6 +150,26 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
   const [rankFilter, setRankFilter] = useState<RankFilter>('all')
   const [tagFilter, setTagFilter] = useState<string>('all')
   const [sort, setSort] = useState<SortOption>('rank')
+  // 정렬 방향: asc(오름차순) / desc(내림차순). 각 옵션별 기본값 다름
+  const defaultDir: Record<SortOption, 'asc' | 'desc'> = {
+    rank: 'asc',      // 1위부터
+    created: 'desc',  // 최신 등록 먼저
+    change: 'desc',   // 상승폭 큰 것 먼저
+    volume: 'desc',   // 검색량 많은 것 먼저
+  }
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(defaultDir.rank)
+
+  function handleSortClick(key: SortOption) {
+    if (sort === key) {
+      // 같은 기준 클릭 시 방향 토글
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      // 다른 기준 클릭 시 해당 기준의 기본 방향으로
+      setSort(key)
+      setSortDir(defaultDir[key])
+    }
+    setPage(0)
+  }
 
   // 등록된 태그 목록 자동 추출
   const availableTags = useMemo(() => {
@@ -182,26 +202,29 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
     }
 
     result = [...result].sort((a, b) => {
+      let diff = 0
       if (sort === 'rank') {
+        // rank는 작을수록 좋으므로 asc=1위부터, desc=마지막부터
         const ra = a.current_rank ?? 9999
         const rb = b.current_rank ?? 9999
-        return ra - rb
-      }
-      if (sort === 'created') {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      }
-      if (sort === 'volume') {
+        diff = ra - rb
+      } else if (sort === 'created') {
+        diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      } else if (sort === 'volume') {
         const va = a.monthly_search_volume ?? -1
         const vb = b.monthly_search_volume ?? -1
-        return vb - va
+        diff = va - vb
+      } else {
+        // change: previous_rank - current_rank (양수=상승)
+        const da = a.current_rank !== null && a.previous_rank !== null ? a.previous_rank - a.current_rank : -9999
+        const db = b.current_rank !== null && b.previous_rank !== null ? b.previous_rank - b.current_rank : -9999
+        diff = da - db
       }
-      const da = a.current_rank !== null && a.previous_rank !== null ? a.previous_rank - a.current_rank : -9999
-      const db = b.current_rank !== null && b.previous_rank !== null ? b.previous_rank - b.current_rank : -9999
-      return db - da
+      return sortDir === 'asc' ? diff : -diff
     })
 
     return result
-  }, [keywords, search, rankFilter, tagFilter, sort])
+  }, [keywords, search, rankFilter, tagFilter, sort, sortDir])
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
@@ -292,20 +315,29 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
           {/* 정렬 */}
           <div className="flex items-center gap-1">
             <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
-            {sortOptions.map((s) => (
-              <button
-                key={s.key}
-                className={cn(
-                  'text-xs px-2 py-1 rounded-lg font-medium transition-colors',
-                  sort === s.key
-                    ? 'bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100'
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                )}
-                onClick={() => setSort(s.key)}
-              >
-                {s.label}
-              </button>
-            ))}
+            {sortOptions.map((s) => {
+              const active = sort === s.key
+              return (
+                <button
+                  key={s.key}
+                  className={cn(
+                    'text-xs px-2 py-1 rounded-lg font-medium transition-colors inline-flex items-center gap-1',
+                    active
+                      ? 'bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100'
+                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  )}
+                  onClick={() => handleSortClick(s.key)}
+                  title={active ? '클릭하면 방향이 바뀝니다' : undefined}
+                >
+                  {s.label}
+                  {active && (sortDir === 'asc' ? (
+                    <ArrowUp className="h-3 w-3" />
+                  ) : (
+                    <ArrowDown className="h-3 w-3" />
+                  ))}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -393,7 +425,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
                   {!isGuest && (
                     <div className="flex gap-0.5 justify-end">
                       <RefreshButton keywordId={kw.id} lastCheckedAt={kw.last_checked_at} onRefreshed={onRefreshed} />
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(kw.id)} className="h-8 w-8 text-muted-foreground hover:text-red-500">
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(kw.id)} className="h-8 w-8 text-muted-foreground hover:text-red-500" aria-label="키워드 삭제">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -418,6 +450,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
               className="h-7 w-7"
               disabled={page === 0}
               onClick={() => setPage(page - 1)}
+              aria-label="이전 페이지"
             >
               <ChevronLeft className="h-3 w-3" />
             </Button>
@@ -428,6 +461,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
               className="h-7 w-7"
               disabled={page >= totalPages - 1}
               onClick={() => setPage(page + 1)}
+              aria-label="다음 페이지"
             >
               <ChevronRight className="h-3 w-3" />
             </Button>
