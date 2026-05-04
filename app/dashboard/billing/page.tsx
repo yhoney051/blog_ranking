@@ -3,6 +3,7 @@
 // 결제 관리 페이지 — 플랜 비교, 업그레이드, 구독 취소, 결제 이력
 
 import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,10 +14,10 @@ import { Check, Crown, Loader2 } from 'lucide-react'
 import type { Subscription, Payment } from '@/types'
 
 export default function BillingPage() {
+  const router = useRouter()
   const [subscription, setSubscription] = useState<Subscription | null>(null)
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
-  const [upgrading, setUpgrading] = useState(false)
   const [canceling, setCanceling] = useState(false)
 
   const fetchBillingStatus = useCallback(async () => {
@@ -40,54 +41,6 @@ export default function BillingPage() {
 
   const isPro = subscription?.plan === 'pro' && subscription?.status === 'active'
   const isCancelScheduled = isPro && subscription?.cancel_at_period_end
-
-  // 업그레이드: 포트원 SDK로 빌링키 발급 → 즉시 구독 활성화
-  const handleUpgrade = async () => {
-    setUpgrading(true)
-    try {
-      const { requestIssueBillingKey } = await import('@/lib/billing/portone-client')
-
-      // 사용자 프로필에서 customerKey 생성 (user_id 기반)
-      const profileRes = await fetch('/api/profile')
-      if (!profileRes.ok) throw new Error('프로필 조회 실패')
-      const profile = await profileRes.json()
-
-      const customerKey = `cust_${profile.email.replace(/[^a-zA-Z0-9]/g, '_')}`
-      const customerName = profile.name || profile.email.split('@')[0]
-
-      // 포트원 빌링키 발급 (카드 등록 결제창)
-      const billingResult = await requestIssueBillingKey(customerKey, customerName)
-
-      if (!billingResult.success) {
-        toast.error(billingResult.error)
-        return
-      }
-
-      // 빌링키로 구독 활성화 API 호출
-      const res = await fetch('/api/billing/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          billingKey: billingResult.billingKey,
-          customerKey,
-        }),
-      })
-
-      const data = await res.json()
-
-      if (res.ok) {
-        toast.success('Pro 플랜이 활성화되었습니다!')
-        fetchBillingStatus()
-      } else {
-        toast.error(data.error || '구독 활성화에 실패했습니다.')
-      }
-    } catch (err) {
-      console.error('[Upgrade] 오류:', err)
-      toast.error('결제 처리 중 오류가 발생했습니다.')
-    } finally {
-      setUpgrading(false)
-    }
-  }
 
   // 구독 취소
   const handleCancel = async () => {
@@ -265,14 +218,9 @@ export default function BillingPage() {
                   ) : (
                     <Button
                       className="w-full"
-                      onClick={handleUpgrade}
-                      disabled={upgrading}
+                      onClick={() => router.push('/dashboard/billing/checkout')}
                     >
-                      {upgrading ? (
-                        <><Loader2 className="h-4 w-4 animate-spin mr-2" />처리 중</>
-                      ) : (
-                        '업그레이드'
-                      )}
+                      업그레이드
                     </Button>
                   )}
                 </div>
