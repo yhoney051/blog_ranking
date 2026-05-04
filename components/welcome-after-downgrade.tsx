@@ -63,7 +63,13 @@ export function WelcomeAfterDowngrade({ activeCount, archivedCount, userId }: Pr
               <Star className="h-4 w-4 text-yellow-500 fill-current" />
               <span className="font-semibold">활성 {activeCount}개</span>
             </div>
-            <p className="text-xs text-muted-foreground pl-6">매일 자동으로 순위가 추적돼요</p>
+            <p className="text-xs text-muted-foreground pl-6 leading-relaxed">
+              메인 화면에서 수동 새로고침으로 순위를 확인할 수 있어요.
+              <br />
+              <span className="text-yellow-600 dark:text-yellow-400">
+                매일 자동 추적은 유료 플랜에서 가능합니다.
+              </span>
+            </p>
           </div>
           <div className="rounded-lg bg-muted/50 border border-border p-3">
             <div className="flex items-center gap-2 mb-1">

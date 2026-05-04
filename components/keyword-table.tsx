@@ -466,7 +466,7 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
                         onClick={() => handleArchive(kw.id)}
                         className="h-8 w-8 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                         aria-label="보관함으로 이동"
-                        title="활성 키워드 — 클릭하면 보관함으로 이동 (자동 추적 중지)"
+                        title="활성 키워드 — 클릭하면 보관함으로 이동"
                       >
                         <Star className="h-4 w-4 fill-current" />
                       </Button>

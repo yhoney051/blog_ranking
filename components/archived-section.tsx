@@ -95,7 +95,7 @@ export const ArchivedSection = forwardRef<HTMLDivElement, Props>(function Archiv
       {open && (
         <div className="px-4 pb-4 border-t border-border pt-3 space-y-2">
           <p className="text-xs text-muted-foreground">
-            보관된 키워드는 자동 순위 체크가 멈춰 있어요. 데이터·순위 히스토리는 안전하게 유지됩니다.
+            보관 키워드는 메인 화면에서 가려져 있어요. 데이터·순위 히스토리는 안전하게 유지됩니다.
             {!canActivate && (
               <span className="ml-1 text-yellow-600 dark:text-yellow-400">
                 활성 한도({keywordLimit}개) 도달 — 업그레이드하면 모두 자동 활성화됩니다.

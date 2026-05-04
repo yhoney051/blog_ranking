@@ -44,7 +44,9 @@ export function StatusBanner({
             보관된 키워드 {archivedCount}개
           </span>
           <span className="text-yellow-700 dark:text-yellow-300">
-            {' '}— 자동 순위 체크가 멈췄어요. 플랜을 업그레이드하면 모두 다시 추적됩니다.
+            {plan === 'free'
+              ? ' — 무료 플랜은 자동 추적이 없어요. 업그레이드하면 모든 키워드가 매일 자동으로 추적됩니다.'
+              : ' — 자동 순위 체크가 멈췄어요. 플랜을 업그레이드하면 모두 다시 추적됩니다.'}
           </span>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -84,7 +86,7 @@ export function StatusBanner({
         </span>
         <span className="text-blue-700 dark:text-blue-300">
           {plan === 'free'
-            ? ' — 더 많은 키워드를 추적하려면 업그레이드하세요.'
+            ? ' — 더 많은 키워드를 등록하고 매일 자동 추적도 받으려면 업그레이드하세요.'
             : ' — 더 많은 키워드를 추적하려면 상위 플랜으로 업그레이드하세요.'}
         </span>
       </div>
