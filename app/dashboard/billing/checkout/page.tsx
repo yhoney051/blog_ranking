@@ -1,12 +1,12 @@
 'use client'
 
 // 결제 확인 페이지
-// /dashboard/billing 의 "업그레이드" 버튼이 이 페이지로 라우팅함
+// /dashboard/billing 의 "업그레이드" 버튼이 ?plan=standard|pro|premium query와 함께 라우팅
 // 사용자가 요금제·결제 내역·약관을 확인하고 동의 체크 후 "결제하기" 클릭 시
 // PortOne SDK 빌링키 발급 → /api/billing/subscribe → /dashboard/billing 복귀
 
-import { useEffect, useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -15,13 +15,23 @@ import { PLANS } from '@/lib/billing/constants'
 import { Check, Crown, Loader2, ArrowLeft } from 'lucide-react'
 import type { Subscription } from '@/types'
 
-export default function CheckoutPage() {
+type PaidPlan = 'standard' | 'pro' | 'premium'
+const PAID_PLANS: PaidPlan[] = ['standard', 'pro', 'premium']
+
+function CheckoutContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [agreed, setAgreed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // 가입자 가드: 이미 Pro 활성 상태면 메인 결제 페이지로 즉시 리다이렉트
+  const planParam = searchParams.get('plan')
+  const plan: PaidPlan = PAID_PLANS.includes(planParam as PaidPlan)
+    ? (planParam as PaidPlan)
+    : 'standard'
+  const planConfig = PLANS[plan]
+
+  // 가입자 가드: 이미 유료(standard/pro/premium) active 상태면 메인 결제 페이지로 즉시 리다이렉트
   useEffect(() => {
     let cancelled = false
     const checkSubscription = async () => {
@@ -33,9 +43,13 @@ export default function CheckoutPage() {
         }
         const data = await res.json()
         const sub: Subscription | null = data.subscription
-        if (sub && sub.plan === 'pro' && sub.status === 'active') {
+        if (
+          sub &&
+          sub.status === 'active' &&
+          PAID_PLANS.includes(sub.plan as PaidPlan)
+        ) {
           if (!cancelled) {
-            toast.info('이미 Pro 플랜에 가입되어 있습니다.')
+            toast.info('이미 유료 플랜에 가입되어 있습니다.')
             router.replace('/dashboard/billing')
           }
           return
@@ -84,12 +98,13 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           billingKey: billingResult.billingKey,
           customerKey,
+          plan,
         }),
       })
       const data = await res.json()
 
       if (res.ok) {
-        toast.success('Pro 플랜이 활성화되었습니다!')
+        toast.success(`${planConfig.label} 플랜이 활성화되었습니다!`)
         router.push('/dashboard/billing')
       } else {
         toast.error(data.error || '구독 활성화에 실패했습니다.')
@@ -100,7 +115,7 @@ export default function CheckoutPage() {
     } finally {
       setSubmitting(false)
     }
-  }, [agreed, submitting, router])
+  }, [agreed, submitting, router, plan, planConfig.label])
 
   // 결제일 / 다음 결제 예정일 (오늘 + 1개월)
   const today = new Date()
@@ -134,25 +149,27 @@ export default function CheckoutPage() {
             <div className="rounded-2xl border-2 border-primary bg-primary/10 p-5 space-y-3">
               <div className="flex items-center gap-1.5 text-sm font-medium">
                 <Crown className="h-4 w-4 text-yellow-500" />
-                {PLANS.pro.label}
+                {planConfig.label}
               </div>
               <p className="text-3xl font-bold tracking-tight">
-                {PLANS.pro.price.toLocaleString('ko-KR')}원
+                {planConfig.price.toLocaleString('ko-KR')}원
                 <span className="text-sm font-normal text-muted-foreground"> /월</span>
               </p>
               <ul className="space-y-2 text-sm pt-1">
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-brand-500" />
-                  키워드 {PLANS.pro.keywordLimit}개
+                  키워드 {planConfig.keywordLimit}개
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-brand-500" />
-                  일 1회 자동 순위 체크
+                  매일 자동 순위 체크
                 </li>
-                <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-brand-500" />
-                  우선 고객 지원
-                </li>
+                {(plan === 'pro' || plan === 'premium') && (
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-brand-500" />
+                    우선 고객 지원
+                  </li>
+                )}
               </ul>
             </div>
           </section>
@@ -183,7 +200,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">결제 금액</span>
                   <span className="font-semibold text-brand-700 dark:text-brand-300">
-                    월 {PLANS.pro.price.toLocaleString('ko-KR')}원
+                    월 {planConfig.price.toLocaleString('ko-KR')}원
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -243,5 +260,24 @@ export default function CheckoutPage() {
         </div>
       </main>
     </>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Header title="결제 확인" />
+          <main className="flex-1 overflow-y-auto">
+            <div className="p-4 lg:p-6 max-w-xl mx-auto">
+              <p className="text-sm text-muted-foreground">불러오는 중...</p>
+            </div>
+          </main>
+        </>
+      }
+    >
+      <CheckoutContent />
+    </Suspense>
   )
 }

@@ -2,8 +2,10 @@
 // 구독 활성화, 취소, 갱신, 다운그레이드 처리
 
 import { supabaseServer } from '@/lib/supabase/server'
-import { PLANS } from './constants'
+import { PLANS, type PlanType } from './constants'
 import { requestBillingKeyPayment, cancelPayment } from './portone'
+
+type PaidPlan = 'standard' | 'pro' | 'premium'
 
 // 고유 결제 ID 생성 (포트원은 paymentId를 가맹점에서 생성)
 function generatePaymentId(userId: string): string {
@@ -21,22 +23,25 @@ type ActivateResult =
   | { success: true }
   | { success: false; error: string }
 
-// Pro 구독 활성화: 빌링키로 즉시 결제 → DB 업데이트
+// 유료 구독 활성화: 빌링키로 즉시 결제 → DB 업데이트
 // 포트원에서는 프론트엔드에서 빌링키를 직접 발급받아서 전달
+// plan 파라미터로 standard/pro/premium 중 선택 (기본값 standard)
 export async function activateSubscription(
   userId: string,
   billingKey: string,
-  customerKey: string
+  customerKey: string,
+  plan: PaidPlan = 'standard'
 ): Promise<ActivateResult> {
+  const planConfig = PLANS[plan]
   const paymentId = generatePaymentId(userId)
-  const amount = PLANS.pro.price
+  const amount = planConfig.price
 
   // 1. 빌링키로 즉시 결제
   const paymentResult = await requestBillingKeyPayment(
     billingKey,
     paymentId,
     amount,
-    `수니 ${PLANS.pro.label} 플랜`,
+    `수니 ${planConfig.label} 플랜`,
     customerKey
   )
 
@@ -57,7 +62,7 @@ export async function activateSubscription(
       .upsert(
         {
           user_id: userId,
-          plan: 'pro',
+          plan,
           status: 'active',
           billing_key: billingKey,
           toss_customer_key: customerKey,
@@ -92,7 +97,7 @@ export async function activateSubscription(
     // profiles 동기화
     const { error: profileError } = await supabaseServer
       .from('profiles')
-      .update({ plan: 'pro', keyword_limit: PLANS.pro.keywordLimit })
+      .update({ plan, keyword_limit: planConfig.keywordLimit })
       .eq('id', userId)
 
     if (profileError) throw profileError
@@ -142,13 +147,15 @@ export async function processRenewal(subscriptionId: string): Promise<ActivateRe
   }
 
   const paymentId = generatePaymentId(sub.user_id)
-  const amount = PLANS.pro.price
+  const planKey = (sub.plan ?? 'pro') as PlanType
+  const planConfig = PLANS[planKey] ?? PLANS.pro
+  const amount = planConfig.price
 
   const paymentResult = await requestBillingKeyPayment(
     sub.billing_key,
     paymentId,
     amount,
-    `수니 ${PLANS.pro.label} 플랜 갱신`,
+    `수니 ${planConfig.label} 플랜 갱신`,
     sub.toss_customer_key
   )
 

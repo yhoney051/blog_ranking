@@ -85,6 +85,7 @@ export const rankCheckSchema = z.object({
 export const subscribeSchema = z.object({
   billingKey: z.string().min(1, '빌링키가 필요합니다.'),
   customerKey: z.string().min(1, '고객 키가 필요합니다.'),
+  plan: z.enum(['standard', 'pro', 'premium']).default('standard'),
 })
 
 // 구독 취소 요청 검증

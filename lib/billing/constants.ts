@@ -7,8 +7,8 @@ export const PLANS = {
     label: '무료',
     price: 0,
     keywordLimit: 3,
-    autoCheckCadence: 'weekly_2x' as const,
-    description: '키워드 3개, 주 2회 자동 순위 체크',
+    autoCheckCadence: 'none' as const,
+    description: '키워드 3개, 수동 순위 체크만',
   },
   standard: {
     name: 'standard' as const,
@@ -40,6 +40,5 @@ export type PlanType = keyof typeof PLANS
 export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'expired'
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 
-// 무료 사용자 자동 체크 주기 (밀리초)
-// weekly_2x = 약 3.5일에 한 번 (주 2회)
-export const FREE_CHECK_INTERVAL_MS = 3.5 * 24 * 60 * 60 * 1000
+// 결제 페이지 카드 표시 순서 (왼쪽→오른쪽, 저렴한 순)
+export const PLAN_DISPLAY_ORDER: PlanType[] = ['free', 'standard', 'pro', 'premium']

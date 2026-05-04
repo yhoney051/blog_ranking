@@ -3,7 +3,6 @@ import { supabaseServer } from '@/lib/supabase/server'
 import { getNaverBlogRank } from '@/lib/serpapi'
 import { getSearchVolume, isNaverSearchAdConfigured } from '@/lib/naver-searchad'
 import { CRON } from '@/lib/constants'
-import { FREE_CHECK_INTERVAL_MS } from '@/lib/billing/constants'
 
 // Vercel 함수 타임아웃 설정 (Pro: 최대 300초)
 export const maxDuration = 300
@@ -46,16 +45,11 @@ export async function GET(request: Request) {
       .in('id', userIds)
     const planMap = new Map<string, string>(profiles?.map((p) => [p.id, p.plan]) ?? [])
 
-    // 무료 사용자 키워드는 last_checked_at이 3.5일 이상 지난 것만 처리 (주 2회)
-    // 유료 사용자(standard/pro/premium)는 매일 체크
-    const freeCheckThreshold = Date.now() - FREE_CHECK_INTERVAL_MS
+    // 무료 사용자는 자동 체크 OFF (수동 새로고침만 가능)
+    // 유료 사용자(standard/pro/premium)만 매일 자동 체크
     const eligibleKeywords = keywords.filter((kw) => {
       const plan = planMap.get(kw.user_id as string)
-      if (plan === 'free') {
-        if (!kw.last_checked_at) return true
-        return new Date(kw.last_checked_at).getTime() < freeCheckThreshold
-      }
-      return true
+      return plan !== 'free'
     })
 
     let success = 0
