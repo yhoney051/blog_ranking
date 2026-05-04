@@ -3,6 +3,7 @@ import { supabaseServer } from '@/lib/supabase/server'
 import { getNaverBlogRank } from '@/lib/serpapi'
 import { getSearchVolume, isNaverSearchAdConfigured } from '@/lib/naver-searchad'
 import { CRON } from '@/lib/constants'
+import { FREE_CHECK_INTERVAL_MS } from '@/lib/billing/constants'
 
 // Vercel 함수 타임아웃 설정 (Pro: 최대 300초)
 export const maxDuration = 300
@@ -22,11 +23,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 모든 키워드 조회
-    // 오래된 키워드부터 우선 처리 (특정 키워드가 영원히 밀리는 문제 방지)
+    // 키워드 조회 (게스트 키워드 제외, 오래된 순)
+    // user_id가 null인 게스트 키워드는 자동 체크 대상에서 제외
     const { data: keywords, error: kwError } = await supabaseServer
       .from('keywords')
       .select('*')
+      .not('user_id', 'is', null)
       .order('last_checked_at', { ascending: true, nullsFirst: true })
 
     if (kwError || !keywords) {
@@ -34,12 +36,35 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: '키워드 조회 실패' }, { status: 500 })
     }
 
+    // 사용자별 plan 조회 (무료 사용자 자동 체크 빈도 분기용)
+    const userIds = Array.from(
+      new Set(keywords.map((kw) => kw.user_id).filter((id): id is string => !!id))
+    )
+    const { data: profiles } = await supabaseServer
+      .from('profiles')
+      .select('id, plan')
+      .in('id', userIds)
+    const planMap = new Map<string, string>(profiles?.map((p) => [p.id, p.plan]) ?? [])
+
+    // 무료 사용자 키워드는 last_checked_at이 3.5일 이상 지난 것만 처리 (주 2회)
+    // 유료 사용자(standard/pro/premium)는 매일 체크
+    const freeCheckThreshold = Date.now() - FREE_CHECK_INTERVAL_MS
+    const eligibleKeywords = keywords.filter((kw) => {
+      const plan = planMap.get(kw.user_id as string)
+      if (plan === 'free') {
+        if (!kw.last_checked_at) return true
+        return new Date(kw.last_checked_at).getTime() < freeCheckThreshold
+      }
+      return true
+    })
+
     let success = 0
     let failed = 0
 
     // 청크 단위로 처리 (타임아웃 방지)
-    const chunk = keywords.slice(0, CRON.RANK_CHECK_CHUNK_SIZE)
-    const skipped = keywords.length - chunk.length
+    const chunk = eligibleKeywords.slice(0, CRON.RANK_CHECK_CHUNK_SIZE)
+    const skipped = eligibleKeywords.length - chunk.length
+    const filteredOut = keywords.length - eligibleKeywords.length
 
     for (const kw of chunk) {
       try {
@@ -112,6 +137,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       total: keywords.length,
+      eligible: eligibleKeywords.length,
+      filteredOut,
       processed: chunk.length,
       skipped,
       success,
