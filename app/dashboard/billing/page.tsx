@@ -11,8 +11,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { PLANS, PLAN_DISPLAY_ORDER, type PlanType } from '@/lib/billing/constants'
-import { Check, Crown, Loader2 } from 'lucide-react'
+import { Check, Crown } from 'lucide-react'
 import type { Subscription, Payment } from '@/types'
+import { MigrationWizard } from '@/components/migration-wizard'
 
 const PAID_PLANS: PlanType[] = ['standard', 'pro', 'premium']
 
@@ -21,7 +22,8 @@ export default function BillingPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null)
   const [payments, setPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
-  const [canceling, setCanceling] = useState(false)
+  // 다운그레이드 마법사 표시 여부
+  const [showMigrationWizard, setShowMigrationWizard] = useState(false)
 
   const fetchBillingStatus = useCallback(async () => {
     try {
@@ -50,30 +52,6 @@ export default function BillingPage() {
   const isPaid = currentPlan !== 'free'
   const isCancelScheduled = isPaid && !!subscription?.cancel_at_period_end
   const currentPlanConfig = PLANS[currentPlan]
-
-  // 구독 취소 (다운그레이드)
-  const handleCancel = async () => {
-    if (!confirm('정말 구독을 취소하시겠습니까?\n현재 결제 기간이 끝나면 무료 플랜으로 전환됩니다.')) {
-      return
-    }
-
-    setCanceling(true)
-    try {
-      const res = await fetch('/api/billing/cancel', { method: 'POST' })
-      const data = await res.json()
-
-      if (res.ok) {
-        toast.success(data.message)
-        fetchBillingStatus()
-      } else {
-        toast.error(data.error || '구독 취소에 실패했습니다.')
-      }
-    } catch {
-      toast.error('구독 취소 중 오류가 발생했습니다.')
-    } finally {
-      setCanceling(false)
-    }
-  }
 
   // 결제일 포맷
   const formatDate = (dateStr: string | null) => {
@@ -251,25 +229,18 @@ export default function BillingPage() {
                             {isPaid ? '플랜 변경' : '업그레이드'}
                           </Button>
                         ) : (
-                          // 무료 카드 — 현재 유료 사용자만 다운그레이드 가능
+                          // 무료 카드 — 현재 유료 사용자만 다운그레이드 가능 (마법사 띄움)
                           <Button
                             variant="outline"
                             className="w-full"
-                            onClick={handleCancel}
-                            disabled={canceling || !!isCancelScheduled || !isPaid}
+                            onClick={() => setShowMigrationWizard(true)}
+                            disabled={!!isCancelScheduled || !isPaid}
                           >
-                            {canceling ? (
-                              <>
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                처리 중
-                              </>
-                            ) : isCancelScheduled ? (
-                              '취소 예약됨'
-                            ) : !isPaid ? (
-                              '현재 플랜'
-                            ) : (
-                              '다운그레이드'
-                            )}
+                            {isCancelScheduled
+                              ? '취소 예약됨'
+                              : !isPaid
+                              ? '현재 플랜'
+                              : '다운그레이드'}
                           </Button>
                         )}
                       </div>
@@ -308,6 +279,13 @@ export default function BillingPage() {
           )}
         </div>
       </main>
+
+      {/* 다운그레이드 마법사 — 사용자가 활성 키워드 N개 선택해 보관 처리 */}
+      <MigrationWizard
+        open={showMigrationWizard}
+        onClose={() => setShowMigrationWizard(false)}
+        onConfirmed={fetchBillingStatus}
+      />
     </>
   )
 }
