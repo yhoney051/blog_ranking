@@ -22,12 +22,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 키워드 조회 (게스트 키워드 제외, 오래된 순)
-    // user_id가 null인 게스트 키워드는 자동 체크 대상에서 제외
+    // 키워드 조회 (게스트 제외 + 활성 키워드만, 오래된 순)
+    // user_id가 null인 게스트 키워드 + is_active=false인 보관 키워드는 자동 체크 대상에서 제외
     const { data: keywords, error: kwError } = await supabaseServer
       .from('keywords')
       .select('*')
       .not('user_id', 'is', null)
+      .eq('is_active', true)
       .order('last_checked_at', { ascending: true, nullsFirst: true })
 
     if (kwError || !keywords) {

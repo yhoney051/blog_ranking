@@ -21,14 +21,16 @@ export async function POST(request: Request) {
     }
 
     // 이미 유료(standard/pro/premium) 구독 중인지 확인
+    // 단 cancel_at_period_end=true(취소 예약 상태)면 재가입 허용
     const { data: existingSub } = await supabaseServer
       .from('subscriptions')
-      .select('plan, status')
+      .select('plan, status, cancel_at_period_end')
       .eq('user_id', userId)
       .single()
 
     if (
       existingSub?.status === 'active' &&
+      !existingSub?.cancel_at_period_end &&
       ['standard', 'pro', 'premium'].includes(existingSub?.plan ?? '')
     ) {
       return NextResponse.json(

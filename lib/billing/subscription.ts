@@ -102,6 +102,33 @@ export async function activateSubscription(
 
     if (profileError) throw profileError
 
+    // Auto-restore: 보관 키워드 중 가장 최근 비활성된 것부터 새 한도 안에서 자동 재활성
+    // (다운그레이드 후 재가입 시 사용자가 잃었던 키워드 자동 복원)
+    const { count: currentActiveCount } = await supabaseServer
+      .from('keywords')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_active', true)
+
+    const slotsAvailable = Math.max(0, planConfig.keywordLimit - (currentActiveCount ?? 0))
+    if (slotsAvailable > 0) {
+      const { data: archivedKeywords } = await supabaseServer
+        .from('keywords')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('is_active', false)
+        .order('deactivated_at', { ascending: false, nullsFirst: false })
+        .limit(slotsAvailable)
+
+      const idsToActivate = (archivedKeywords ?? []).map((k) => k.id)
+      if (idsToActivate.length > 0) {
+        await supabaseServer
+          .from('keywords')
+          .update({ is_active: true, deactivated_at: null })
+          .in('id', idsToActivate)
+      }
+    }
+
     return { success: true }
   } catch (dbError) {
     // DB 실패 시 결제 환불
@@ -112,12 +139,54 @@ export async function activateSubscription(
 }
 
 // 구독 취소 예약 (기간 만료 시 다운그레이드)
-export async function cancelSubscription(userId: string): Promise<ActivateResult> {
+// 즉시 활성 키워드 보관 처리: keepActiveIds 외 나머지는 is_active=false로 보관
+// keepActiveIds 미전송 시 → 가장 최근 created_at 활성 키워드 N개 자동 유지
+export async function cancelSubscription(
+  userId: string,
+  keepActiveIds?: string[]
+): Promise<ActivateResult> {
+  const now = new Date().toISOString()
+  const newLimit = PLANS.free.keywordLimit
+
+  // 1. 활성 키워드 중 유지할 ID 결정
+  let idsToKeepActive: string[]
+  if (keepActiveIds && keepActiveIds.length > 0) {
+    idsToKeepActive = keepActiveIds.slice(0, newLimit)
+  } else {
+    const { data: recentActive } = await supabaseServer
+      .from('keywords')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(newLimit)
+    idsToKeepActive = (recentActive ?? []).map((k) => k.id)
+  }
+
+  // 2. 활성 키워드 중 keep 외의 것들 보관 처리
+  const { data: allActive } = await supabaseServer
+    .from('keywords')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+
+  const idsToArchive = (allActive ?? [])
+    .map((k) => k.id)
+    .filter((id) => !idsToKeepActive.includes(id))
+
+  if (idsToArchive.length > 0) {
+    await supabaseServer
+      .from('keywords')
+      .update({ is_active: false, deactivated_at: now })
+      .in('id', idsToArchive)
+  }
+
+  // 3. subscription cancel 예약
   const { error } = await supabaseServer
     .from('subscriptions')
     .update({
       cancel_at_period_end: true,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
     })
     .eq('user_id', userId)
     .eq('status', 'active')
@@ -241,7 +310,28 @@ export async function handlePaymentFailure(subscriptionId: string): Promise<void
 }
 
 // Free 플랜으로 다운그레이드
+// 안전장치: 활성 키워드 한도(free=3) 초과 시 자동 보관 처리
+// (cancelSubscription을 거치지 않은 직접 호출 흐름 대비)
 export async function downgradeToFree(userId: string): Promise<void> {
+  const newLimit = PLANS.free.keywordLimit
+  const now = new Date().toISOString()
+
+  // 활성 키워드 한도 초과 시 자동 보관 (가장 최근 created_at 보존, 나머지 보관)
+  const { data: allActive } = await supabaseServer
+    .from('keywords')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+
+  if ((allActive?.length ?? 0) > newLimit) {
+    const idsToArchive = allActive!.slice(newLimit).map((k) => k.id)
+    await supabaseServer
+      .from('keywords')
+      .update({ is_active: false, deactivated_at: now })
+      .in('id', idsToArchive)
+  }
+
   // subscription 상태 변경
   await supabaseServer
     .from('subscriptions')
@@ -249,7 +339,7 @@ export async function downgradeToFree(userId: string): Promise<void> {
       plan: 'free',
       status: 'expired',
       cancel_at_period_end: false,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
     })
     .eq('user_id', userId)
 

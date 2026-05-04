@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 
   const supabase = await createSupabaseServerClient()
 
-  // 플랜별 키워드 등록 한도 검사
+  // 활성 키워드 한도 검사 (보관 키워드는 한도에 포함 X — 무한정 보관 가능)
   const { data: profile } = await supabase
     .from('profiles')
     .select('keyword_limit')
@@ -59,10 +59,14 @@ export async function POST(req: Request) {
     .from('keywords')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
+    .eq('is_active', true)
 
   if (profile && count !== null && count >= profile.keyword_limit) {
     return NextResponse.json(
-      { error: `키워드 등록 한도(${profile.keyword_limit}개)에 도달했습니다.`, code: 'KEYWORD_LIMIT_REACHED' },
+      {
+        error: `활성 키워드 한도(${profile.keyword_limit}개)에 도달했습니다. 보관 키워드를 활성화하거나 플랜을 업그레이드해주세요.`,
+        code: 'ACTIVE_LIMIT_REACHED',
+      },
       { status: 403 }
     )
   }
