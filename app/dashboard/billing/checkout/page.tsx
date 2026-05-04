@@ -13,7 +13,9 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { PLANS } from '@/lib/billing/constants'
 import { Check, Crown, Loader2, ArrowLeft } from 'lucide-react'
-import type { Subscription } from '@/types'
+import type { Subscription, Keyword } from '@/types'
+import { UpgradeValueCard } from '@/components/upgrade-value-card'
+import { ConfettiBurst } from '@/components/confetti-burst'
 
 type PaidPlan = 'standard' | 'pro' | 'premium'
 const PAID_PLANS: PaidPlan[] = ['standard', 'pro', 'premium']
@@ -24,6 +26,10 @@ function CheckoutContent() {
   const [agreed, setAgreed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
+  // 보관 키워드 수 (UpgradeValueCard 표시 + Auto-restore 가치 제안용)
+  const [archivedCount, setArchivedCount] = useState(0)
+  // 결제 성공 confetti 애니메이션
+  const [showConfetti, setShowConfetti] = useState(false)
 
   const planParam = searchParams.get('plan')
   const plan: PaidPlan = PAID_PLANS.includes(planParam as PaidPlan)
@@ -31,21 +37,28 @@ function CheckoutContent() {
     : 'standard'
   const planConfig = PLANS[plan]
 
-  // 가입자 가드: 이미 유료(standard/pro/premium) active 상태면 메인 결제 페이지로 즉시 리다이렉트
+  // 가입자 가드 + 보관 키워드 수 fetch
   useEffect(() => {
     let cancelled = false
-    const checkSubscription = async () => {
+    const init = async () => {
       try {
-        const res = await fetch('/api/billing/status')
-        if (!res.ok) {
+        const [statusRes, keywordsRes] = await Promise.all([
+          fetch('/api/billing/status'),
+          fetch('/api/keywords'),
+        ])
+
+        if (!statusRes.ok) {
           if (!cancelled) setLoading(false)
           return
         }
-        const data = await res.json()
+        const data = await statusRes.json()
         const sub: Subscription | null = data.subscription
+
+        // 가입자 가드: 이미 active 유료(취소 예약 X)면 메인으로 리다이렉트
         if (
           sub &&
           sub.status === 'active' &&
+          !sub.cancel_at_period_end &&
           PAID_PLANS.includes(sub.plan as PaidPlan)
         ) {
           if (!cancelled) {
@@ -54,12 +67,23 @@ function CheckoutContent() {
           }
           return
         }
+
+        // 보관 키워드 수 계산 (UpgradeValueCard용)
+        if (keywordsRes.ok) {
+          const kws: Keyword[] = await keywordsRes.json()
+          if (!cancelled) {
+            setArchivedCount(
+              Array.isArray(kws) ? kws.filter((k) => k.is_active === false).length : 0
+            )
+          }
+        }
+
         if (!cancelled) setLoading(false)
       } catch {
         if (!cancelled) setLoading(false)
       }
     }
-    checkSubscription()
+    init()
     return () => {
       cancelled = true
     }
@@ -105,7 +129,8 @@ function CheckoutContent() {
 
       if (res.ok) {
         toast.success(`${planConfig.label} 플랜이 활성화되었습니다!`)
-        router.push('/dashboard/billing')
+        // Confetti 애니메이션 표시 후 메인 결제 페이지로 (onComplete에서 router.push)
+        setShowConfetti(true)
       } else {
         toast.error(data.error || '구독 활성화에 실패했습니다.')
       }
@@ -146,6 +171,8 @@ function CheckoutContent() {
           {/* 선택한 요금제 — 라임 그린 강조 카드 */}
           <section className="space-y-3">
             <h2 className="text-base font-semibold">선택한 요금제</h2>
+            {/* 보관 키워드가 있으면 잠금해제 가치 카드 (다운그레이드 후 재가입 시) */}
+            <UpgradeValueCard archivedCount={archivedCount} />
             <div className="rounded-2xl border-2 border-primary bg-primary/10 p-5 space-y-3">
               <div className="flex items-center gap-1.5 text-sm font-medium">
                 <Crown className="h-4 w-4 text-yellow-500" />
@@ -259,6 +286,12 @@ function CheckoutContent() {
           </section>
         </div>
       </main>
+
+      {/* 결제 성공 시 confetti — 끝나면 메인 결제 페이지로 자동 이동 */}
+      <ConfettiBurst
+        show={showConfetti}
+        onComplete={() => router.push('/dashboard/billing')}
+      />
     </>
   )
 }

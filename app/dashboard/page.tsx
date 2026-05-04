@@ -9,6 +9,7 @@ import { KeywordForm } from '@/components/keyword-form'
 import { KeywordTable } from '@/components/keyword-table'
 import { ArchivedSection } from '@/components/archived-section'
 import { StatusBanner } from '@/components/status-banner'
+import { WelcomeAfterDowngrade } from '@/components/welcome-after-downgrade'
 import { RefreshAllButton } from '@/components/refresh-all-button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -29,6 +30,8 @@ export default function Home() {
   // 회원의 플랜 정보 (한도 검사용)
   const [profilePlan, setProfilePlan] = useState<string>('free')
   const [keywordLimit, setKeywordLimit] = useState<number>(3)
+  // 사용자 ID (WelcomeAfterDowngrade의 localStorage flag 키 생성용)
+  const [userId, setUserId] = useState<string | null>(null)
   // ref로 관리하여 useCallback 클로저 문제 방지
   const volumeFetchedRef = useRef(false)
   // ArchivedSection 스크롤 타겟
@@ -145,6 +148,7 @@ export default function Home() {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user) {
         setIsLoggedIn(true)
+        setUserId(user.id)
         // 비회원 키워드 자동 이전
         await migrateGuestKeywords()
         // 프로필 + 키워드 동시 fetch
@@ -277,6 +281,15 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      {/* 다운그레이드 후 첫 진입 환영 모달 (보관 키워드가 있을 때만 1회 표시) */}
+      {isLoggedIn === true && userId && archivedKeywords.length > 0 && (
+        <WelcomeAfterDowngrade
+          activeCount={activeKeywords.length}
+          archivedCount={archivedKeywords.length}
+          userId={userId}
+        />
+      )}
     </>
   )
 }
