@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { RankBadge } from './rank-badge'
 import { RefreshButton } from './refresh-button'
 import { EmptyState } from './empty-state'
-import { Trash2, Search, ExternalLink, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Trash2, Search, ExternalLink, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Star } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -249,6 +249,25 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
     onDeleted()
   }
 
+  // 활성 키워드를 보관(비활성화)로 변경 — 항상 허용 (한도 검사 X)
+  async function handleArchive(id: string) {
+    try {
+      const res = await fetch(`/api/keywords/${id}/active`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: false }),
+      })
+      if (res.ok) {
+        toast.success('보관함으로 이동했습니다')
+        onRefreshed()
+      } else {
+        toast.error('보관 처리에 실패했습니다')
+      }
+    } catch {
+      toast.error('보관 처리 중 오류가 발생했습니다')
+    }
+  }
+
   if (keywords.length === 0) {
     return <EmptyState />
   }
@@ -441,6 +460,16 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
                   {!isGuest && (
                     <div className="flex gap-0.5 justify-end">
                       <RefreshButton keywordId={kw.id} lastCheckedAt={kw.last_checked_at} onRefreshed={onRefreshed} />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleArchive(kw.id)}
+                        className="h-8 w-8 text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                        aria-label="보관함으로 이동"
+                        title="활성 키워드 — 클릭하면 보관함으로 이동 (자동 추적 중지)"
+                      >
+                        <Star className="h-4 w-4 fill-current" />
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => handleDelete(kw.id)} className="h-8 w-8 text-muted-foreground hover:text-red-500" aria-label="키워드 삭제">
                         <Trash2 className="h-4 w-4" />
                       </Button>

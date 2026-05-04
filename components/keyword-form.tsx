@@ -1,13 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Plus, ChevronDown, ChevronUp, X } from 'lucide-react'
+import { Plus, ChevronDown, ChevronUp, X, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 
-type Props = { onAdded: () => void }
+type Props = {
+  onAdded: () => void
+  currentActiveCount?: number  // 활성 키워드 수
+  keywordLimit?: number         // 활성 한도
+}
 
 type Row = { keyword: string; blogUrl: string; tag: string }
 
@@ -15,10 +20,19 @@ const MAX_ROWS = 10
 const emptyRow = (): Row => ({ keyword: '', blogUrl: '', tag: '' })
 
 // 키워드 + 블로그 URL 다중 등록 폼 (최대 10개까지 한 번에 등록)
-export function KeywordForm({ onAdded }: Props) {
+export function KeywordForm({ onAdded, currentActiveCount, keywordLimit }: Props) {
+  const router = useRouter()
   const [rows, setRows] = useState<Row[]>([emptyRow()])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
+
+  // 한도 도달 여부
+  const limitReached =
+    typeof currentActiveCount === 'number' &&
+    typeof keywordLimit === 'number' &&
+    currentActiveCount >= keywordLimit
+  const showCount =
+    typeof currentActiveCount === 'number' && typeof keywordLimit === 'number'
 
   function updateRow(index: number, patch: Partial<Row>) {
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)))
@@ -126,6 +140,15 @@ export function KeywordForm({ onAdded }: Props) {
         <span className="flex items-center gap-2 text-sm font-semibold text-card-foreground">
           <Plus className="h-4 w-4 text-brand-500" />
           키워드 등록
+          {showCount && (
+            <span
+              className={`text-xs font-normal ${
+                limitReached ? 'text-yellow-600 dark:text-yellow-400' : 'text-muted-foreground'
+              }`}
+            >
+              ({currentActiveCount}/{keywordLimit})
+            </span>
+          )}
         </span>
         {open ? (
           <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -136,6 +159,27 @@ export function KeywordForm({ onAdded }: Props) {
 
       {open && (
         <form onSubmit={handleSubmit} className="px-4 pb-4 flex flex-col gap-3 border-t border-border pt-4">
+          {limitReached && (
+            <div className="rounded-lg border border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20 p-3 text-sm flex items-start gap-2">
+              <Sparkles className="h-4 w-4 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium text-yellow-800 dark:text-yellow-200">
+                  활성 키워드 한도({keywordLimit}개)에 도달했어요
+                </p>
+                <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-0.5">
+                  새 키워드를 등록하려면 기존 활성 키워드를 보관함으로 이동하거나 플랜을 업그레이드하세요.
+                </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="h-7 text-xs mt-2 bg-yellow-500 hover:bg-yellow-600 text-white"
+                  onClick={() => router.push('/dashboard/billing')}
+                >
+                  업그레이드 →
+                </Button>
+              </div>
+            </div>
+          )}
           {rows.map((row, index) => (
             <div key={index} className="flex flex-col sm:flex-row gap-3 sm:items-end">
               <div className="flex-1 space-y-1.5">

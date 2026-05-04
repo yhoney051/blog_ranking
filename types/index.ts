@@ -12,6 +12,8 @@ export type Keyword = {
   last_checked_at: string | null
   created_at: string
   rank_histories?: { rank: number; checked_at: string }[]  // 최근 7일 순위 히스토리
+  is_active: boolean            // 활성(자동 추적) / 보관(수동만)
+  deactivated_at: string | null // 보관된 시점 (Auto-restore 우선순위 정렬용)
 }
 
 // 사용자 프로필 (플랜 정보 포함)

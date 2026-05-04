@@ -1,12 +1,14 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Keyword } from '@/types'
 import { Header } from '@/components/layout/header'
 import { StatsCards } from '@/components/dashboard/stats-cards'
 import { OverviewChart } from '@/components/dashboard/overview-chart'
 import { KeywordForm } from '@/components/keyword-form'
 import { KeywordTable } from '@/components/keyword-table'
+import { ArchivedSection } from '@/components/archived-section'
+import { StatusBanner } from '@/components/status-banner'
 import { RefreshAllButton } from '@/components/refresh-all-button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -16,13 +18,33 @@ import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 
 // 메인 대시보드 — 회원/비회원 모두 접근 가능
+// 회원: 활성/보관 키워드 분리 표시 + 상태 배너 + 한도 안내
+// 비회원: localStorage 키워드 (가입 유도 배너만)
 export default function Home() {
   const router = useRouter()
   const [keywords, setKeywords] = useState<Keyword[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
-  const [volumeFetched, setVolumeFetched] = useState(false)
+  // 회원의 플랜 정보 (한도 검사용)
+  const [profilePlan, setProfilePlan] = useState<string>('free')
+  const [keywordLimit, setKeywordLimit] = useState<number>(3)
+  // ref로 관리하여 useCallback 클로저 문제 방지
+  const volumeFetchedRef = useRef(false)
+  // ArchivedSection 스크롤 타겟
+  const archivedRef = useRef<HTMLDivElement>(null)
+
+  // 활성/보관 키워드 분리
+  const { activeKeywords, archivedKeywords } = useMemo(() => {
+    if (isLoggedIn === false) {
+      // 비회원은 localStorage 기반이라 분리 안 함 (모두 활성으로 취급)
+      return { activeKeywords: keywords, archivedKeywords: [] as Keyword[] }
+    }
+    return {
+      activeKeywords: keywords.filter((k) => k.is_active !== false),
+      archivedKeywords: keywords.filter((k) => k.is_active === false),
+    }
+  }, [keywords, isLoggedIn])
 
   // localStorage에서 비회원 키워드 로드
   const loadGuestKeywords = useCallback(() => {
@@ -59,6 +81,20 @@ export default function Home() {
     }
   }, [])
 
+  // 회원의 프로필(plan + keyword_limit) 조회
+  const fetchProfile = useCallback(async () => {
+    try {
+      const res = await fetch('/api/profile')
+      if (res.ok) {
+        const data = await res.json()
+        if (typeof data.plan === 'string') setProfilePlan(data.plan)
+        if (typeof data.keyword_limit === 'number') setKeywordLimit(data.keyword_limit)
+      }
+    } catch {
+      // 실패 시 default(free, 3) 유지
+    }
+  }, [])
+
   // 회원용: API에서 키워드 로드
   const fetchKeywords = useCallback(async () => {
     setLoading(true)
@@ -81,11 +117,13 @@ export default function Home() {
       setKeywords(kwList)
       setIsLoggedIn(true)
 
-      // 검색량이 없는 키워드 자동 조회 (최초 1회만)
-      if (!volumeFetched) {
-        const noVolume = kwList.filter((kw) => kw.monthly_search_volume == null)
+      // 검색량이 없는 키워드 자동 조회 (최초 1회만, 활성 키워드만)
+      if (!volumeFetchedRef.current) {
+        const noVolume = kwList.filter(
+          (kw) => kw.is_active !== false && kw.monthly_search_volume == null
+        )
         if (noVolume.length > 0) {
-          setVolumeFetched(true)
+          volumeFetchedRef.current = true
           fetch('/api/search-volume', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -109,19 +147,26 @@ export default function Home() {
         setIsLoggedIn(true)
         // 비회원 키워드 자동 이전
         await migrateGuestKeywords()
+        // 프로필 + 키워드 동시 fetch
+        fetchProfile()
         fetchKeywords()
       } else {
         setIsLoggedIn(false)
         loadGuestKeywords()
       }
     })
-  }, [fetchKeywords, loadGuestKeywords, migrateGuestKeywords])
+  }, [fetchKeywords, fetchProfile, loadGuestKeywords, migrateGuestKeywords])
+
+  const scrollToArchived = useCallback(() => {
+    archivedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    // 보관 섹션이 닫혀 있으면 클릭 효과를 위해... 일단 스크롤만
+  }, [])
 
   return (
     <>
       <Header title="대시보드">
         {isLoggedIn && (
-          <RefreshAllButton keywords={keywords} onRefreshed={fetchKeywords} />
+          <RefreshAllButton keywords={activeKeywords} onRefreshed={fetchKeywords} />
         )}
       </Header>
 
@@ -141,6 +186,17 @@ export default function Home() {
             </div>
           )}
 
+          {/* 회원: 활성/보관 상태 배너 */}
+          {isLoggedIn === true && !loading && (
+            <StatusBanner
+              activeCount={activeKeywords.length}
+              archivedCount={archivedKeywords.length}
+              keywordLimit={keywordLimit}
+              plan={profilePlan}
+              onScrollToArchived={archivedKeywords.length > 0 ? scrollToArchived : undefined}
+            />
+          )}
+
           {/* 에러 메시지 */}
           {error && (
             <div className="rounded-xl border border-red-200/60 dark:border-red-800/50 bg-red-50 dark:bg-red-900/20 p-4 flex items-center justify-between">
@@ -151,7 +207,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* 통계 카드 */}
+          {/* 통계 카드 — 활성 키워드 기준 */}
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -159,17 +215,21 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <StatsCards keywords={keywords} />
+            <StatsCards keywords={activeKeywords} />
           )}
 
-          {/* 순위 분포 차트 */}
-          {!loading && keywords.length > 0 && (
-            <OverviewChart keywords={keywords} />
+          {/* 순위 분포 차트 — 활성 키워드 기준 */}
+          {!loading && activeKeywords.length > 0 && (
+            <OverviewChart keywords={activeKeywords} />
           )}
 
-          {/* 키워드 등록: 회원은 폼, 비회원은 루트로 이동 */}
+          {/* 키워드 등록: 회원은 폼(한도 정보 전달), 비회원은 루트로 이동 */}
           {isLoggedIn ? (
-            <KeywordForm onAdded={fetchKeywords} />
+            <KeywordForm
+              onAdded={fetchKeywords}
+              currentActiveCount={activeKeywords.length}
+              keywordLimit={keywordLimit}
+            />
           ) : keywords.length >= 3 ? (
             <Button
               onClick={() => router.push('/signup')}
@@ -188,7 +248,7 @@ export default function Home() {
             </Button>
           )}
 
-          {/* 순위 테이블 */}
+          {/* 활성 키워드 테이블 */}
           {loading ? (
             <div className="space-y-3">
               <Skeleton className="h-10 rounded-lg" />
@@ -197,7 +257,23 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <KeywordTable keywords={keywords} onRefreshed={fetchKeywords} onDeleted={fetchKeywords} isGuest={isLoggedIn === false} />
+            <KeywordTable
+              keywords={activeKeywords}
+              onRefreshed={fetchKeywords}
+              onDeleted={fetchKeywords}
+              isGuest={isLoggedIn === false}
+            />
+          )}
+
+          {/* 보관 키워드 섹션 — 회원 + 보관 키워드 있을 때만 */}
+          {isLoggedIn === true && !loading && archivedKeywords.length > 0 && (
+            <ArchivedSection
+              ref={archivedRef}
+              archivedKeywords={archivedKeywords}
+              activeCount={activeKeywords.length}
+              keywordLimit={keywordLimit}
+              onActivated={fetchKeywords}
+            />
           )}
         </div>
       </main>
