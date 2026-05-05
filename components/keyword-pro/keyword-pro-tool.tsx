@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, TrendingUp, Loader2, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
+import { Search, TrendingUp, Loader2, AlertTriangle, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -61,7 +61,6 @@ export function KeywordProTool({ isLoggedIn }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [highlighted, setHighlighted] = useState<string | null>(null)
-  const [showRelated, setShowRelated] = useState(false)
 
   const handleSearch = async () => {
     setError(null)
@@ -206,22 +205,37 @@ export function KeywordProTool({ isLoggedIn }: Props) {
         </div>
       )}
 
-      {/* 결과 — 메트릭 테이블 */}
-      {!loading && data && data.metrics.searched.length > 0 && (
+      {/* 결과 — 입력 키워드 + 연관 키워드 통합 테이블 */}
+      {!loading && data && (data.metrics.searched.length > 0 || data.metrics.related.length > 0) && (
         <div className="rounded-xl border bg-card p-4 lg:p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-semibold">메트릭</h4>
-            {data.cached && (
-              <span className="text-[10px] text-muted-foreground">캐시 결과</span>
-            )}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-semibold">키워드 분석 결과</h4>
+              {data.cached && (
+                <span className="text-[10px] text-muted-foreground">캐시 결과</span>
+              )}
+            </div>
+            {/* 엑셀 다운로드 — 버튼만 노출, 실제 동작은 추후 */}
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+              title="엑셀 다운로드 (준비 중)"
+              className="cursor-not-allowed opacity-60"
+            >
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              엑셀 다운로드
+            </Button>
           </div>
           <div className="overflow-x-auto rounded-lg border">
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr className="text-xs text-muted-foreground">
+                  <th className="px-3 py-2 text-center">구분</th>
                   <th className="px-3 py-2 text-left">키워드</th>
                   <th className="px-3 py-2 text-right">PC 검색량</th>
                   <th className="px-3 py-2 text-right">모바일 검색량</th>
+                  <th className="px-3 py-2 text-right">합계</th>
                   <th className="px-3 py-2 text-center">경쟁도</th>
                   <th className="px-3 py-2 text-right">PC CTR</th>
                   <th className="px-3 py-2 text-right">모바일 CTR</th>
@@ -229,18 +243,31 @@ export function KeywordProTool({ isLoggedIn }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {data.metrics.searched.map((row) => (
+                {[
+                  ...data.metrics.searched.map((r) => ({ row: r, isSearched: true })),
+                  ...data.metrics.related.map((r) => ({ row: r, isSearched: false })),
+                ].map(({ row, isSearched }) => (
                   <tr
-                    key={row.keyword}
+                    key={`${isSearched ? 's' : 'r'}-${row.keyword}`}
                     onClick={() => setHighlighted((cur) => (cur === row.keyword ? null : row.keyword))}
                     className={cn(
                       'border-t cursor-pointer hover:bg-muted/30 transition-colors',
-                      highlighted === row.keyword && 'bg-brand-300/30 dark:bg-brand-900/20'
+                      isSearched && 'bg-brand-300/20 dark:bg-brand-900/15',
+                      highlighted === row.keyword && 'bg-brand-300/40 dark:bg-brand-900/30'
                     )}
                   >
+                    <td className="px-3 py-2 text-center">
+                      <Badge
+                        variant={isSearched ? 'default' : 'secondary'}
+                        className="text-[10px]"
+                      >
+                        {isSearched ? '내 키워드' : '연관'}
+                      </Badge>
+                    </td>
                     <td className="px-3 py-2 font-medium">{row.keyword}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatNumber(row.monthlyPcQcCnt)}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatNumber(row.monthlyMobileQcCnt)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums font-semibold">{formatNumber(row.totalSearchVolume)}</td>
                     <td className="px-3 py-2 text-center">{getCompBadge(row.compIdx) ?? '-'}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatPercent(row.monthlyAvePcCtr)}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatPercent(row.monthlyAveMobileCtr)}</td>
@@ -251,7 +278,7 @@ export function KeywordProTool({ isLoggedIn }: Props) {
             </table>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            💡 행을 클릭하면 아래 트렌드 차트에서 해당 키워드만 강조됩니다.
+            💡 입력 키워드 행을 클릭하면 아래 트렌드 차트에서 해당 키워드만 강조됩니다.
           </p>
         </div>
       )}
@@ -278,32 +305,6 @@ export function KeywordProTool({ isLoggedIn }: Props) {
             <KeywordTrendChart trend={data.trend} highlightedKeyword={highlighted} />
           ) : (
             <p className="text-sm text-muted-foreground py-8 text-center">트렌드 데이터가 없습니다.</p>
-          )}
-        </div>
-      )}
-
-      {/* 연관 키워드 (collapsible) */}
-      {!loading && data && data.metrics.related.length > 0 && (
-        <div className="rounded-xl border bg-card p-4 lg:p-6 space-y-3">
-          <button
-            type="button"
-            onClick={() => setShowRelated((v) => !v)}
-            className="w-full flex items-center justify-between text-sm font-semibold"
-          >
-            <span>연관 키워드 ({data.metrics.related.length}개)</span>
-            {showRelated ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </button>
-          {showRelated && (
-            <div className="flex flex-wrap gap-2">
-              {data.metrics.related.map((row) => (
-                <Badge key={row.keyword} variant="secondary" className="text-xs font-normal">
-                  {row.keyword}
-                  <span className="ml-1.5 text-muted-foreground tabular-nums">
-                    {formatNumber(row.totalSearchVolume)}
-                  </span>
-                </Badge>
-              ))}
-            </div>
           )}
         </div>
       )}
