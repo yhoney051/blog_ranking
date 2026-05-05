@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Keyword } from '@/types'
 import { Header } from '@/components/layout/header'
 import { StatsCards } from '@/components/dashboard/stats-cards'
+import { KeywordResearchTool } from '@/components/dashboard/keyword-research-tool'
 import { OverviewChart } from '@/components/dashboard/overview-chart'
 import { KeywordForm } from '@/components/keyword-form'
 import { KeywordTable } from '@/components/keyword-table'
@@ -250,10 +251,13 @@ export default function Home() {
             </div>
           )}
 
-          {/* 통계 카드 — 활성 키워드 기준 */}
+          {/* 키워드 발굴 도구 — funnel 입구 (비회원/회원 모두 노출) */}
+          <KeywordResearchTool isLoggedIn={isLoggedIn} onAdded={fetchKeywords} />
+
+          {/* 통계 카드 — 활성 키워드 기준 (1페이지 진입 / 1페이지 누락) */}
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 4 }).map((_, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {Array.from({ length: 2 }).map((_, i) => (
                 <Skeleton key={i} className="h-[120px] rounded-xl" />
               ))}
             </div>

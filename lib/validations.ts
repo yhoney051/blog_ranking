@@ -97,3 +97,16 @@ export const cancelSubscriptionSchema = z.object({
 export const formatRequestSchema = z.object({
   text: z.string().min(10, '최소 10자 이상의 원고를 입력해주세요.').max(10000, '원고는 10,000자 이내로 입력해주세요.'),
 })
+
+// 키워드 발굴(검색 도구) 요청 검증 — 비회원도 호출 가능
+export const keywordResearchSchema = z.object({
+  keywords: z
+    .array(
+      z
+        .string()
+        .min(1, '키워드를 입력해주세요.')
+        .max(40, '키워드는 40자 이내로 입력해주세요.')
+    )
+    .min(1, '최소 1개 이상의 키워드가 필요합니다.')
+    .max(5, '한 번에 최대 5개까지 검색할 수 있습니다.'),
+})

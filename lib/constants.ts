@@ -11,6 +11,10 @@ export const RATE_LIMITS = {
   GUEST_RANK_CHECK_PER_DAY: 3,
   /** AI 포맷 분석: IP당 시간당 10회 */
   FORMAT_PER_HOUR: 10,
+  /** 키워드 발굴(검색 도구) 게스트: IP당 시간당 5회 */
+  KEYWORD_RESEARCH_GUEST_PER_HOUR: 5,
+  /** 키워드 발굴(검색 도구) 회원: 사용자당 시간당 20회 */
+  KEYWORD_RESEARCH_USER_PER_HOUR: 20,
   /** 1시간 (밀리초) */
   ONE_HOUR_MS: 60 * 60 * 1000,
   /** 24시간 (밀리초) */
@@ -39,4 +43,14 @@ export const CRON = {
 export const TELEGRAM = {
   /** 연동 토큰 만료 시간 (분) */
   CONNECT_TOKEN_EXPIRY_MINUTES: 5,
+} as const
+
+// 키워드 발굴(검색 도구) 설정
+export const KEYWORD_RESEARCH = {
+  /** 한 번에 입력 가능한 키워드 수 (네이버 API 배치 한도) */
+  MAX_INPUT_KEYWORDS: 5,
+  /** 결과 테이블에 표시할 연관 키워드 상위 개수 */
+  RELATED_DISPLAY_LIMIT: 20,
+  /** 인메모리 캐시 TTL (시간) */
+  CACHE_TTL_HOURS: 24,
 } as const
