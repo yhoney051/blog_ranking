@@ -167,14 +167,13 @@ export const ArchivedSection = forwardRef<HTMLDivElement, Props>(function Archiv
             </p>
             {/* 전체 선택 토글 — 슬롯 1개 이상 남아있을 때만 노출.
                 이미 가능한 최대치만큼 체크되어 있으면 '선택 해제'로 토글.
-                안내 문구 옆에서 묻히지 않도록 박스형 + 굵은 글씨로 강조. */}
+                안내 문구 옆에서 묻히지 않도록 채워진(default) 버튼으로 강조 — 흰 배경에서도 명확히 보임. */}
             {slotsAvailable > 0 && (
               <Button
                 type="button"
-                variant="outline"
                 size="sm"
                 onClick={handleSelectAll}
-                className="shrink-0 h-7 px-2.5 text-xs font-semibold border-primary/50 text-primary hover:bg-primary/10 hover:text-primary"
+                className="shrink-0 h-7 px-3 text-xs font-semibold"
               >
                 {selectedIds.size >= Math.min(slotsAvailable, archivedKeywords.length) && selectedIds.size > 0
                   ? '선택 해제'
