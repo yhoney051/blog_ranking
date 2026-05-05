@@ -11,8 +11,9 @@ type Props = {
   highlightedKeyword?: string | null
 }
 
-// 키워드 라인 색상 (recharts 차트 토큰 재사용)
-const LINE_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)']
+// 키워드 라인 색상 — 흰 배경/어두운 배경 모두 충분한 대비
+// 1: 진한 파랑(blue-600), 2: 진한 빨강(red-600), 3: 진한 에메랄드(emerald-600)
+const LINE_COLORS = ['#2563eb', '#dc2626', '#059669']
 
 // 데이터랩 응답을 recharts가 먹는 형태로 변환
 // { period: '2025-01-01', '키워드A': 50, '키워드B': 80 } 식으로 가로 합치기
@@ -58,14 +59,14 @@ export function KeywordTrendChart({ trend, highlightedKeyword }: Props) {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
         <XAxis
           dataKey="period"
-          tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+          tick={{ fontSize: 11, fill: 'var(--foreground)' }}
           axisLine={{ stroke: 'var(--border)' }}
           tickLine={false}
           tickFormatter={(v) => formatPeriodLabel(v, trend.timeUnit)}
         />
         <YAxis
           domain={[0, 100]}
-          tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+          tick={{ fontSize: 11, fill: 'var(--foreground)' }}
           axisLine={false}
           tickLine={false}
         />

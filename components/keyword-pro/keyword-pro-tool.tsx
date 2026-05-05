@@ -3,9 +3,10 @@
 // 전문 키워드 검색 도구 — 메인 UI
 // 입력 키워드 1~3개 + 기간 → 검색량/경쟁도 메트릭 + 트렌드 차트
 // 좌(입력) / 우(트렌드 차트) 2열 레이아웃, 결과 표는 그 아래 전체 너비.
-// 비회원도 결과 조회 가능. 비회원에겐 키워드 등록 버튼이 가입 페이지로 유도.
+// 마운트 시 기본 키워드("강남피부과")가 자동 검색되어 결과 화면이 보여짐.
+// 표 행을 체크박스로 선택해 CSV(엑셀 호환)로 전체/선택 다운로드 가능.
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, TrendingUp, Loader2, AlertTriangle, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -50,39 +51,38 @@ const PERIOD_OPTIONS: { value: '1m' | '3m' | '6m' | '12m'; label: string }[] = [
   { value: '12m', label: '12개월' },
 ]
 
+const DEFAULT_KEYWORD = '강남피부과'
+
 interface Props {
   isLoggedIn: boolean | null
 }
 
 export function KeywordProTool({ isLoggedIn }: Props) {
   const router = useRouter()
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(DEFAULT_KEYWORD)
   const [period, setPeriod] = useState<'1m' | '3m' | '6m' | '12m'>('12m')
   const [data, setData] = useState<Response | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [highlighted, setHighlighted] = useState<string | null>(null)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const didAutoSearch = useRef(false)
 
-  const handleSearch = async () => {
-    setError(null)
-    const keywords = input
-      .split(/[,\n]/)
-      .map((k) => k.trim())
-      .filter(Boolean)
-      .slice(0, 3)
-
-    if (keywords.length === 0) {
+  // 외부 호출 공통 — handleSearch와 mount 자동 검색이 공유
+  const fetchKeywords = async (keywordsArr: string[], periodArg: '1m' | '3m' | '6m' | '12m') => {
+    if (keywordsArr.length === 0) {
       setError('키워드를 1개 이상 입력해주세요.')
       return
     }
-
+    setError(null)
     setLoading(true)
     setHighlighted(null)
+    setSelected(new Set())
     try {
       const res = await fetch('/api/keyword-pro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keywords, period }),
+        body: JSON.stringify({ keywords: keywordsArr, period: periodArg }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -97,6 +97,23 @@ export function KeywordProTool({ isLoggedIn }: Props) {
       setLoading(false)
     }
   }
+
+  const handleSearch = () => {
+    const keywords = input
+      .split(/[,\n]/)
+      .map((k) => k.trim())
+      .filter(Boolean)
+      .slice(0, 3)
+    void fetchKeywords(keywords, period)
+  }
+
+  // 마운트 시 1회 기본 키워드 자동 검색 (예시 결과로 빈 화면 방지)
+  useEffect(() => {
+    if (didAutoSearch.current) return
+    didAutoSearch.current = true
+    void fetchKeywords([DEFAULT_KEYWORD], '12m')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const formatNumber = (n: number | undefined): string => {
     if (n === undefined || n === null) return '-'
@@ -117,6 +134,75 @@ export function KeywordProTool({ isLoggedIn }: Props) {
         {comp}
       </Badge>
     )
+  }
+
+  // 표에 표시되는 통합 행 목록 (입력 + 연관)
+  const allRows = data
+    ? [
+        ...data.metrics.searched.map((r) => ({ row: r, isSearched: true })),
+        ...data.metrics.related.map((r) => ({ row: r, isSearched: false })),
+      ]
+    : []
+
+  const allSelected = allRows.length > 0 && allRows.every((r) => selected.has(r.row.keyword))
+  const someSelected = !allSelected && allRows.some((r) => selected.has(r.row.keyword))
+
+  const toggleSelectOne = (keyword: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(keyword)) next.delete(keyword)
+      else next.add(keyword)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (allSelected) setSelected(new Set())
+    else setSelected(new Set(allRows.map((r) => r.row.keyword)))
+  }
+
+  // CSV 안전 escape — 콤마/큰따옴표/줄바꿈 포함 시 따옴표로 감싸고 내부 따옴표는 두 개로
+  const escapeCsv = (val: string | number) => {
+    const s = String(val ?? '')
+    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`
+    return s
+  }
+
+  // CSV 생성 + 다운로드 트리거
+  const downloadCsv = (rows: { row: MetricRow; isSearched: boolean }[], suffix: string) => {
+    if (rows.length === 0) return
+    const BOM = '﻿' // 엑셀 한글 깨짐 방지
+    const headers = ['구분', '키워드', 'PC 검색량', '모바일 검색량', '합계', '경쟁도']
+    const lines = [
+      headers.map(escapeCsv).join(','),
+      ...rows.map(({ row, isSearched }) =>
+        [
+          isSearched ? '내 키워드' : '연관',
+          escapeCsv(row.keyword),
+          row.monthlyPcQcCnt,
+          row.monthlyMobileQcCnt,
+          row.totalSearchVolume,
+          row.compIdx ?? '',
+        ].join(',')
+      ),
+    ]
+    const csv = BOM + lines.join('\r\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `keyword-pro-${suffix}-${today}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleDownloadAll = () => downloadCsv(allRows, 'all')
+  const handleDownloadSelected = () => {
+    const rows = allRows.filter((r) => selected.has(r.row.keyword))
+    downloadCsv(rows, `selected-${rows.length}`)
   }
 
   // 트렌드 차트 영역 — data 없을 땐 placeholder, 있으면 케이스별 렌더
@@ -235,18 +321,8 @@ export function KeywordProTool({ isLoggedIn }: Props) {
         </div>
       )}
 
-      {/* 빈 상태 */}
-      {!loading && !data && !error && (
-        <div className="rounded-xl border border-dashed bg-muted/30 px-4 py-8 text-center">
-          <p className="text-sm font-medium">키워드의 검색량·경쟁도·트렌드를 한 번에 분석해 보세요</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            예: &quot;강남 미용실&quot;을 입력하면 PC/모바일 검색량, 경쟁도, 시간별 검색 트렌드까지 보여드려요.
-          </p>
-        </div>
-      )}
-
       {/* 결과 — 입력 키워드 + 연관 키워드 통합 테이블 */}
-      {!loading && data && (data.metrics.searched.length > 0 || data.metrics.related.length > 0) && (
+      {!loading && data && allRows.length > 0 && (
         <div className="rounded-xl border bg-card p-4 lg:p-6 space-y-4">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2">
@@ -255,22 +331,39 @@ export function KeywordProTool({ isLoggedIn }: Props) {
                 <span className="text-[10px] text-muted-foreground">캐시 결과</span>
               )}
             </div>
-            {/* 엑셀 다운로드 — 버튼만 노출, 실제 동작은 추후 */}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-              title="엑셀 다운로드 (준비 중)"
-              className="cursor-not-allowed opacity-60"
-            >
-              <Download className="h-3.5 w-3.5 mr-1.5" />
-              엑셀 다운로드
-            </Button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={selected.size === 0}
+                onClick={handleDownloadSelected}
+                title={selected.size === 0 ? '체크박스로 키워드를 먼저 선택해주세요' : `${selected.size}개 키워드 다운로드`}
+              >
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                선택 다운로드 ({selected.size})
+              </Button>
+              <Button variant="default" size="sm" onClick={handleDownloadAll}>
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                전체 다운로드
+              </Button>
+            </div>
           </div>
           <div className="overflow-x-auto rounded-lg border">
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr className="text-xs text-muted-foreground">
+                  <th className="px-3 py-2 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      ref={(el) => {
+                        if (el) el.indeterminate = someSelected
+                      }}
+                      onChange={toggleSelectAll}
+                      className="h-4 w-4 rounded border-border accent-brand-500"
+                      aria-label="전체 선택"
+                    />
+                  </th>
                   <th className="px-3 py-2 text-center">구분</th>
                   <th className="px-3 py-2 text-left">키워드</th>
                   <th className="px-3 py-2 text-right">PC 검색량</th>
@@ -280,10 +373,7 @@ export function KeywordProTool({ isLoggedIn }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {[
-                  ...data.metrics.searched.map((r) => ({ row: r, isSearched: true })),
-                  ...data.metrics.related.map((r) => ({ row: r, isSearched: false })),
-                ].map(({ row, isSearched }) => (
+                {allRows.map(({ row, isSearched }) => (
                   <tr
                     key={`${isSearched ? 's' : 'r'}-${row.keyword}`}
                     onClick={() => setHighlighted((cur) => (cur === row.keyword ? null : row.keyword))}
@@ -293,6 +383,15 @@ export function KeywordProTool({ isLoggedIn }: Props) {
                       highlighted === row.keyword && 'bg-brand-300/40 dark:bg-brand-900/30'
                     )}
                   >
+                    <td className="px-3 py-2 text-center" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selected.has(row.keyword)}
+                        onChange={() => toggleSelectOne(row.keyword)}
+                        className="h-4 w-4 rounded border-border accent-brand-500"
+                        aria-label={`${row.keyword} 선택`}
+                      />
+                    </td>
                     <td className="px-3 py-2 text-center">
                       <Badge
                         variant={isSearched ? 'default' : 'secondary'}
@@ -312,7 +411,7 @@ export function KeywordProTool({ isLoggedIn }: Props) {
             </table>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            💡 행을 클릭하면 우측 트렌드 차트에서 해당 키워드만 강조됩니다.
+            💡 행을 클릭하면 우측 트렌드 차트에서 해당 키워드만 강조됩니다. 체크박스로 선택 후 일부만 다운로드할 수 있어요.
           </p>
         </div>
       )}
