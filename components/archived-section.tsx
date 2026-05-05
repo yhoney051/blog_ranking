@@ -64,6 +64,31 @@ export const ArchivedSection = forwardRef<HTMLDivElement, Props>(function Archiv
     })
   }
 
+  // 전체 선택 토글 — 한도(slotsAvailable)까지만 자동 체크.
+  // 이미 한도까지 또는 전부 체크된 상태면 해제로 동작.
+  function handleSelectAll() {
+    const cap = Math.min(slotsAvailable, archivedKeywords.length)
+    // 이미 가능한 최대치만큼 체크되어 있으면 → 해제
+    if (selectedIds.size >= cap && cap > 0) {
+      setSelectedIds(new Set())
+      return
+    }
+    // 위에서부터 cap개 자동 체크
+    const ids = archivedKeywords.slice(0, cap).map((k) => k.id)
+    setSelectedIds(new Set(ids))
+
+    // 보관함 개수가 한도보다 많아 일부만 선택된 경우 안내
+    if (cap < archivedKeywords.length) {
+      toast.info(`${archivedKeywords.length}개 중 한도까지 ${cap}개를 선택했어요`, {
+        description: '더 추가하려면 다른 키워드를 비활성화하거나 플랜을 업그레이드하세요',
+        action: {
+          label: '업그레이드',
+          onClick: () => router.push('/dashboard/billing'),
+        },
+      })
+    }
+  }
+
   async function handleBulkActivate() {
     if (selectedIds.size === 0 || bulkActivating) return
     setBulkActivating(true)
@@ -140,6 +165,19 @@ export const ArchivedSection = forwardRef<HTMLDivElement, Props>(function Archiv
                 </span>
               )}
             </p>
+            {/* 전체 선택 토글 — 슬롯 1개 이상 남아있을 때만 노출.
+                이미 가능한 최대치만큼 체크되어 있으면 '선택 해제'로 토글. */}
+            {slotsAvailable > 0 && (
+              <button
+                type="button"
+                onClick={handleSelectAll}
+                className="shrink-0 text-xs font-medium text-primary hover:underline px-1"
+              >
+                {selectedIds.size >= Math.min(slotsAvailable, archivedKeywords.length) && selectedIds.size > 0
+                  ? '선택 해제'
+                  : '전체 선택'}
+              </button>
+            )}
           </div>
 
           {/* 보관 키워드 카드 그리드 */}
