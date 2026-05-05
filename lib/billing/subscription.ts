@@ -54,6 +54,16 @@ export async function activateSubscription(
   const now = new Date().toISOString()
   const periodEnd = getNextPeriodEnd()
 
+  // 영구 grandfather 보너스 한도 조회 (없으면 0)
+  // profile에 bonus_keyword_limit 컬럼이 없는 환경(마이그레이션 전)에서는 fallback 0
+  const { data: profileBonusData } = await supabaseServer
+    .from('profiles')
+    .select('bonus_keyword_limit')
+    .eq('id', userId)
+    .single()
+  const bonus = (profileBonusData as { bonus_keyword_limit?: number } | null)?.bonus_keyword_limit ?? 0
+  const effectiveKeywordLimit = planConfig.keywordLimit + bonus
+
   // 2. DB 업데이트 (subscriptions + payments + profiles)
   try {
     // subscriptions upsert
@@ -94,10 +104,10 @@ export async function activateSubscription(
 
     if (payError) throw payError
 
-    // profiles 동기화
+    // profiles 동기화 (effective limit = plan 한도 + 영구 보너스)
     const { error: profileError } = await supabaseServer
       .from('profiles')
-      .update({ plan, keyword_limit: planConfig.keywordLimit })
+      .update({ plan, keyword_limit: effectiveKeywordLimit })
       .eq('id', userId)
 
     if (profileError) throw profileError
@@ -110,7 +120,7 @@ export async function activateSubscription(
       .eq('user_id', userId)
       .eq('is_active', true)
 
-    const slotsAvailable = Math.max(0, planConfig.keywordLimit - (currentActiveCount ?? 0))
+    const slotsAvailable = Math.max(0, effectiveKeywordLimit - (currentActiveCount ?? 0))
     if (slotsAvailable > 0) {
       const { data: archivedKeywords } = await supabaseServer
         .from('keywords')
@@ -343,9 +353,16 @@ export async function downgradeToFree(userId: string): Promise<void> {
     })
     .eq('user_id', userId)
 
-  // profiles 동기화
+  // profiles 동기화 — 영구 보너스 보존 (effective = free 한도 + bonus)
+  const { data: profileBonusData } = await supabaseServer
+    .from('profiles')
+    .select('bonus_keyword_limit')
+    .eq('id', userId)
+    .single()
+  const bonus = (profileBonusData as { bonus_keyword_limit?: number } | null)?.bonus_keyword_limit ?? 0
+
   await supabaseServer
     .from('profiles')
-    .update({ plan: 'free', keyword_limit: PLANS.free.keywordLimit })
+    .update({ plan: 'free', keyword_limit: PLANS.free.keywordLimit + bonus })
     .eq('id', userId)
 }
