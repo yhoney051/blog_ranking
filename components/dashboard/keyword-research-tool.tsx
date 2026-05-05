@@ -105,6 +105,9 @@ export function KeywordResearchTool({ isLoggedIn, onAdded }: Props) {
       const list = Array.from(selected)
       let okCount = 0
       let failCount = 0
+      // 실패 케이스 중 가장 마지막 서버 에러 메시지를 보관 → 모두 실패했을 때 사용자에게 노출
+      // (예: "활성 키워드 한도(3개)에 도달했습니다..." 같은 구체적 안내)
+      let lastError: string | null = null
       for (const kw of list) {
         try {
           const res = await fetch("/api/keywords", {
@@ -112,8 +115,13 @@ export function KeywordResearchTool({ isLoggedIn, onAdded }: Props) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ keyword: kw, blog_url: blogUrl.trim() }),
           })
-          if (res.ok) okCount++
-          else failCount++
+          if (res.ok) {
+            okCount++
+          } else {
+            failCount++
+            const json = await res.json().catch(() => null)
+            if (json?.error) lastError = json.error as string
+          }
         } catch {
           failCount++
         }
@@ -127,7 +135,8 @@ export function KeywordResearchTool({ isLoggedIn, onAdded }: Props) {
         setBlogUrl("")
         onAdded?.()
       } else {
-        toast.error("추가에 실패했습니다.")
+        // 모두 실패한 경우, 서버가 준 실제 사유를 그대로 노출 (한도 초과·중복 등)
+        toast.error(lastError ?? "추가에 실패했습니다.")
       }
     })
   }
