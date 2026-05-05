@@ -27,15 +27,11 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 미인증 사용자 → /dashboard 및 하위 경로 보호 (/dashboard/formatter만 비회원 허용)
+  // 미인증 사용자 → /dashboard 및 하위 경로 보호
   if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-    const publicDashboardPaths = ['/dashboard/formatter']
-    const isPublic = request.nextUrl.pathname === '/dashboard' || publicDashboardPaths.some(p => request.nextUrl.pathname.startsWith(p))
-    if (!isPublic) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
 
   // 미인증 사용자 → API 요청 차단
@@ -54,5 +50,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/onboarding', '/dashboard/:path*', '/login', '/signup', '/api/((?!auth|cron|webhooks|guest-rank-check|format|telegram|keyword-research).*)'],
+  matcher: ['/', '/onboarding', '/dashboard/:path*', '/login', '/signup', '/api/((?!auth|cron|webhooks|guest-rank-check|telegram|keyword-research).*)'],
 }

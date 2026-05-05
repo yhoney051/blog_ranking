@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { LayoutDashboard, Settings, CreditCard, FileText } from "lucide-react";
+import { LayoutDashboard, Settings, CreditCard } from "lucide-react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "대시보드", href: "/dashboard" },
-  { icon: FileText, label: "가독성King", href: "/dashboard/formatter" },
   { icon: CreditCard, label: "결제", href: "/dashboard/billing" },
   { icon: Settings, label: "설정", href: "/dashboard/settings" },
 ];
@@ -51,7 +51,7 @@ export function Header({ title, children }: HeaderProps) {
         <Sheet>
           <SheetTrigger
             render={
-              <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8">
+              <Button variant="ghost" size="icon" className="lg:hidden h-8 w-8" aria-label="메뉴 열기">
                 <Menu className="h-4 w-4" />
               </Button>
             }
@@ -59,8 +59,8 @@ export function Header({ title, children }: HeaderProps) {
           <SheetContent side="left" className="w-64 p-0">
             <SheetTitle className="sr-only">네비게이션 메뉴</SheetTitle>
             <div className="flex items-center gap-1 px-4 h-14 border-b">
-              <img src="/logo.png" alt="수니" className="h-8 w-8 rounded-lg object-cover" />
-              <img src="/sooni-logo.png" alt="수니 Sooni" className="h-8 object-contain" />
+              <Image src="/logo.png" alt="수니" width={32} height={32} className="rounded-lg object-cover" />
+              <Image src="/sooni-logo.png" alt="수니 Sooni" width={80} height={32} className="object-contain" />
             </div>
             <nav className="py-4 px-2 space-y-1">
               {navItems.map((item) => {
@@ -92,7 +92,7 @@ export function Header({ title, children }: HeaderProps) {
 
       <div className="flex items-center gap-2">
         {children}
-        <Button variant="ghost" size="icon" onClick={handleLogout} title="로그아웃">
+        <Button variant="ghost" size="icon" onClick={handleLogout} title="로그아웃" aria-label="로그아웃">
           <LogOut className="h-4 w-4" />
         </Button>
       </div>

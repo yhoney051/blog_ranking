@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, CreditCard, FileText, Crown } from "lucide-react";
+import { LayoutDashboard, Settings, ChevronLeft, ChevronRight, CreditCard, Crown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
@@ -12,7 +13,6 @@ import { Badge } from "@/components/ui/badge";
 
 const navItems = [
   { icon: LayoutDashboard, label: "대시보드", href: "/dashboard" },
-  { icon: FileText, label: "가독성King", href: "/dashboard/formatter" },
 ];
 
 const bottomNavItems = [
@@ -50,9 +50,9 @@ export function Sidebar() {
     >
       {/* 로고 */}
       <div className="flex items-center gap-1 px-4 h-14 border-b border-sidebar-border">
-        <img src="/logo.png" alt="수니" className="h-9 w-9 rounded-lg shrink-0 object-cover" />
+        <Image src="/logo.png" alt="수니" width={36} height={36} className="rounded-lg shrink-0 object-cover" />
         {!collapsed && (
-          <img src="/sooni-logo.png" alt="수니 Sooni" className="h-8 object-contain" />
+          <Image src="/sooni-logo.png" alt="수니 Sooni" width={80} height={32} className="object-contain" />
         )}
       </div>
 

@@ -1,6 +1,7 @@
-// 허브 랜딩페이지 — 순위체커 / 원고 포맷터 선택
+// 허브 랜딩페이지
+import Image from 'next/image'
 import Link from 'next/link'
-import { BarChart3, FileText, ArrowRight, LogIn, Check, Crown } from 'lucide-react'
+import { BarChart3, ArrowRight, LogIn, Check, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Footer } from '@/components/layout/footer'
 
@@ -12,13 +13,6 @@ const services = [
     href: '/onboarding',
     color: 'lime',
   },
-  {
-    title: '가독성King',
-    description: '당신의 블로그가 안 읽히는 이유,\n가독성을 개선해보세요.',
-    icon: FileText,
-    href: '/dashboard/formatter',
-    color: 'emerald',
-  },
 ]
 
 export default function HomePage() {
@@ -27,8 +21,8 @@ export default function HomePage() {
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="flex items-center gap-1">
-          <img src="/logo.png" alt="수니" className="h-8 w-8 rounded-lg object-cover" />
-          <img src="/sooni-logo.png" alt="수니 Sooni" className="h-8 object-contain" />
+          <Image src="/logo.png" alt="수니" width={32} height={32} className="rounded-lg object-cover" />
+          <Image src="/sooni-logo.png" alt="수니 Sooni" width={80} height={32} className="object-contain" />
         </div>
         <Link href="/login">
           <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
@@ -44,16 +38,16 @@ export default function HomePage() {
           <div className="text-center space-y-3">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center justify-center gap-1">
               내 블로그는 몇 순위인진 궁금할 땐 ? 수니!
-              <img src="/logo.png" alt="수니" className="h-7 w-7 rounded-lg object-cover" />
+              <Image src="/logo.png" alt="수니" width={28} height={28} className="rounded-lg object-cover" />
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              사용할 도구를 선택하세요
+              지금 바로 시작해보세요
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex justify-center">
             {services.map((service) => (
-              <Link key={service.href} href={service.href} className="group">
+              <Link key={service.href} href={service.href} className="group w-full max-w-sm">
                 <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 h-full flex flex-col gap-4 transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
                   <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${
                     service.color === 'lime'
@@ -95,7 +89,6 @@ export default function HomePage() {
                 <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />키워드 10개</li>
                   <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />일 1회 자동 순위 체크</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />가독성King 무제한</li>
                 </ul>
               </div>
               {/* Pro 플랜 */}

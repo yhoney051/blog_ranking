@@ -4,7 +4,6 @@ import {
   rankCheckSchema,
   subscribeSchema,
   cancelSubscriptionSchema,
-  formatRequestSchema,
 } from '@/lib/validations'
 
 describe('keywordCreateSchema', () => {
@@ -149,23 +148,3 @@ describe('cancelSubscriptionSchema', () => {
   })
 })
 
-describe('formatRequestSchema', () => {
-  it('유효한 텍스트를 통과시킨다', () => {
-    const result = formatRequestSchema.safeParse({
-      text: '이것은 테스트 원고입니다. 블로그에 올릴 글입니다.',
-    })
-    expect(result.success).toBe(true)
-  })
-
-  it('10자 미만 텍스트를 거부한다', () => {
-    const result = formatRequestSchema.safeParse({ text: '짧은글' })
-    expect(result.success).toBe(false)
-  })
-
-  it('10000자 초과 텍스트를 거부한다', () => {
-    const result = formatRequestSchema.safeParse({
-      text: 'a'.repeat(10001),
-    })
-    expect(result.success).toBe(false)
-  })
-})
