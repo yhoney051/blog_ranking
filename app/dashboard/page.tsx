@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 
 // 메인 대시보드 — 회원/비회원 모두 접근 가능
 // 회원: 활성/보관 키워드 분리 표시 + 상태 배너 + 한도 안내
@@ -166,6 +167,44 @@ export default function Home() {
     // 보관 섹션이 닫혀 있으면 클릭 효과를 위해... 일단 스크롤만
   }, [])
 
+  // 활성 → 보관 낙관적 업데이트 — 별 클릭 즉시 UI에 반영, 백엔드는 백그라운드 처리
+  // 실패 시 자동 롤백 + 에러 토스트
+  const handleOptimisticArchive = useCallback(async (id: string) => {
+    const now = new Date().toISOString()
+    // 1. 즉시 로컬 state 업데이트 (UI 즉각 반응)
+    setKeywords((prev) =>
+      prev.map((kw) =>
+        kw.id === id ? { ...kw, is_active: false, deactivated_at: now } : kw
+      )
+    )
+
+    // 2. 백엔드 호출 (백그라운드)
+    try {
+      const res = await fetch(`/api/keywords/${id}/active`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: false }),
+      })
+      if (!res.ok) {
+        // 실패 → 롤백
+        setKeywords((prev) =>
+          prev.map((kw) =>
+            kw.id === id ? { ...kw, is_active: true, deactivated_at: null } : kw
+          )
+        )
+        toast.error('보관 처리에 실패했습니다')
+      }
+    } catch {
+      // 네트워크 오류 → 롤백
+      setKeywords((prev) =>
+        prev.map((kw) =>
+          kw.id === id ? { ...kw, is_active: true, deactivated_at: null } : kw
+        )
+      )
+      toast.error('보관 처리 중 오류가 발생했습니다')
+    }
+  }, [])
+
   return (
     <>
       <Header title="대시보드">
@@ -265,6 +304,7 @@ export default function Home() {
               keywords={activeKeywords}
               onRefreshed={fetchKeywords}
               onDeleted={fetchKeywords}
+              onArchive={isLoggedIn ? handleOptimisticArchive : undefined}
               isGuest={isLoggedIn === false}
             />
           )}

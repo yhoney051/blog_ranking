@@ -14,7 +14,14 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { PAGINATION } from '@/lib/constants'
 
-type Props = { keywords: Keyword[]; onRefreshed: () => void; onDeleted: () => void; isGuest?: boolean }
+type Props = {
+  keywords: Keyword[]
+  onRefreshed: () => void
+  onDeleted: () => void
+  // 부모가 낙관적 업데이트(즉시 UI 반영) 처리하도록 위임. 미전달 시 폴백 동작
+  onArchive?: (id: string) => void | Promise<void>
+  isGuest?: boolean
+}
 
 const DEFAULT_PAGE_SIZE = PAGINATION.KEYWORD_TABLE_PAGE_SIZE
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
@@ -145,7 +152,7 @@ const sortOptions: { key: SortOption; label: string }[] = [
 ]
 
 // 키워드 순위 목록 테이블
-export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false }: Props) {
+export function KeywordTable({ keywords, onRefreshed, onDeleted, onArchive, isGuest = false }: Props) {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const [rankFilter, setRankFilter] = useState<RankFilter>('all')
@@ -249,8 +256,15 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, isGuest = false
     onDeleted()
   }
 
-  // 활성 키워드를 보관(비활성화)로 변경 — 항상 허용 (한도 검사 X)
+  // 활성 키워드를 보관(비활성화)로 변경
+  // 부모에서 onArchive 콜백 받으면 위임 (낙관적 업데이트 패턴) — 즉시 UI 반영
+  // 미전달 시 폴백 — 직접 API 호출 + onRefreshed
   async function handleArchive(id: string) {
+    if (onArchive) {
+      await onArchive(id)
+      return
+    }
+    // 폴백: 기존 동작 (콜백 미전달 시)
     try {
       const res = await fetch(`/api/keywords/${id}/active`, {
         method: 'PATCH',
