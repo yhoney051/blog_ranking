@@ -178,6 +178,19 @@ export function KeywordProTool({ isLoggedIn }: Props) {
       ]),
     ]
     const ws = XLSX.utils.aoa_to_sheet(aoa)
+    // 숫자 셀(B/C/D 컬럼 = PC/모바일/합계)에 천 단위 콤마 포맷 적용
+    // 헤더는 R=0이므로 R=1부터 데이터 행만 적용
+    const numFmt = '#,##0'
+    for (let r = 1; r <= rows.length; r++) {
+      for (const c of [1, 2, 3]) {
+        const addr = XLSX.utils.encode_cell({ r, c })
+        const cell = ws[addr]
+        if (cell && typeof cell.v === 'number') {
+          cell.t = 'n'
+          cell.z = numFmt
+        }
+      }
+    }
     // 헤더 + 데이터 전체 범위에 AutoFilter 적용 → 엑셀에서 열자마자 필터 화살표 노출
     ws['!autofilter'] = { ref: `A1:E${rows.length + 1}` }
     // 보기 좋은 열 너비
