@@ -168,6 +168,28 @@ export default function Home() {
     // 보관 섹션이 닫혀 있으면 클릭 효과를 위해... 일단 스크롤만
   }, [])
 
+  // 활성 키워드 삭제 낙관적 업데이트 — 휴지통 클릭 즉시 행 제거, 백엔드는 백그라운드
+  // 실패 시 원본 복원 + 에러 토스트. 통계 카드/차트도 새 keywords 배열에 맞춰 즉시 부드럽게 재계산됨.
+  const handleOptimisticDelete = useCallback(async (id: string) => {
+    let original: Keyword | undefined
+    // 함수형 업데이트 안에서 원본 보관 + 즉시 제거 (한 번에)
+    setKeywords((prev) => {
+      original = prev.find((k) => k.id === id)
+      return prev.filter((k) => k.id !== id)
+    })
+
+    try {
+      const res = await fetch(`/api/keywords/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        if (original) setKeywords((prev) => [original!, ...prev])
+        toast.error('삭제에 실패했습니다')
+      }
+    } catch {
+      if (original) setKeywords((prev) => [original!, ...prev])
+      toast.error('삭제 중 오류가 발생했습니다')
+    }
+  }, [])
+
   // 활성 → 보관 낙관적 업데이트 — 별 클릭 즉시 UI에 반영, 백엔드는 백그라운드 처리
   // 실패 시 자동 롤백 + 에러 토스트
   const handleOptimisticArchive = useCallback(async (id: string) => {
@@ -309,6 +331,7 @@ export default function Home() {
               onRefreshed={fetchKeywords}
               onDeleted={fetchKeywords}
               onArchive={isLoggedIn ? handleOptimisticArchive : undefined}
+              onDelete={isLoggedIn ? handleOptimisticDelete : undefined}
               isGuest={isLoggedIn === false}
             />
           )}

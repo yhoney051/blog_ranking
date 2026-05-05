@@ -20,6 +20,8 @@ type Props = {
   onDeleted: () => void
   // 부모가 낙관적 업데이트(즉시 UI 반영) 처리하도록 위임. 미전달 시 폴백 동작
   onArchive?: (id: string) => void | Promise<void>
+  // 삭제도 동일 패턴 — 부모 onDelete가 있으면 위임, 없으면 폴백(전체 fetch 새로고침)
+  onDelete?: (id: string) => void | Promise<void>
   isGuest?: boolean
 }
 
@@ -152,7 +154,7 @@ const sortOptions: { key: SortOption; label: string }[] = [
 ]
 
 // 키워드 순위 목록 테이블
-export function KeywordTable({ keywords, onRefreshed, onDeleted, onArchive, isGuest = false }: Props) {
+export function KeywordTable({ keywords, onRefreshed, onDeleted, onArchive, onDelete, isGuest = false }: Props) {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
   const [rankFilter, setRankFilter] = useState<RankFilter>('all')
@@ -251,6 +253,13 @@ export function KeywordTable({ keywords, onRefreshed, onDeleted, onArchive, isGu
   const paged = filtered.slice(page * pageSize, (page + 1) * pageSize)
 
   async function handleDelete(id: string) {
+    // 부모가 낙관적 업데이트 처리 (handleOptimisticDelete) — 즉시 행 제거 + 백그라운드 fetch
+    if (onDelete) {
+      await onDelete(id)
+      toast.success('키워드가 삭제되었습니다')
+      return
+    }
+    // 폴백: 콜백 미전달(비회원 등) 시 기존 동작
     await fetch(`/api/keywords/${id}`, { method: 'DELETE' })
     toast.success('키워드가 삭제되었습니다')
     onDeleted()
