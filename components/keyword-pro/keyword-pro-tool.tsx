@@ -161,48 +161,43 @@ export function KeywordProTool({ isLoggedIn }: Props) {
     else setSelected(new Set(allRows.map((r) => r.row.keyword)))
   }
 
-  // CSV 안전 escape — 콤마/큰따옴표/줄바꿈 포함 시 따옴표로 감싸고 내부 따옴표는 두 개로
-  const escapeCsv = (val: string | number) => {
-    const s = String(val ?? '')
-    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`
-    return s
-  }
-
-  // CSV 생성 + 다운로드 트리거
-  const downloadCsv = (rows: { row: MetricRow; isSearched: boolean }[], suffix: string) => {
+  // .xlsx 생성 + AutoFilter 적용 + 다운로드 트리거
+  // xlsx 패키지는 동적 import로 초기 번들에서 분리 (다운로드 버튼 클릭 시에만 로드)
+  const downloadXlsx = async (rows: { row: MetricRow; isSearched: boolean }[], suffix: string) => {
     if (rows.length === 0) return
-    const BOM = '﻿' // 엑셀 한글 깨짐 방지
-    const headers = ['구분', '키워드', 'PC 검색량', '모바일 검색량', '합계', '경쟁도']
-    const lines = [
-      headers.map(escapeCsv).join(','),
-      ...rows.map(({ row, isSearched }) =>
-        [
-          isSearched ? '내 키워드' : '연관',
-          escapeCsv(row.keyword),
-          row.monthlyPcQcCnt,
-          row.monthlyMobileQcCnt,
-          row.totalSearchVolume,
-          row.compIdx ?? '',
-        ].join(',')
-      ),
+    const XLSX = await import('xlsx')
+    const headers = ['키워드', 'PC 검색량', '모바일 검색량', '합계', '경쟁도']
+    const aoa: (string | number)[][] = [
+      headers,
+      ...rows.map(({ row }) => [
+        row.keyword,
+        row.monthlyPcQcCnt,
+        row.monthlyMobileQcCnt,
+        row.totalSearchVolume,
+        row.compIdx ?? '',
+      ]),
     ]
-    const csv = BOM + lines.join('\r\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
+    const ws = XLSX.utils.aoa_to_sheet(aoa)
+    // 헤더 + 데이터 전체 범위에 AutoFilter 적용 → 엑셀에서 열자마자 필터 화살표 노출
+    ws['!autofilter'] = { ref: `A1:E${rows.length + 1}` }
+    // 보기 좋은 열 너비
+    ws['!cols'] = [
+      { wch: 28 }, // 키워드
+      { wch: 14 }, // PC 검색량
+      { wch: 14 }, // 모바일 검색량
+      { wch: 12 }, // 합계
+      { wch: 10 }, // 경쟁도
+    ]
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '키워드 분석')
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `keyword-pro-${suffix}-${today}.csv`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    XLSX.writeFile(wb, `keyword-pro-${suffix}-${today}.xlsx`)
   }
 
-  const handleDownloadAll = () => downloadCsv(allRows, 'all')
+  const handleDownloadAll = () => void downloadXlsx(allRows, 'all')
   const handleDownloadSelected = () => {
     const rows = allRows.filter((r) => selected.has(r.row.keyword))
-    downloadCsv(rows, `selected-${rows.length}`)
+    void downloadXlsx(rows, `selected-${rows.length}`)
   }
 
   // 트렌드 차트 영역 — data 없을 땐 placeholder, 있으면 케이스별 렌더
