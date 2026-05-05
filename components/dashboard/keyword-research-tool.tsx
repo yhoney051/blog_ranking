@@ -261,42 +261,65 @@ export function KeywordResearchTool({ isLoggedIn, onAdded }: Props) {
             </table>
           </div>
 
-          {/* 하단 인라인 추적 추가 영역 (선택 1개 이상일 때만 노출) */}
+          {/* 하단 인라인 추적 추가 영역 (선택 1개 이상일 때만 노출)
+              비개발자도 "이걸 누르면 뭐가 되는지" 직관적으로 보이도록
+              '추적'이라는 단어 대신 결과(매일 순위 체크)를 직접 카피에 담음. */}
           {selected.size > 0 && (
-            <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
-              <p className="text-xs font-medium">
-                선택한 {selected.size}개 키워드를 추적 추가
-              </p>
+            <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">
+                  선택한 {selected.size}개 키워드에서 내 블로그가 몇 위인지 매일 체크해 드릴게요
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  어느 블로그를 체크할지 알려주세요
+                </p>
+              </div>
               {isLoggedIn ? (
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Input
-                    placeholder="내 블로그 URL (예: blog.naver.com/내아이디)"
-                    value={blogUrl}
-                    onChange={(e) => setBlogUrl(e.target.value)}
-                    disabled={isAdding}
-                  />
-                  <Button
-                    onClick={handleAddTracked}
-                    disabled={isAdding || !blogUrl.trim()}
-                    className="sm:w-40"
-                  >
-                    {isAdding ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-1.5" />
-                        추적 추가
-                      </>
-                    )}
-                  </Button>
-                </div>
+                <>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input
+                      placeholder="예: blog.naver.com/내아이디"
+                      value={blogUrl}
+                      onChange={(e) => setBlogUrl(e.target.value)}
+                      disabled={isAdding}
+                    />
+                    <Button
+                      onClick={handleAddTracked}
+                      disabled={isAdding || !blogUrl.trim()}
+                      className="sm:w-44 shrink-0"
+                    >
+                      {isAdding ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4 mr-1.5" />
+                          매일 순위 체크 시작
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+                    <span>💡</span>
+                    <span>
+                      매일 자동으로 네이버 블로그탭에서 검색 순위를 확인하고, 1페이지 진입 여부를 알려드려요.
+                    </span>
+                  </p>
+                </>
               ) : (
-                <Button
-                  onClick={() => router.push("/signup")}
-                  className="w-full"
-                >
-                  가입하고 {selected.size}개 추적하기
-                </Button>
+                <>
+                  <Button
+                    onClick={() => router.push("/signup")}
+                    className="w-full"
+                  >
+                    가입하고 {selected.size}개 키워드 매일 체크 받기
+                  </Button>
+                  <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+                    <span>💡</span>
+                    <span>
+                      가입하면 매일 자동으로 순위를 확인해서 변동을 알려드려요. 무료로 시작할 수 있어요.
+                    </span>
+                  </p>
+                </>
               )}
             </div>
           )}
