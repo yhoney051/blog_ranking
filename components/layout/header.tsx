@@ -10,10 +10,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { LayoutDashboard, Settings, CreditCard } from "lucide-react";
+import { LayoutDashboard, Settings, CreditCard, TrendingUp } from "lucide-react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "대시보드", href: "/dashboard" },
+  { icon: TrendingUp, label: "전문 키워드", href: "/dashboard/keyword-pro" },
   { icon: CreditCard, label: "결제", href: "/dashboard/billing" },
   { icon: Settings, label: "설정", href: "/dashboard/settings" },
 ];

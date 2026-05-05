@@ -15,6 +15,10 @@ export const RATE_LIMITS = {
   KEYWORD_RESEARCH_GUEST_PER_HOUR: 5,
   /** 키워드 발굴(검색 도구) 회원: 사용자당 시간당 20회 */
   KEYWORD_RESEARCH_USER_PER_HOUR: 20,
+  /** 전문 키워드 검색 도구 게스트: IP당 시간당 5회 */
+  KEYWORD_PRO_GUEST_PER_HOUR: 5,
+  /** 전문 키워드 검색 도구 회원: 사용자당 시간당 20회 */
+  KEYWORD_PRO_USER_PER_HOUR: 20,
   /** 1시간 (밀리초) */
   ONE_HOUR_MS: 60 * 60 * 1000,
   /** 24시간 (밀리초) */
@@ -53,4 +57,12 @@ export const KEYWORD_RESEARCH = {
   RELATED_DISPLAY_LIMIT: 20,
   /** 인메모리 캐시 TTL (시간) */
   CACHE_TTL_HOURS: 24,
+} as const
+
+// 전문 키워드 검색 도구 설정 (트렌드 차트 가독성 위해 입력 한도를 좁힘)
+export const KEYWORD_PRO = {
+  /** 한 번에 입력 가능한 키워드 수 (트렌드 라인 색상 구분 한도) */
+  MAX_INPUT_KEYWORDS: 3,
+  /** 트렌드 캐시 TTL (시간) — 검색량 캐시보다 짧게 (일별 변화 의미 있음) */
+  TREND_CACHE_TTL_HOURS: 12,
 } as const

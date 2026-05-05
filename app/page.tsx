@@ -1,7 +1,7 @@
 // 허브 랜딩페이지
 import Image from 'next/image'
 import Link from 'next/link'
-import { BarChart3, ArrowRight, LogIn, Check, Crown } from 'lucide-react'
+import { BarChart3, TrendingUp, ArrowRight, LogIn, Check, Crown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Footer } from '@/components/layout/footer'
 
@@ -12,6 +12,13 @@ const services = [
     icon: BarChart3,
     href: '/onboarding',
     color: 'lime',
+  },
+  {
+    title: '전문 키워드 검색',
+    description: '검색량 + 경쟁도 + 클릭률 + 트렌드 그래프까지 한눈에. 키워드 3개 비교 분석.',
+    icon: TrendingUp,
+    href: '/dashboard/keyword-pro',
+    color: 'emerald',
   },
 ]
 
@@ -41,13 +48,13 @@ export default function HomePage() {
               <Image src="/logo.png" alt="수니" width={28} height={28} className="rounded-lg object-cover" />
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              지금 바로 시작해보세요
+              사용할 도구를 선택하세요
             </p>
           </div>
 
-          <div className="flex justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {services.map((service) => (
-              <Link key={service.href} href={service.href} className="group w-full max-w-sm">
+              <Link key={service.href} href={service.href} className="group">
                 <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 h-full flex flex-col gap-4 transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600">
                   <div className={`flex items-center justify-center h-12 w-12 rounded-xl ${
                     service.color === 'lime'

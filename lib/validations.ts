@@ -105,3 +105,18 @@ export const keywordResearchSchema = z.object({
     .min(1, '최소 1개 이상의 키워드가 필요합니다.')
     .max(5, '한 번에 최대 5개까지 검색할 수 있습니다.'),
 })
+
+// 전문 키워드 검색 도구 요청 검증 — 비회원도 호출 가능
+// 트렌드 차트 가독성을 위해 입력 한도 3개로 좁힘.
+export const keywordProSchema = z.object({
+  keywords: z
+    .array(
+      z
+        .string()
+        .min(1, '키워드를 입력해주세요.')
+        .max(40, '키워드는 40자 이내로 입력해주세요.')
+    )
+    .min(1, '최소 1개 이상의 키워드가 필요합니다.')
+    .max(3, '한 번에 최대 3개까지 분석할 수 있습니다.'),
+  period: z.enum(['1m', '3m', '6m', '12m']).default('12m'),
+})

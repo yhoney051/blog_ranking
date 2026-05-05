@@ -39,6 +39,24 @@ export type SearchVolumeResult = {
   monthlyPcQcCnt: number   // PC 월간 검색량
   monthlyMobileQcCnt: number  // 모바일 월간 검색량
   totalSearchVolume: number   // 합산
+  // 전문 키워드 도구용 추가 지표 (검색광고 API 응답에 동봉, 옵셔널)
+  compIdx?: string                 // 경쟁 정도 ("낮음" | "중간" | "높음")
+  monthlyAvePcClkCnt?: number      // PC 월평균 클릭수
+  monthlyAveMobileClkCnt?: number  // 모바일 월평균 클릭수
+  monthlyAvePcCtr?: number         // PC 월평균 클릭률(%)
+  monthlyAveMobileCtr?: number     // 모바일 월평균 클릭률(%)
+  plAvgDepth?: number              // 월평균 노출 광고수
+}
+
+// 검색광고 응답의 추가 숫자 필드 안전 파싱 ("0", "< 10", 빈 문자열 등 처리)
+function parseNumericField(value: unknown): number | undefined {
+  if (typeof value === 'number' && !isNaN(value)) return value
+  if (typeof value === 'string') {
+    if (value.includes('<')) return 0
+    const num = parseFloat(value.replace(/,/g, ''))
+    return isNaN(num) ? undefined : num
+  }
+  return undefined
 }
 
 // 네이버 검색광고 API 응답에서 검색량 값 파싱 ("< 10" 같은 문자열 처리)
@@ -191,6 +209,12 @@ export async function fetchKeywordResearch(
         monthlyPcQcCnt: pc,
         monthlyMobileQcCnt: mobile,
         totalSearchVolume: pc + mobile,
+        compIdx: typeof item.compIdx === 'string' ? item.compIdx : undefined,
+        monthlyAvePcClkCnt: parseNumericField(item.monthlyAvePcClkCnt),
+        monthlyAveMobileClkCnt: parseNumericField(item.monthlyAveMobileClkCnt),
+        monthlyAvePcCtr: parseNumericField(item.monthlyAvePcCtr),
+        monthlyAveMobileCtr: parseNumericField(item.monthlyAveMobileCtr),
+        plAvgDepth: parseNumericField(item.plAvgDepth),
       }
 
       if (keywordSet.has(kw)) {
