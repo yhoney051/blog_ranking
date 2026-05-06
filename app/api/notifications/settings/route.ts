@@ -32,6 +32,7 @@ export async function GET() {
       notify_rank_down: true,
       notify_new_entry: true,
       notify_dropped_out: true,
+      notify_hour_kst: 9,
     })
   }
 
@@ -47,20 +48,24 @@ export async function PUT(request: Request) {
 
   const body = await request.json()
 
-  // 허용된 필드만 추출
-  const allowedFields = [
+  // 허용된 필드만 추출 (boolean 5종 + 정수 1종)
+  const booleanFields = [
     'enabled',
     'notify_rank_up',
     'notify_rank_down',
     'notify_new_entry',
     'notify_dropped_out',
   ] as const
+  const allowedHours = [9, 12, 19]
 
-  const updates: Record<string, boolean> = {}
-  for (const field of allowedFields) {
+  const updates: Record<string, boolean | number> = {}
+  for (const field of booleanFields) {
     if (typeof body[field] === 'boolean') {
       updates[field] = body[field]
     }
+  }
+  if (typeof body.notify_hour_kst === 'number' && allowedHours.includes(body.notify_hour_kst)) {
+    updates.notify_hour_kst = body.notify_hour_kst
   }
 
   if (Object.keys(updates).length === 0) {

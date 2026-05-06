@@ -5,17 +5,22 @@ import { sendTelegramMessage, formatRankSummary, type RankResult } from '@/lib/t
 import type { NotificationSettings } from '@/types'
 
 // 일일 순위 알림 발송 (크론 잡에서 호출)
-export async function sendDailyNotifications(): Promise<{
+// kstHour 인자가 주어지면 그 시각으로 설정한 사용자만 발송. 미지정 시 모든 활성 사용자.
+export async function sendDailyNotifications(opts: { kstHour?: number } = {}): Promise<{
   sent: number
   failed: number
   skipped: number
 }> {
-  // 1. 알림 활성화된 사용자 조회
-  const { data: settings, error: settingsErr } = await supabaseServer
+  // 1. 알림 활성화된 사용자 조회 (kstHour 매칭)
+  let query = supabaseServer
     .from('notification_settings')
     .select('*')
     .eq('enabled', true)
     .not('telegram_chat_id', 'is', null)
+  if (typeof opts.kstHour === 'number') {
+    query = query.eq('notify_hour_kst', opts.kstHour)
+  }
+  const { data: settings, error: settingsErr } = await query
 
   if (settingsErr || !settings || settings.length === 0) {
     console.log('[NOTIFY] 알림 대상 없음')

@@ -1,9 +1,11 @@
-// GET /api/cron/send-notifications — 일일 순위 알림 발송 (Vercel Cron)
-// check-ranks 완료 후 30분 뒤(1:30 AM UTC)에 실행
+// GET /api/cron/send-notifications — 매시간 호출되는 알림 발송 (Vercel Cron)
+// 현재 KST 시각이 9/12/19 중 하나면 그 시각을 선택한 사용자만 발송, 아니면 즉시 skip.
 import { NextResponse } from 'next/server'
 import { sendDailyNotifications } from '@/lib/notifications'
 
 export const maxDuration = 60
+
+const NOTIFY_HOURS_KST = [9, 12, 19] as const
 
 export async function GET(request: Request) {
   // CRON_SECRET 검증
@@ -18,10 +20,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // KST 현재 시각 → 알림 시각 후보(9/12/19) 매칭 확인
+  const kstHour = (new Date().getUTCHours() + 9) % 24
+  if (!(NOTIFY_HOURS_KST as readonly number[]).includes(kstHour)) {
+    return NextResponse.json({
+      skipped: true,
+      reason: 'not a notify hour',
+      kstHour,
+      sent_at: new Date().toISOString(),
+    })
+  }
+
   try {
-    const result = await sendDailyNotifications()
+    const result = await sendDailyNotifications({ kstHour })
     return NextResponse.json({
       ...result,
+      kstHour,
       sent_at: new Date().toISOString(),
     })
   } catch (err) {

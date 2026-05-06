@@ -70,6 +70,7 @@ export type NotificationSettings = {
   notify_rank_down: boolean
   notify_new_entry: boolean
   notify_dropped_out: boolean
+  notify_hour_kst: number  // 9 | 12 | 19 (KST 기준 발송 시각)
   connect_token: string | null
   connect_token_expires_at: string | null
   created_at: string

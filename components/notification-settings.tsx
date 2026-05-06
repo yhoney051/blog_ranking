@@ -20,7 +20,14 @@ interface Settings {
   notify_rank_down: boolean
   notify_new_entry: boolean
   notify_dropped_out: boolean
+  notify_hour_kst: number
 }
+
+const NOTIFY_HOUR_OPTIONS: { value: number; label: string; sub: string }[] = [
+  { value: 9, label: '아침 9시', sub: '하루 시작 전 확인' },
+  { value: 12, label: '정오 12시', sub: '점심 시간 체크' },
+  { value: 19, label: '저녁 7시', sub: '하루 마감 정리' },
+]
 
 export function NotificationSettings() {
   const [settings, setSettings] = useState<Settings | null>(null)
@@ -116,9 +123,14 @@ export function NotificationSettings() {
     }
   }
 
-  // 설정 토글 변경
-  const handleToggle = async (field: keyof Settings, value: boolean) => {
-    setSettings((prev) => (prev ? { ...prev, [field]: value } : null))
+  // 설정 변경 — boolean 토글과 number 옵션(notify_hour_kst) 공용. 실패 시 이전 값으로 롤백.
+  const handleUpdate = async <K extends keyof Settings>(field: K, value: Settings[K]) => {
+    let prevValue: Settings[K] | undefined
+    setSettings((prev) => {
+      if (!prev) return prev
+      prevValue = prev[field]
+      return { ...prev, [field]: value }
+    })
 
     try {
       const res = await fetch('/api/notifications/settings', {
@@ -127,15 +139,21 @@ export function NotificationSettings() {
         body: JSON.stringify({ [field]: value }),
       })
       if (!res.ok) {
-        // 실패 시 롤백
-        setSettings((prev) => (prev ? { ...prev, [field]: !value } : null))
+        setSettings((prev) =>
+          prev && prevValue !== undefined ? { ...prev, [field]: prevValue! } : prev
+        )
         toast.error('설정 변경에 실패했습니다.')
       }
     } catch {
-      setSettings((prev) => (prev ? { ...prev, [field]: !value } : null))
+      setSettings((prev) =>
+        prev && prevValue !== undefined ? { ...prev, [field]: prevValue! } : prev
+      )
       toast.error('설정 변경에 실패했습니다.')
     }
   }
+
+  // boolean 전용 헬퍼 (Switch onCheckedChange 시그니처용)
+  const handleToggle = (field: keyof Settings, value: boolean) => handleUpdate(field, value as never)
 
   // 테스트 알림 발송
   const handleTest = async () => {
@@ -226,6 +244,41 @@ export function NotificationSettings() {
                       checked={settings?.enabled ?? true}
                       onCheckedChange={(v) => handleToggle('enabled', v)}
                     />
+                  </div>
+
+                  {/* 알림 시각 선택 — 마스터 토글과 같은 disabled 흐름 */}
+                  <div
+                    className={cn(
+                      'pl-4 border-l-2 border-border space-y-2 transition-opacity',
+                      !settings?.enabled && 'opacity-40 pointer-events-none'
+                    )}
+                    aria-disabled={!settings?.enabled}
+                  >
+                    <Label className="text-sm">알림 받을 시각</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {NOTIFY_HOUR_OPTIONS.map((opt) => {
+                        const active = (settings?.notify_hour_kst ?? 9) === opt.value
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => handleUpdate('notify_hour_kst', opt.value)}
+                            disabled={!settings?.enabled}
+                            className={cn(
+                              'rounded-lg border px-3 py-2 text-left transition-colors',
+                              active
+                                ? 'border-primary bg-primary/10'
+                                : 'border-border bg-background hover:bg-muted'
+                            )}
+                          >
+                            <div className={cn('text-sm font-semibold', active && 'text-primary')}>
+                              {opt.label}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground mt-0.5">{opt.sub}</div>
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
 
                   {/* 하위 토글 — 마스터 OFF 시 사라지지 않고 disabled로 흐림 */}

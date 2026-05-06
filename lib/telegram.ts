@@ -52,9 +52,13 @@ export type RankResult = {
   current_rank: number | null
 }
 
-// 일일 순위 리포트 메시지 포맷팅 (진입/이탈만 표시)
+// 일일 순위 리포트 메시지 포맷팅 — 진입/상승/하락/이탈 4섹션
+// filterByPreferences가 사용자 토글로 미리 필터한 결과를 받으므로,
+// 여기에서는 모든 케이스를 분류해 메시지로 만든다.
 export function formatRankSummary(results: RankResult[], date: string): string {
   const newEntry: string[] = []
+  const rankUp: string[] = []
+  const rankDown: string[] = []
   const droppedOut: string[] = []
 
   for (const r of results) {
@@ -66,21 +70,40 @@ export function formatRankSummary(results: RankResult[], date: string): string {
     } else if (r.previous_rank !== null && r.current_rank === null) {
       // 순위권 이탈
       droppedOut.push(`• "${kw}"`)
+    } else if (r.previous_rank !== null && r.current_rank !== null) {
+      const diff = r.previous_rank - r.current_rank // 양수 = 상승, 음수 = 하락
+      if (diff > 0) {
+        rankUp.push(`• "${kw}" ${r.previous_rank}위 → ${r.current_rank}위 (▲${diff})`)
+      } else if (diff < 0) {
+        rankDown.push(`• "${kw}" ${r.previous_rank}위 → ${r.current_rank}위 (▼${-diff})`)
+      }
+      // diff === 0: 변동 없음 → 메시지에 포함하지 않음
     }
   }
 
-  // 진입도 이탈도 없으면 빈 문자열 반환 (알림 발송하지 않음)
-  if (newEntry.length === 0 && droppedOut.length === 0) {
+  // 모든 섹션 비면 발송 안 함 (skip)
+  if (
+    newEntry.length === 0 &&
+    rankUp.length === 0 &&
+    rankDown.length === 0 &&
+    droppedOut.length === 0
+  ) {
     return ''
   }
 
   const lines: string[] = [`📊 <b>일일 순위 리포트</b> (${date})\n`]
 
   if (newEntry.length > 0) {
-    lines.push(`🔵 <b>진입 키워드</b>`, ...newEntry, '')
+    lines.push(`🔵 <b>신규 진입</b>`, ...newEntry, '')
+  }
+  if (rankUp.length > 0) {
+    lines.push(`📈 <b>순위 상승</b>`, ...rankUp, '')
+  }
+  if (rankDown.length > 0) {
+    lines.push(`📉 <b>순위 하락</b>`, ...rankDown, '')
   }
   if (droppedOut.length > 0) {
-    lines.push(`❌ <b>이탈 키워드</b>`, ...droppedOut, '')
+    lines.push(`❌ <b>순위권 이탈</b>`, ...droppedOut, '')
     lines.push(`💡 이탈 키워드는 오늘 새로 블로그를 작성해 보는 건 어떨까요?`)
   }
 
