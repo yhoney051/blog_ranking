@@ -27,13 +27,18 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 미인증 사용자 → /dashboard 및 하위 경로 보호 (/dashboard/keyword-pro만 비회원 허용)
+  // 미인증 사용자 → /dashboard 하위 보호
+  // 단 비회원도 들어갈 수 있는 곳:
+  //   1) /dashboard 메인 (localStorage 기반 비회원 키워드 표시 — 이탈 방지)
+  //   2) /dashboard/keyword-pro (광고 funnel 입구)
+  // 그 외 /dashboard/billing, /dashboard/settings 등 회원 전용은 /login으로
   if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-    const publicDashboardPaths = ['/dashboard/keyword-pro']
-    const isPublic = publicDashboardPaths.some((p) =>
+    const isMainDashboard = request.nextUrl.pathname === '/dashboard'
+    const publicSubPaths = ['/dashboard/keyword-pro']
+    const isPublicSub = publicSubPaths.some((p) =>
       request.nextUrl.pathname === p || request.nextUrl.pathname.startsWith(p + '/')
     )
-    if (!isPublic) {
+    if (!isMainDashboard && !isPublicSub) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
