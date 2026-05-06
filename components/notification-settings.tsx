@@ -20,7 +20,17 @@ interface Settings {
   notify_rank_down: boolean
   notify_new_entry: boolean
   notify_dropped_out: boolean
+  notify_first_page_only: boolean
   notify_hour_kst: number
+}
+
+interface HistoryEntry {
+  id: string
+  sent_at: string
+  channel: string
+  status: 'sent' | 'failed' | 'blocked'
+  keyword_count: number
+  message_preview: string | null
 }
 
 const NOTIFY_HOUR_OPTIONS: { value: number; label: string; sub: string }[] = [
@@ -35,6 +45,7 @@ export function NotificationSettings() {
   const [connecting, setConnecting] = useState(false)
   const [disconnecting, setDisconnecting] = useState(false)
   const [testing, setTesting] = useState(false)
+  const [history, setHistory] = useState<HistoryEntry[]>([])
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -49,9 +60,22 @@ export function NotificationSettings() {
     }
   }, [])
 
+  const fetchHistory = useCallback(async () => {
+    try {
+      const res = await fetch('/api/notifications/history?limit=5')
+      if (res.ok) {
+        const json = await res.json()
+        setHistory(Array.isArray(json.items) ? json.items : [])
+      }
+    } catch {
+      // 무시 — 이력은 보조 정보라 실패해도 메인 UI는 정상
+    }
+  }, [])
+
   useEffect(() => {
     fetchSettings()
-  }, [fetchSettings])
+    fetchHistory()
+  }, [fetchSettings, fetchHistory])
 
   // 텔레그램 연동
   const handleConnect = async () => {
@@ -166,6 +190,8 @@ export function NotificationSettings() {
         const data = await res.json()
         toast.error(data.error || '테스트 알림 발송 실패')
       }
+      // 결과와 무관하게 이력 갱신 (성공이든 실패든 history에 기록되므로)
+      void fetchHistory()
     } catch {
       toast.error('오류가 발생했습니다.')
     } finally {
@@ -289,6 +315,24 @@ export function NotificationSettings() {
                     )}
                     aria-disabled={!settings?.enabled}
                   >
+                    {/* 임계값: 1페이지(1~10위) 변동만 */}
+                    <div className="flex items-center justify-between gap-3 pb-2 border-b border-border/60">
+                      <div className="min-w-0">
+                        <Label htmlFor="notify_first_page_only" className="text-sm font-medium cursor-pointer">
+                          1페이지(1~10위) 변동만 알림
+                        </Label>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          노이즈를 줄여 의미 있는 변동만 받기 — 11위 밖 사이의 변동은 무시
+                        </p>
+                      </div>
+                      <Switch
+                        id="notify_first_page_only"
+                        checked={settings?.notify_first_page_only ?? false}
+                        onCheckedChange={(v) => handleToggle('notify_first_page_only', v)}
+                        disabled={!settings?.enabled}
+                      />
+                    </div>
+
                     <div className="flex items-center justify-between">
                       <Label htmlFor="notify_rank_up" className="text-sm">
                         순위 상승 시
@@ -343,6 +387,45 @@ export function NotificationSettings() {
                 <p className="text-xs text-muted-foreground mt-3">
                   💡 텔레그램에서 <b>/rank</b> 명령어로 현재 순위를 바로 확인할 수 있습니다
                 </p>
+
+                {/* 발송 이력 — 최근 5건. 비어 있으면 안내. 트러블슈팅용 단서 제공. */}
+                <div className="mt-4 space-y-2">
+                  <Label className="text-sm">최근 알림 이력</Label>
+                  {history.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">
+                      아직 발송된 알림이 없습니다. 매일 설정한 시각에 변동이 있을 때만 발송돼요.
+                    </p>
+                  ) : (
+                    <ul className="rounded-lg border divide-y">
+                      {history.map((h) => (
+                        <li key={h.id} className="flex items-center justify-between px-3 py-2 text-xs">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span
+                              className={cn(
+                                'inline-block h-1.5 w-1.5 rounded-full shrink-0',
+                                h.status === 'sent' && 'bg-emerald-500',
+                                h.status === 'failed' && 'bg-amber-500',
+                                h.status === 'blocked' && 'bg-red-500'
+                              )}
+                              aria-label={h.status}
+                            />
+                            <span className="truncate">
+                              {h.message_preview ?? '(미리보기 없음)'}
+                            </span>
+                          </div>
+                          <span className="text-muted-foreground shrink-0 ml-2 tabular-nums">
+                            {new Date(h.sent_at).toLocaleString('ko-KR', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </>
             )}
           </>

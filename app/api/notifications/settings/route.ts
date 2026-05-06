@@ -32,6 +32,7 @@ export async function GET() {
       notify_rank_down: true,
       notify_new_entry: true,
       notify_dropped_out: true,
+      notify_first_page_only: false,
       notify_hour_kst: 9,
     })
   }
@@ -48,13 +49,14 @@ export async function PUT(request: Request) {
 
   const body = await request.json()
 
-  // 허용된 필드만 추출 (boolean 5종 + 정수 1종)
+  // 허용된 필드만 추출 (boolean 6종 + 정수 1종)
   const booleanFields = [
     'enabled',
     'notify_rank_up',
     'notify_rank_down',
     'notify_new_entry',
     'notify_dropped_out',
+    'notify_first_page_only',
   ] as const
   const allowedHours = [9, 12, 19]
 
@@ -103,6 +105,16 @@ export async function POST() {
   }
 
   const success = await sendTestNotification(data.telegram_chat_id)
+
+  // 테스트 발송도 이력에 기록 → 사용자가 화면에서 바로 확인 가능
+  await supabaseServer.from('notification_history').insert({
+    user_id: userId,
+    channel: 'telegram',
+    status: success ? 'sent' : 'failed',
+    keyword_count: 0,
+    message_preview: '테스트 알림 — 연동 확인용',
+  })
+
   if (!success) {
     return NextResponse.json({ error: '알림 발송에 실패했습니다.' }, { status: 500 })
   }

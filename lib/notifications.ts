@@ -79,6 +79,17 @@ export async function sendDailyNotifications(opts: { kstHour?: number } = {}): P
     }
     const result = await sendTelegramMessage(setting.telegram_chat_id!, message)
 
+    // 발송 결과를 notification_history에 기록 (사용자 본인이 settings 화면에서 조회)
+    let historyStatus: 'sent' | 'failed' | 'blocked' = 'sent'
+    if (!result.ok) historyStatus = result.blocked ? 'blocked' : 'failed'
+    await supabaseServer.from('notification_history').insert({
+      user_id: setting.user_id,
+      channel: 'telegram',
+      status: historyStatus,
+      keyword_count: filtered.length,
+      message_preview: message.slice(0, 200),
+    })
+
     if (result.ok) {
       sent++
     } else if (result.blocked) {
@@ -98,25 +109,37 @@ export async function sendDailyNotifications(opts: { kstHour?: number } = {}): P
 }
 
 // 사용자 알림 설정에 따라 키워드 필터링
+// notify_first_page_only=true 면 1~10위 관련 변동만 통과시킴 (소상공인 노이즈 차단)
 function filterByPreferences(
   keywords: RankResult[],
   settings: NotificationSettings
 ): RankResult[] {
+  const firstPageOnly = settings.notify_first_page_only ?? false
+  const inFirstPage = (rank: number | null) => rank !== null && rank >= 1 && rank <= 10
+
   return keywords.filter((kw) => {
     // 신규 진입
     if (kw.previous_rank === null && kw.current_rank !== null) {
-      return settings.notify_new_entry
+      if (!settings.notify_new_entry) return false
+      if (firstPageOnly && !inFirstPage(kw.current_rank)) return false
+      return true
     }
     // 순위권 이탈
     if (kw.previous_rank !== null && kw.current_rank === null) {
-      return settings.notify_dropped_out
+      if (!settings.notify_dropped_out) return false
+      if (firstPageOnly && !inFirstPage(kw.previous_rank)) return false
+      return true
     }
     // 순위 변동
     if (kw.previous_rank !== null && kw.current_rank !== null) {
+      // 1페이지 모드: 이전·이후 중 하나라도 1~10에 속해야 알림 (1페이지 진입/이탈/내부변동)
+      if (firstPageOnly && !inFirstPage(kw.previous_rank) && !inFirstPage(kw.current_rank)) {
+        return false
+      }
       const diff = kw.previous_rank - kw.current_rank
       if (diff > 0) return settings.notify_rank_up
       if (diff < 0) return settings.notify_rank_down
-      return true // 변동 없음은 항상 포함
+      return false // 변동 없음은 메시지에 포함하지 않음 (이전엔 true였으나 무의미)
     }
     return false
   })

@@ -70,11 +70,23 @@ export type NotificationSettings = {
   notify_rank_down: boolean
   notify_new_entry: boolean
   notify_dropped_out: boolean
+  notify_first_page_only: boolean  // true면 1~10위 관련 변동만 알림
   notify_hour_kst: number  // 9 | 12 | 19 (KST 기준 발송 시각)
   connect_token: string | null
   connect_token_expires_at: string | null
   created_at: string
   updated_at: string
+}
+
+// 알림 발송 이력 (notification_history)
+export type NotificationHistoryEntry = {
+  id: string
+  user_id: string
+  sent_at: string
+  channel: string             // 'telegram' (추후 확장)
+  status: 'sent' | 'failed' | 'blocked'
+  keyword_count: number
+  message_preview: string | null
 }
 
 // 결제 이력
