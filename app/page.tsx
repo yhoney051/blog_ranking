@@ -1,7 +1,7 @@
 // 허브 랜딩페이지
 import Image from 'next/image'
 import Link from 'next/link'
-import { BarChart3, TrendingUp, ArrowRight, LogIn, Check, Crown } from 'lucide-react'
+import { BarChart3, TrendingUp, ArrowRight, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Footer } from '@/components/layout/footer'
 
@@ -79,40 +79,6 @@ export default function HomePage() {
                 </div>
               </Link>
             ))}
-          </div>
-
-          {/* 요금제 안내 */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-center text-slate-900 dark:text-slate-100">
-              요금제
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* 무료 플랜 */}
-              <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 space-y-4">
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">무료</h3>
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  0<span className="text-sm font-normal text-slate-500">원/월</span>
-                </p>
-                <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />키워드 10개</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />일 1회 자동 순위 체크</li>
-                </ul>
-              </div>
-              {/* Pro 플랜 */}
-              <div className="rounded-xl border-2 border-brand-500 bg-white dark:bg-slate-800 p-6 space-y-4">
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                  <Crown className="h-4 w-4 text-yellow-500" />Pro
-                </h3>
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  9,900<span className="text-sm font-normal text-slate-500">원/월</span>
-                </p>
-                <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />키워드 100개</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />일 1회 자동 순위 체크</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-brand-500" />우선 고객 지원</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </div>
       </main>
