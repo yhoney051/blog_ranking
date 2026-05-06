@@ -8,15 +8,6 @@ export async function getNaverBlogRank(
   return getBrightDataBlogRank(keyword, blogUrl)
 }
 
-// URL 정규화 (https://, http://, www, m. 제거)
-function normalizeUrl(url: string): string {
-  return url
-    .toLowerCase()
-    .replace(/^https?:\/\//, '')
-    .replace(/^(www\.|m\.)/, '')
-    .replace(/\/$/, '')
-}
-
 // 사용자가 입력한 blog_url에서 네이버 블로그 ID만 정확히 추출
 // 'https://blog.naver.com/myid' / 'm.blog.naver.com/myid/12345' / 'myid' 등 다양한 입력 허용.
 // 추출 실패 시 null → 검증 단계에서 잡을 수 있음.
