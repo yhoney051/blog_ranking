@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { Bell, Send, Unlink } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface Settings {
   telegram_chat_id: string | null
@@ -171,16 +172,22 @@ export function NotificationSettings() {
         ) : (
           <>
             {/* 텔레그램 연동 상태 */}
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
                 <p className="text-sm font-medium">텔레그램</p>
-                {isConnected && settings?.telegram_username && (
-                  <p className="text-xs text-muted-foreground">@{settings.telegram_username}</p>
+                {isConnected && (
+                  <p className="text-xs text-muted-foreground truncate">
+                    {settings?.telegram_username
+                      ? `@${settings.telegram_username}`
+                      : '연동된 계정'}
+                  </p>
                 )}
               </div>
               {isConnected ? (
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">연동됨</Badge>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300">
+                    연동됨
+                  </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -203,11 +210,17 @@ export function NotificationSettings() {
             {isConnected && (
               <>
                 <hr />
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="enabled" className="text-sm">
-                      알림 받기
-                    </Label>
+                <div className="space-y-3">
+                  {/* 마스터 토글 — 더 강조 (큰 글자 + 보조 설명) */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <Label htmlFor="enabled" className="text-sm font-semibold cursor-pointer">
+                        알림 받기
+                      </Label>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        끄면 매일 자동 발송이 멈춥니다 (수동 테스트는 그대로 가능)
+                      </p>
+                    </div>
                     <Switch
                       id="enabled"
                       checked={settings?.enabled ?? true}
@@ -215,53 +228,59 @@ export function NotificationSettings() {
                     />
                   </div>
 
-                  {settings?.enabled && (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="notify_rank_up" className="text-sm text-muted-foreground">
-                          순위 상승 시
-                        </Label>
-                        <Switch
-                          id="notify_rank_up"
-                          checked={settings?.notify_rank_up ?? true}
-                          onCheckedChange={(v) => handleToggle('notify_rank_up', v)}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="notify_rank_down" className="text-sm text-muted-foreground">
-                          순위 하락 시
-                        </Label>
-                        <Switch
-                          id="notify_rank_down"
-                          checked={settings?.notify_rank_down ?? true}
-                          onCheckedChange={(v) => handleToggle('notify_rank_down', v)}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="notify_new_entry" className="text-sm text-muted-foreground">
-                          신규 진입 시
-                        </Label>
-                        <Switch
-                          id="notify_new_entry"
-                          checked={settings?.notify_new_entry ?? true}
-                          onCheckedChange={(v) => handleToggle('notify_new_entry', v)}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label
-                          htmlFor="notify_dropped_out"
-                          className="text-sm text-muted-foreground"
-                        >
-                          순위권 이탈 시
-                        </Label>
-                        <Switch
-                          id="notify_dropped_out"
-                          checked={settings?.notify_dropped_out ?? true}
-                          onCheckedChange={(v) => handleToggle('notify_dropped_out', v)}
-                        />
-                      </div>
-                    </>
-                  )}
+                  {/* 하위 토글 — 마스터 OFF 시 사라지지 않고 disabled로 흐림 */}
+                  <div
+                    className={cn(
+                      'pl-4 border-l-2 border-border space-y-3 transition-opacity',
+                      !settings?.enabled && 'opacity-40 pointer-events-none'
+                    )}
+                    aria-disabled={!settings?.enabled}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="notify_rank_up" className="text-sm">
+                        순위 상승 시
+                      </Label>
+                      <Switch
+                        id="notify_rank_up"
+                        checked={settings?.notify_rank_up ?? true}
+                        onCheckedChange={(v) => handleToggle('notify_rank_up', v)}
+                        disabled={!settings?.enabled}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="notify_rank_down" className="text-sm">
+                        순위 하락 시
+                      </Label>
+                      <Switch
+                        id="notify_rank_down"
+                        checked={settings?.notify_rank_down ?? true}
+                        onCheckedChange={(v) => handleToggle('notify_rank_down', v)}
+                        disabled={!settings?.enabled}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="notify_new_entry" className="text-sm">
+                        신규 진입 시
+                      </Label>
+                      <Switch
+                        id="notify_new_entry"
+                        checked={settings?.notify_new_entry ?? true}
+                        onCheckedChange={(v) => handleToggle('notify_new_entry', v)}
+                        disabled={!settings?.enabled}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="notify_dropped_out" className="text-sm">
+                        순위권 이탈 시
+                      </Label>
+                      <Switch
+                        id="notify_dropped_out"
+                        checked={settings?.notify_dropped_out ?? true}
+                        onCheckedChange={(v) => handleToggle('notify_dropped_out', v)}
+                        disabled={!settings?.enabled}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <hr />
