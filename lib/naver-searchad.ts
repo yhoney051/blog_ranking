@@ -155,7 +155,7 @@ export type KeywordResearchResult = {
 // 입력은 최대 5개 (네이버 API 배치 한도)
 export async function fetchKeywordResearch(
   keywords: string[],
-  relatedLimit = 20
+  relatedLimit = 100
 ): Promise<KeywordResearchResult> {
   if (keywords.length === 0) {
     return { searched: [], related: [] }

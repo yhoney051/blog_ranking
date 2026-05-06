@@ -11,7 +11,7 @@ import {
   setCached,
   makeCacheKey,
 } from '@/lib/keyword-research-cache'
-import { RATE_LIMITS } from '@/lib/constants'
+import { RATE_LIMITS, KEYWORD_RESEARCH } from '@/lib/constants'
 
 // POST /api/keyword-research
 // 비회원도 호출 가능. 입력 키워드의 검색량 + 연관 키워드를 한 번에 조회.
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
 
   // 네이버 검색광고 API 호출
   try {
-    const result = await fetchKeywordResearch(keywords)
+    const result = await fetchKeywordResearch(keywords, KEYWORD_RESEARCH.RELATED_DISPLAY_LIMIT)
     setCached(cacheKey, result)
     return NextResponse.json({
       ...result,

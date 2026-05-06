@@ -27,7 +27,7 @@ import {
   setCachedTrend,
   makeTrendCacheKey,
 } from '@/lib/keyword-pro-cache'
-import { RATE_LIMITS } from '@/lib/constants'
+import { RATE_LIMITS, KEYWORD_PRO } from '@/lib/constants'
 
 export async function POST(req: Request) {
   if (!isNaverSearchAdConfigured()) {
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
   // 미히트 항목만 외부 호출 (양쪽 병렬). trendEnabled false면 null 즉시 resolve
   const metricsP: Promise<KeywordResearchResult> = cachedMetrics
     ? Promise.resolve(cachedMetrics)
-    : fetchKeywordResearch(keywords)
+    : fetchKeywordResearch(keywords, KEYWORD_PRO.RELATED_DISPLAY_LIMIT)
   const trendP: Promise<TrendResult | null> = trendEnabled
     ? cachedTrend
       ? Promise.resolve(cachedTrend)

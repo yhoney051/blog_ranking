@@ -63,6 +63,8 @@ export const KEYWORD_RESEARCH = {
 export const KEYWORD_PRO = {
   /** 한 번에 입력 가능한 키워드 수 (트렌드 라인 색상 구분 한도) */
   MAX_INPUT_KEYWORDS: 3,
+  /** 결과 표에 표시할 연관 키워드 상위 개수 (발굴 도구 깊이) */
+  RELATED_DISPLAY_LIMIT: 100,
   /** 트렌드 캐시 TTL (시간) — 검색량 캐시보다 짧게 (일별 변화 의미 있음) */
   TREND_CACHE_TTL_HOURS: 12,
 } as const
