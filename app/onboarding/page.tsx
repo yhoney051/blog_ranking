@@ -58,6 +58,15 @@ export default function HomePage() {
       return
     }
 
+    // 네이버 블로그 형식만 허용 — '22' 같은 의미 없는 입력 차단
+    const cleaned = blogUrl.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^(www\.|m\.)/, '')
+    const isNaverBlog = /^blog\.naver\.com\/[a-z0-9_-]{2,}/i.test(cleaned)
+    const isIdOnly = /^[a-z0-9_-]{4,}$/i.test(cleaned)
+    if (!isNaverBlog && !isIdOnly) {
+      toast.error('네이버 블로그 주소를 입력해주세요. (예: blog.naver.com/내아이디)')
+      return
+    }
+
     setLoading(true)
     try {
       if (isLoggedIn) {

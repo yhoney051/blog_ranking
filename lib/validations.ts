@@ -65,6 +65,16 @@ export function normalizeBlogUrl(url: string): string {
   return s.slice(0, slashIdx).toLowerCase() + s.slice(slashIdx)
 }
 
+// 네이버 블로그 형식 검증 — 'blog.naver.com/id' 또는 ID만 허용
+// '22' 같은 의미 없는 입력으로 잘못된 매칭이 일어나는 것 방지
+// ID 단독 입력은 최소 4자 (네이버 블로그 ID 정책 안전마진)
+function isNaverBlogUrl(url: string): boolean {
+  const cleaned = url.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^(www\.|m\.)/, '')
+  if (/^blog\.naver\.com\/[a-z0-9_-]{2,}/i.test(cleaned)) return true
+  if (/^[a-z0-9_-]{4,}$/i.test(cleaned)) return true
+  return false
+}
+
 // 키워드 등록 요청 검증
 export const keywordCreateSchema = z.object({
   keyword: z.string().min(1, '키워드를 입력해주세요.').max(100, '키워드는 100자 이내로 입력해주세요.'),
@@ -72,7 +82,8 @@ export const keywordCreateSchema = z.object({
     .string()
     .min(1, 'URL을 입력해주세요.')
     .max(500, 'URL은 500자 이내로 입력해주세요.')
-    .refine(isSafeUrl, { message: '유효하지 않은 URL 형식입니다.' }),
+    .refine(isSafeUrl, { message: '유효하지 않은 URL 형식입니다.' })
+    .refine(isNaverBlogUrl, { message: '네이버 블로그 주소만 입력할 수 있어요. (예: blog.naver.com/내아이디)' }),
   tag: z.string().max(50, '태그는 50자 이내로 입력해주세요.').optional(),
 })
 

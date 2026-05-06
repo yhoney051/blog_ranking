@@ -3,7 +3,7 @@
 
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getNaverBlogRank } from '@/lib/serpapi'
+import { getNaverBlogRank, extractNaverBlogId } from '@/lib/serpapi'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
 import { RATE_LIMITS } from '@/lib/constants'
 
@@ -18,6 +18,14 @@ export async function POST(req: Request) {
 
     if (!keyword || !blog_url) {
       return NextResponse.json({ error: '키워드와 블로그 URL을 입력해주세요.' }, { status: 400 })
+    }
+
+    // 네이버 블로그 형식 검증 — '22' 같은 의미 없는 입력 차단
+    if (!extractNaverBlogId(String(blog_url))) {
+      return NextResponse.json(
+        { error: '네이버 블로그 주소를 입력해주세요. (예: blog.naver.com/내아이디)' },
+        { status: 400 }
+      )
     }
 
     // IP 기반 rate limit: 시간당 5회 (쿠키 우회 방어)
