@@ -7,7 +7,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Sparkles, Loader2, Plus } from "lucide-react"
+import { Search, Sparkles, Loader2, Plus, ChevronDown, ChevronUp } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -43,6 +43,7 @@ export function KeywordResearchTool({ isLoggedIn, onAdded }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [blogUrl, setBlogUrl] = useState("")
   const [isAdding, startAdding] = useTransition()
+  const [expanded, setExpanded] = useState(true)
 
   // 입력값을 쉼표/줄바꿈 기준으로 쪼개고 최대 5개로 제한
   const handleSearch = async () => {
@@ -149,8 +150,13 @@ export function KeywordResearchTool({ isLoggedIn, onAdded }: Props) {
 
   return (
     <div className="rounded-xl border bg-card p-4 lg:p-6 space-y-4">
-      {/* 헤더 */}
-      <div className="flex items-start gap-2">
+      {/* 헤더 — 클릭하면 접힙/펼침 */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-start gap-2 text-left"
+        aria-expanded={expanded}
+      >
         <Sparkles className="h-5 w-5 text-brand-500 shrink-0 mt-0.5" />
         <div className="flex-1">
           <h3 className="text-sm font-semibold">키워드 발굴</h3>
@@ -158,8 +164,14 @@ export function KeywordResearchTool({ isLoggedIn, onAdded }: Props) {
             어떤 키워드로 글을 써야 할지 찾아보세요. 우리 동네 검색량 50회만 돼도 의미 있는 키워드예요.
           </p>
         </div>
-      </div>
+        {expanded ? (
+          <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
+        )}
+      </button>
 
+      {expanded && (<>
       {/* 입력창 + 검색 버튼 */}
       <div className="flex flex-col sm:flex-row gap-2">
         <Input
@@ -334,6 +346,7 @@ export function KeywordResearchTool({ isLoggedIn, onAdded }: Props) {
           )}
         </>
       )}
+      </>)}
     </div>
   )
 }

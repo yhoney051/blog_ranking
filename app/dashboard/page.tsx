@@ -5,7 +5,6 @@ import { Keyword } from '@/types'
 import { Header } from '@/components/layout/header'
 import { StatsCards } from '@/components/dashboard/stats-cards'
 import { KeywordResearchTool } from '@/components/dashboard/keyword-research-tool'
-import { OverviewChart } from '@/components/dashboard/overview-chart'
 import { KeywordForm } from '@/components/keyword-form'
 import { KeywordTable } from '@/components/keyword-table'
 import { ArchivedSection } from '@/components/archived-section'
@@ -285,11 +284,6 @@ export default function Home() {
             </div>
           ) : (
             <StatsCards keywords={activeKeywords} />
-          )}
-
-          {/* 순위 분포 차트 — 활성 키워드 기준 */}
-          {!loading && activeKeywords.length > 0 && (
-            <OverviewChart keywords={activeKeywords} />
           )}
 
           {/* 키워드 등록: 회원은 폼(한도 정보 전달), 비회원은 루트로 이동 */}
