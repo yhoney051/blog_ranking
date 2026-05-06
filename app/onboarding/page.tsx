@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { ArrowRight, Search, ArrowLeft, CheckCircle2, LogIn } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default function HomePage() {
@@ -136,8 +137,8 @@ export default function HomePage() {
       {/* 헤더 */}
       <header className="flex items-center justify-between px-6 h-14 border-b border-slate-200/60 dark:border-slate-700/50">
         <div className="flex items-center gap-1">
-          <img src="/logo.png" alt="수니" className="h-8 w-8 rounded-lg object-cover" />
-          <img src="/sooni-logo.png" alt="수니 Sooni" className="h-8 object-contain" />
+          <Image src="/logo.png" alt="수니" width={32} height={32} className="rounded-lg object-cover" />
+          <Image src="/sooni-logo.png" alt="수니 Sooni" width={80} height={32} className="object-contain" />
         </div>
         {!isLoggedIn && (
           <Link href="/login">
@@ -172,10 +173,10 @@ export default function HomePage() {
             <div className="space-y-6">
               <div className="text-center space-y-2">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  어떤 키워드를 추적할까요?
+                  어떤 검색어로 내 블로그를 찾으세요?
                 </h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  N사 통합검색에서 검색되는 키워드를 입력하세요
+                  네이버에서 검색하는 단어를 적어주세요
                 </p>
               </div>
 
@@ -185,10 +186,25 @@ export default function HomePage() {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="예: 강남 맛집, 분당 성형외과"
+                  placeholder="예: 강남역 피부과"
                   className="pl-10 h-12 text-base rounded-xl border-slate-200/60 dark:border-slate-700/50"
                   autoFocus
                 />
+              </div>
+
+              {/* 예시 칩 — 클릭 한 번으로 키워드 자동 입력, 입력 막힘 방지 */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                <span className="text-xs text-slate-400 self-center">예시:</span>
+                {['강남역 피부과', '다산동 카페', '분당 성형외과'].map((ex) => (
+                  <button
+                    key={ex}
+                    type="button"
+                    onClick={() => setKeyword(ex)}
+                    className="px-3 py-1.5 rounded-full text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
+                  >
+                    {ex}
+                  </button>
+                ))}
               </div>
 
               <Button onClick={handleNext} disabled={!keyword.trim()} className="w-full h-11 rounded-xl text-sm font-medium">
@@ -197,17 +213,17 @@ export default function HomePage() {
 
               {/* 예시 목업 */}
               <div className="pt-4">
-                <p className="text-xs text-slate-400 text-center mb-3">이렇게 순위를 추적할 수 있어요</p>
+                <p className="text-xs text-slate-400 text-center mb-3">이렇게 매일 순위를 알려드려요</p>
                 <div className="rounded-xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 overflow-hidden">
-                  <div className="grid grid-cols-[1fr_80px_60px_64px_60px] gap-2 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200/60 dark:border-slate-700/50">
+                  <div className="grid grid-cols-[minmax(0,1fr)_56px_56px_56px_56px] gap-2 px-3 py-2.5 bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200/60 dark:border-slate-700/50">
                     <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">키워드</span>
                     <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">순위</span>
                     <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">추이</span>
                     <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">변동</span>
                     <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">조회</span>
                   </div>
-                  <div className="grid grid-cols-[1fr_80px_60px_64px_60px] gap-2 px-4 py-3 items-center">
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">대구지방분해주사</span>
+                  <div className="grid grid-cols-[minmax(0,1fr)_56px_56px_56px_56px] gap-2 px-3 py-3 items-center">
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">강남역 피부과</span>
                     <div className="text-center">
                       <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-brand-300 text-slate-800 dark:bg-brand-900/30 dark:text-slate-300 font-bold">1</span>
                     </div>
@@ -229,10 +245,10 @@ export default function HomePage() {
             <div className="space-y-6">
               <div className="text-center space-y-2">
                 <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  블로그 주소를 알려주세요
+                  내 블로그 주소를 알려주세요
                 </h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  &ldquo;{keyword}&rdquo; 키워드에서 순위를 추적할 블로그 URL
+                  &ldquo;{keyword}&rdquo; 검색했을 때 보여주고 싶은 블로그예요
                 </p>
               </div>
 
@@ -240,23 +256,27 @@ export default function HomePage() {
                 value={blogUrl}
                 onChange={(e) => setBlogUrl(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="blog.naver.com/아이디"
+                placeholder="blog.naver.com/내아이디"
                 className="h-12 text-base rounded-xl border-slate-200/60 dark:border-slate-700/50"
                 autoFocus
               />
+
+              <p className="text-[11px] text-slate-400 -mt-3 px-1">
+                💡 블로그 주소창에 보이는 그대로 복사해서 붙여넣어주세요
+              </p>
 
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setStep(1)} className="flex-1 h-11 rounded-xl text-sm font-medium">
                   <ArrowLeft className="h-4 w-4 mr-1.5" /> 이전
                 </Button>
                 <Button onClick={handleSubmit} disabled={!blogUrl.trim() || loading} className="flex-1 h-11 rounded-xl text-sm font-medium">
-                  {loading ? '조회 중...' : '순위 확인하기'}
+                  {loading ? '조회 중...' : '내 순위 확인하기'}
                 </Button>
               </div>
 
               {!isLoggedIn && (
                 <p className="text-xs text-slate-400 text-center">
-                  가입 없이 3회까지 무료로 조회할 수 있어요
+                  가입 안 해도 3번까지 무료로 확인할 수 있어요
                 </p>
               )}
             </div>
