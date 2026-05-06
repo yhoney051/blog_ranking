@@ -332,7 +332,7 @@ export default function HomePage() {
 
               {/* CTA */}
               <Button onClick={handleGoToDashboard} className="w-full h-11 rounded-xl text-sm font-medium">
-                다음 키워드 추가
+                다음
               </Button>
             </div>
           )}
