@@ -107,13 +107,15 @@ export async function POST() {
   const success = await sendTestNotification(data.telegram_chat_id)
 
   // 테스트 발송도 이력에 기록 → 사용자가 화면에서 바로 확인 가능
-  await supabaseServer.from('notification_history').insert({
+  // history 테이블이 아직 마이그레이션 안 됐어도 발송 자체는 영향 없도록 에러 무시
+  const { error: histErr } = await supabaseServer.from('notification_history').insert({
     user_id: userId,
     channel: 'telegram',
     status: success ? 'sent' : 'failed',
     keyword_count: 0,
     message_preview: '테스트 알림 — 연동 확인용',
   })
+  if (histErr) console.error('[POST settings/test] history insert 실패 (무시):', histErr.message)
 
   if (!success) {
     return NextResponse.json({ error: '알림 발송에 실패했습니다.' }, { status: 500 })

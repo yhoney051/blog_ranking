@@ -80,15 +80,17 @@ export async function sendDailyNotifications(opts: { kstHour?: number } = {}): P
     const result = await sendTelegramMessage(setting.telegram_chat_id!, message)
 
     // 발송 결과를 notification_history에 기록 (사용자 본인이 settings 화면에서 조회)
+    // 테이블이 아직 마이그레이션 안 된 상태일 수 있으므로 에러 무시 — 발송 자체엔 영향 없음
     let historyStatus: 'sent' | 'failed' | 'blocked' = 'sent'
     if (!result.ok) historyStatus = result.blocked ? 'blocked' : 'failed'
-    await supabaseServer.from('notification_history').insert({
+    const { error: histErr } = await supabaseServer.from('notification_history').insert({
       user_id: setting.user_id,
       channel: 'telegram',
       status: historyStatus,
       keyword_count: filtered.length,
       message_preview: message.slice(0, 200),
     })
+    if (histErr) console.error('[NOTIFY] history insert 실패 (무시):', histErr.message)
 
     if (result.ok) {
       sent++
