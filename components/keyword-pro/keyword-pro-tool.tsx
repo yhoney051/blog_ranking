@@ -3,10 +3,10 @@
 // 전문 키워드 검색 도구 — 메인 UI
 // 입력 키워드 1~3개 + 기간 → 검색량/경쟁도 메트릭 + 트렌드 차트
 // 좌(입력) / 우(트렌드 차트) 2열 레이아웃, 결과 표는 그 아래 전체 너비.
-// 마운트 시 기본 키워드("강남피부과")가 자동 검색되어 결과 화면이 보여짐.
+// 기본 결과(defaultData)는 서버 컴포넌트가 미리 fetch해 prop으로 전달 — 마운트 시 외부 호출 0.
 // 표 인라인 필터: 키워드 검색창 + 컬럼 헤더 클릭 정렬 + 체크박스 다운로드.
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Search,
@@ -68,22 +68,41 @@ const PERIOD_OPTIONS: { value: '1m' | '3m' | '6m' | '12m'; label: string }[] = [
 
 const DEFAULT_KEYWORD = '강남피부과'
 
+// 서버에서 전달되는 기본 데이터 형태 (page.tsx의 DefaultData와 호환)
+type DefaultData = {
+  metrics: { searched: MetricRow[]; related: MetricRow[] }
+  trend: TrendResult | null
+  trendDisabled: boolean
+  trendError: string | null
+} | null
+
 interface Props {
   isLoggedIn: boolean | null
+  defaultData?: DefaultData
 }
 
-export function KeywordProTool({ isLoggedIn }: Props) {
+export function KeywordProTool({ isLoggedIn, defaultData }: Props) {
   const router = useRouter()
   const [input, setInput] = useState(DEFAULT_KEYWORD)
   const [period, setPeriod] = useState<'1m' | '3m' | '6m' | '12m'>('12m')
-  const [data, setData] = useState<Response | null>(null)
+  // 기본 결과를 서버에서 받은 값으로 초기화 → 사용자별 외부 호출 0
+  const [data, setData] = useState<Response | null>(
+    defaultData
+      ? {
+          metrics: defaultData.metrics,
+          trend: defaultData.trend,
+          trendDisabled: defaultData.trendDisabled,
+          trendError: defaultData.trendError,
+          cached: true,
+        }
+      : null
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [highlighted, setHighlighted] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [filterText, setFilterText] = useState('')
   const [sort, setSort] = useState<{ key: SortKey | null; dir: SortDir }>({ key: null, dir: 'desc' })
-  const didAutoSearch = useRef(false)
 
   // 외부 호출 공통 — handleSearch와 mount 자동 검색이 공유
   const fetchKeywords = async (keywordsArr: string[], periodArg: '1m' | '3m' | '6m' | '12m') => {
@@ -126,13 +145,7 @@ export function KeywordProTool({ isLoggedIn }: Props) {
     void fetchKeywords(keywords, period)
   }
 
-  // 마운트 시 1회 기본 키워드 자동 검색 (예시 결과로 빈 화면 방지)
-  useEffect(() => {
-    if (didAutoSearch.current) return
-    didAutoSearch.current = true
-    void fetchKeywords([DEFAULT_KEYWORD], '12m')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // 자동 fetch는 서버에서 미리 받은 defaultData로 대체 → 마운트 시 외부 호출 없음
 
   const formatNumber = (n: number | undefined): string => {
     if (n === undefined || n === null) return '-'
