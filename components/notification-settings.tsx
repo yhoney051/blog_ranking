@@ -250,6 +250,28 @@ export function NotificationSettings() {
               )}
             </div>
 
+            {/* 미연동 사용자 안내 — 연동 시 받게 될 알림 미리보기 + 핵심 가치 */}
+            {!isConnected && (
+              <div className="rounded-lg border border-dashed bg-muted/30 p-4 space-y-3">
+                <p className="text-sm font-semibold">📱 연동하면 이런 알림을 받게 됩니다</p>
+                <div className="rounded-lg bg-card border p-3 text-[11px] leading-relaxed space-y-0.5">
+                  <p className="font-semibold">📊 일일 순위 리포트 (2026-05-05)</p>
+                  <p className="mt-1.5 font-medium">🔵 신규 진입</p>
+                  <p>• &quot;강남 미용실&quot; — 8위</p>
+                  <p className="mt-1.5 font-medium">📈 순위 상승</p>
+                  <p>• &quot;다산동 카페&quot; 12위 → 7위 (▲5)</p>
+                  <p className="mt-1.5 font-medium">❌ 순위권 이탈</p>
+                  <p>• &quot;압구정 피부과&quot;</p>
+                </div>
+                <ul className="text-xs space-y-1 text-muted-foreground">
+                  <li>✓ 매일 선택한 시각(아침 9시 / 정오 / 저녁 7시)에 자동 발송</li>
+                  <li>✓ 1페이지 변동만 보기 등 노이즈 필터 옵션</li>
+                  <li>✓ <b>/rank</b> 명령으로 언제든 즉시 순위 확인</li>
+                  <li>✓ <b>/today</b>, <b>/keywords</b>, <b>/stop</b> 명령 지원</li>
+                </ul>
+              </div>
+            )}
+
             {/* 알림 설정 (연동된 경우만) */}
             {isConnected && (
               <>

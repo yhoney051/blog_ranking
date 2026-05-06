@@ -112,9 +112,17 @@ export async function sendDailyNotifications(opts: { kstHour?: number } = {}): P
 
 // 사용자 알림 설정에 따라 키워드 필터링
 // notify_first_page_only=true 면 1~10위 관련 변동만 통과시킴 (소상공인 노이즈 차단)
-function filterByPreferences(
+// /today 명령에서도 동일 규칙 재사용을 위해 export.
+export function filterByPreferences(
   keywords: RankResult[],
-  settings: NotificationSettings
+  settings: Pick<
+    NotificationSettings,
+    | 'notify_rank_up'
+    | 'notify_rank_down'
+    | 'notify_new_entry'
+    | 'notify_dropped_out'
+    | 'notify_first_page_only'
+  >
 ): RankResult[] {
   const firstPageOnly = settings.notify_first_page_only ?? false
   const inFirstPage = (rank: number | null) => rank !== null && rank >= 1 && rank <= 10

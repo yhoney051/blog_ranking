@@ -1,7 +1,8 @@
 // POST /api/telegram/webhook — 텔레그램 봇 업데이트 수신
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
-import { sendTelegramMessage, formatCurrentRanks } from '@/lib/telegram'
+import { sendTelegramMessage, formatCurrentRanks, formatRankSummary } from '@/lib/telegram'
+import { filterByPreferences } from '@/lib/notifications'
 
 export async function POST(request: Request) {
   // 웹훅 시크릿 검증
@@ -66,14 +67,23 @@ export async function POST(request: Request) {
     if (text === '/help') {
       await sendTelegramMessage(
         chatId,
-        '📋 <b>사용 가능한 명령어</b>\n\n/rank — 현재 키워드 순위 조회\n/help — 이 도움말 보기\n\n매일 아침 자동으로 순위 변동 리포트도 보내드려요!'
+        [
+          '📋 <b>사용 가능한 명령어</b>',
+          '',
+          '/rank — 지금 내 키워드 순위 보기',
+          '/today — 오늘의 변동 리포트 즉시 보기',
+          '/keywords — 추적 중인 키워드 목록',
+          '/stop — 자동 알림 끄기 (다시 켜려면 설정 페이지)',
+          '/help — 이 도움말 보기',
+          '',
+          '매일 설정한 시각에 자동 리포트를 보내드려요.',
+        ].join('\n')
       )
       return NextResponse.json({ ok: true })
     }
 
     // /rank 명령 처리 (현재 순위 조회)
     if (text === '/rank') {
-      // chat_id로 사용자 찾기
       const { data: setting } = await supabaseServer
         .from('notification_settings')
         .select('user_id')
@@ -85,7 +95,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ ok: true })
       }
 
-      // 사용자 키워드 조회
       const { data: keywords } = await supabaseServer
         .from('keywords')
         .select('keyword, current_rank')
@@ -94,6 +103,98 @@ export async function POST(request: Request) {
 
       const message = formatCurrentRanks(keywords || [])
       await sendTelegramMessage(chatId, message)
+      return NextResponse.json({ ok: true })
+    }
+
+    // /today 명령 — 사용자 설정에 맞춘 오늘의 변동 리포트 즉시 발송
+    if (text === '/today') {
+      const { data: setting } = await supabaseServer
+        .from('notification_settings')
+        .select(
+          'user_id, notify_rank_up, notify_rank_down, notify_new_entry, notify_dropped_out, notify_first_page_only'
+        )
+        .eq('telegram_chat_id', chatId)
+        .single()
+
+      if (!setting) {
+        await sendTelegramMessage(chatId, '먼저 설정 페이지에서 텔레그램을 연동해주세요.')
+        return NextResponse.json({ ok: true })
+      }
+
+      const { data: keywords } = await supabaseServer
+        .from('keywords')
+        .select('keyword, current_rank, previous_rank')
+        .eq('user_id', setting.user_id)
+
+      const filtered = filterByPreferences(
+        (keywords || []).map((k) => ({
+          keyword: k.keyword,
+          previous_rank: k.previous_rank,
+          current_rank: k.current_rank,
+        })),
+        setting
+      )
+      const today = new Date().toISOString().split('T')[0]
+      const summary = formatRankSummary(filtered, today)
+      await sendTelegramMessage(
+        chatId,
+        summary || '오늘은 알림 조건에 맞는 변동이 없습니다.'
+      )
+      return NextResponse.json({ ok: true })
+    }
+
+    // /keywords 명령 — 추적 중(활성) 키워드 목록
+    if (text === '/keywords') {
+      const { data: setting } = await supabaseServer
+        .from('notification_settings')
+        .select('user_id')
+        .eq('telegram_chat_id', chatId)
+        .single()
+
+      if (!setting) {
+        await sendTelegramMessage(chatId, '먼저 설정 페이지에서 텔레그램을 연동해주세요.')
+        return NextResponse.json({ ok: true })
+      }
+
+      const { data: keywords } = await supabaseServer
+        .from('keywords')
+        .select('keyword, current_rank, is_active')
+        .eq('user_id', setting.user_id)
+        .eq('is_active', true)
+        .order('current_rank', { ascending: true, nullsFirst: false })
+
+      if (!keywords || keywords.length === 0) {
+        await sendTelegramMessage(
+          chatId,
+          '추적 중인 키워드가 없습니다.\n대시보드에서 키워드를 추가해 주세요.'
+        )
+      } else {
+        const lines = ['📋 <b>추적 중인 키워드</b>', '']
+        for (const k of keywords) {
+          const rank = k.current_rank ? `${k.current_rank}위` : '순위 밖'
+          lines.push(`• ${k.keyword} — ${rank}`)
+        }
+        lines.push('', `총 ${keywords.length}개`)
+        await sendTelegramMessage(chatId, lines.join('\n'))
+      }
+      return NextResponse.json({ ok: true })
+    }
+
+    // /stop 명령 — 자동 알림 일시 중지 (enabled=false). 다시 켜려면 설정 페이지에서.
+    if (text === '/stop') {
+      const { error } = await supabaseServer
+        .from('notification_settings')
+        .update({ enabled: false, updated_at: new Date().toISOString() })
+        .eq('telegram_chat_id', chatId)
+
+      if (error) {
+        await sendTelegramMessage(chatId, '알림 중지에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      } else {
+        await sendTelegramMessage(
+          chatId,
+          '🔕 자동 알림을 껐습니다.\n다시 켜려면 설정 페이지에서 "알림 받기"를 ON으로 바꿔주세요.\n언제든 /rank, /today, /keywords 명령은 여전히 사용 가능합니다.'
+        )
+      }
       return NextResponse.json({ ok: true })
     }
 
