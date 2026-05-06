@@ -213,7 +213,7 @@ export function NotificationSettings() {
           <Bell className="h-5 w-5" />
           <CardTitle className="text-lg">알림 설정</CardTitle>
         </div>
-        <CardDescription>텔레그램으로 매일 순위 변동 리포트를 받아보세요</CardDescription>
+        <CardDescription>내 블로그 순위가 바뀌면 텔레그램으로 바로 알려드려요</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {loading ? (
@@ -269,10 +269,10 @@ export function NotificationSettings() {
                   <p>• &quot;압구정 피부과&quot;</p>
                 </div>
                 <ul className="text-xs space-y-1 text-muted-foreground">
-                  <li>✓ 매일 선택한 시각(아침 9시 / 정오 / 저녁 7시)에 자동 발송</li>
-                  <li>✓ 1페이지 변동만 보기 등 노이즈 필터 옵션</li>
-                  <li>✓ <b>/rank</b> 명령으로 언제든 즉시 순위 확인</li>
-                  <li>✓ <b>/today</b>, <b>/keywords</b>, <b>/stop</b> 명령 지원</li>
+                  <li>✓ 내가 정한 시각(아침 9시 / 정오 / 저녁 7시)에 자동으로 알림</li>
+                  <li>✓ 중요한 변동만 받기 — 1~10위 진입/이탈만 알림 모드 지원</li>
+                  <li>✓ <b>/rank</b> 입력하면 지금 내 순위 즉시 확인</li>
+                  <li>✓ <b>/today</b>, <b>/keywords</b>, <b>/stop</b> 도 사용 가능</li>
                 </ul>
               </div>
             )}
@@ -283,13 +283,14 @@ export function NotificationSettings() {
                 <hr />
                 <div className="space-y-3">
                   {/* 마스터 토글 — 더 강조 (큰 글자 + 보조 설명) */}
-                  <div className="flex items-center justify-between gap-3">
+                  <label
+                    htmlFor="enabled"
+                    className="flex items-center justify-between gap-3 cursor-pointer"
+                  >
                     <div className="min-w-0">
-                      <Label htmlFor="enabled" className="text-sm font-semibold cursor-pointer">
-                        알림 받기
-                      </Label>
+                      <span className="text-sm font-semibold block">알림 받기</span>
                       <p className="text-[11px] text-muted-foreground mt-0.5">
-                        끄면 매일 자동 발송이 멈춥니다 (수동 테스트는 그대로 가능)
+                        끄면 자동 알림이 안 가요. 다시 켜면 바로 받기 시작
                       </p>
                     </div>
                     <Switch
@@ -298,7 +299,7 @@ export function NotificationSettings() {
                       onCheckedChange={(v) => handleToggle('enabled', v)}
                       className={SWITCH_CLS}
                     />
-                  </div>
+                  </label>
 
                   {/* 알림 시각 선택 — 마스터 토글과 같은 disabled 흐름 */}
                   <div
@@ -344,13 +345,14 @@ export function NotificationSettings() {
                     aria-disabled={!settings?.enabled}
                   >
                     {/* 임계값: 1페이지(1~10위) 변동만 */}
-                    <div className="flex items-center justify-between gap-3 pb-2 border-b border-border/60">
+                    <label
+                      htmlFor="notify_first_page_only"
+                      className="flex items-center justify-between gap-3 pb-3 border-b border-border/60 cursor-pointer"
+                    >
                       <div className="min-w-0">
-                        <Label htmlFor="notify_first_page_only" className="text-sm font-medium cursor-pointer">
-                          1페이지(1~10위) 변동만 알림
-                        </Label>
+                        <span className="text-sm font-medium block">중요한 알림만 받기</span>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                          노이즈를 줄여 의미 있는 변동만 받기 — 11위 밖 사이의 변동은 무시
+                          내 글이 검색 1페이지(1~10위)에 들어오거나 빠질 때만 알림이 와요. 그 밖의 자잘한 순위 변동은 안 보내요.
                         </p>
                       </div>
                       <Switch
@@ -360,12 +362,13 @@ export function NotificationSettings() {
                         disabled={!settings?.enabled}
                         className={SWITCH_CLS}
                       />
-                    </div>
+                    </label>
 
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="notify_rank_up" className="text-sm">
-                        순위 상승 시
-                      </Label>
+                    <label
+                      htmlFor="notify_rank_up"
+                      className="flex items-center justify-between cursor-pointer"
+                    >
+                      <span className="text-sm">순위가 올랐을 때</span>
                       <Switch
                         id="notify_rank_up"
                         checked={settings?.notify_rank_up ?? true}
@@ -373,11 +376,12 @@ export function NotificationSettings() {
                         disabled={!settings?.enabled}
                         className={SWITCH_CLS}
                       />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="notify_rank_down" className="text-sm">
-                        순위 하락 시
-                      </Label>
+                    </label>
+                    <label
+                      htmlFor="notify_rank_down"
+                      className="flex items-center justify-between cursor-pointer"
+                    >
+                      <span className="text-sm">순위가 떨어졌을 때</span>
                       <Switch
                         id="notify_rank_down"
                         checked={settings?.notify_rank_down ?? true}
@@ -385,11 +389,12 @@ export function NotificationSettings() {
                         disabled={!settings?.enabled}
                         className={SWITCH_CLS}
                       />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="notify_new_entry" className="text-sm">
-                        신규 진입 시
-                      </Label>
+                    </label>
+                    <label
+                      htmlFor="notify_new_entry"
+                      className="flex items-center justify-between cursor-pointer"
+                    >
+                      <span className="text-sm">검색 결과에 새로 들어왔을 때</span>
                       <Switch
                         id="notify_new_entry"
                         checked={settings?.notify_new_entry ?? true}
@@ -397,11 +402,12 @@ export function NotificationSettings() {
                         disabled={!settings?.enabled}
                         className={SWITCH_CLS}
                       />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="notify_dropped_out" className="text-sm">
-                        순위권 이탈 시
-                      </Label>
+                    </label>
+                    <label
+                      htmlFor="notify_dropped_out"
+                      className="flex items-center justify-between cursor-pointer"
+                    >
+                      <span className="text-sm">검색 결과에서 사라졌을 때</span>
                       <Switch
                         id="notify_dropped_out"
                         checked={settings?.notify_dropped_out ?? true}
@@ -409,24 +415,24 @@ export function NotificationSettings() {
                         disabled={!settings?.enabled}
                         className={SWITCH_CLS}
                       />
-                    </div>
+                    </label>
                   </div>
                 </div>
 
                 <hr />
                 <Button variant="outline" size="sm" onClick={handleTest} disabled={testing}>
-                  {testing ? '발송 중...' : '테스트 알림 보내기'}
+                  {testing ? '보내는 중...' : '한 번 테스트로 보내보기'}
                 </Button>
                 <p className="text-xs text-muted-foreground mt-3">
-                  💡 텔레그램에서 <b>/rank</b> 명령어로 현재 순위를 바로 확인할 수 있습니다
+                  💡 텔레그램 채팅창에서 <b>/rank</b>를 입력하면 지금 내 순위를 바로 알려드려요
                 </p>
 
                 {/* 발송 이력 — 최근 5건. 비어 있으면 안내. 트러블슈팅용 단서 제공. */}
                 <div className="mt-4 space-y-2">
-                  <Label className="text-sm">최근 알림 이력</Label>
+                  <Label className="text-sm">최근 보낸 알림</Label>
                   {history.length === 0 ? (
                     <p className="text-xs text-muted-foreground">
-                      아직 발송된 알림이 없습니다. 매일 설정한 시각에 변동이 있을 때만 발송돼요.
+                      아직 보낸 알림이 없어요. 매일 정한 시각에 순위 변동이 있을 때만 알림이 가요.
                     </p>
                   ) : (
                     <ul className="rounded-lg border divide-y">
