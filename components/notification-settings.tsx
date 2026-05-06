@@ -39,6 +39,11 @@ const NOTIFY_HOUR_OPTIONS: { value: number; label: string; sub: string }[] = [
   { value: 19, label: '저녁 7시', sub: '하루 마감 정리' },
 ]
 
+// 라이트 모드 brand color(lime)가 너무 밝아 흰 배경에서 잘 안 보이므로
+// 알림 설정 Switch는 명시적으로 진한 emerald + slate 회색으로 시각 대비 강화
+const SWITCH_CLS =
+  'data-checked:bg-emerald-500 data-unchecked:bg-slate-300 dark:data-checked:bg-emerald-500 dark:data-unchecked:bg-slate-600'
+
 export function NotificationSettings() {
   const [settings, setSettings] = useState<Settings | null>(null)
   const [loading, setLoading] = useState(true)
@@ -291,6 +296,7 @@ export function NotificationSettings() {
                       id="enabled"
                       checked={settings?.enabled ?? true}
                       onCheckedChange={(v) => handleToggle('enabled', v)}
+                      className={SWITCH_CLS}
                     />
                   </div>
 
@@ -352,6 +358,7 @@ export function NotificationSettings() {
                         checked={settings?.notify_first_page_only ?? false}
                         onCheckedChange={(v) => handleToggle('notify_first_page_only', v)}
                         disabled={!settings?.enabled}
+                        className={SWITCH_CLS}
                       />
                     </div>
 
@@ -364,6 +371,7 @@ export function NotificationSettings() {
                         checked={settings?.notify_rank_up ?? true}
                         onCheckedChange={(v) => handleToggle('notify_rank_up', v)}
                         disabled={!settings?.enabled}
+                        className={SWITCH_CLS}
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -375,6 +383,7 @@ export function NotificationSettings() {
                         checked={settings?.notify_rank_down ?? true}
                         onCheckedChange={(v) => handleToggle('notify_rank_down', v)}
                         disabled={!settings?.enabled}
+                        className={SWITCH_CLS}
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -386,6 +395,7 @@ export function NotificationSettings() {
                         checked={settings?.notify_new_entry ?? true}
                         onCheckedChange={(v) => handleToggle('notify_new_entry', v)}
                         disabled={!settings?.enabled}
+                        className={SWITCH_CLS}
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -397,6 +407,7 @@ export function NotificationSettings() {
                         checked={settings?.notify_dropped_out ?? true}
                         onCheckedChange={(v) => handleToggle('notify_dropped_out', v)}
                         disabled={!settings?.enabled}
+                        className={SWITCH_CLS}
                       />
                     </div>
                   </div>
