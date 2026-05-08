@@ -3,6 +3,12 @@ import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
 import { sendTelegramMessage, formatCurrentRanks, formatRankSummary } from '@/lib/telegram'
 import { filterByPreferences } from '@/lib/notifications'
+import {
+  buildOverallStat,
+  buildRecentUsers,
+  buildRecentPayments,
+  buildCronStatus,
+} from '@/lib/admin-stats'
 
 export async function POST(request: Request) {
   // 웹훅 시크릿 검증
@@ -63,22 +69,75 @@ export async function POST(request: Request) {
       )
     }
 
-    // /help 명령 처리 (사용법 안내)
+    // 운영자 명령어 처리 (ADMIN_TELEGRAM_CHAT_ID 일치 시에만)
+    // 다른 사용자가 같은 명령어를 쳐도 이 분기는 건너뛰고 일반 사용자 명령어로 떨어짐
+    const adminChatId = process.env.ADMIN_TELEGRAM_CHAT_ID
+    const isAdmin = !!adminChatId && chatId === adminChatId
+
+    if (isAdmin) {
+      if (text === '/admin') {
+        await sendTelegramMessage(
+          chatId,
+          [
+            '🛎️ <b>운영자 명령어</b>',
+            '',
+            '/stat — 종합 통계 (오늘 + 누적 + 최근활동)',
+            '/users — 최근 가입자 20명',
+            '/pay — 최근 결제 20건',
+            '/cron — cron 실행 상태',
+            '',
+            '※ 사용자용 명령어(/rank, /today, /keywords)도 그대로 사용 가능',
+          ].join('\n')
+        )
+        return NextResponse.json({ ok: true })
+      }
+
+      if (text === '/stat') {
+        await sendTelegramMessage(chatId, await buildOverallStat())
+        return NextResponse.json({ ok: true })
+      }
+
+      if (text === '/users') {
+        await sendTelegramMessage(chatId, await buildRecentUsers(20))
+        return NextResponse.json({ ok: true })
+      }
+
+      if (text === '/pay') {
+        await sendTelegramMessage(chatId, await buildRecentPayments(20))
+        return NextResponse.json({ ok: true })
+      }
+
+      if (text === '/cron') {
+        await sendTelegramMessage(chatId, await buildCronStatus())
+        return NextResponse.json({ ok: true })
+      }
+    }
+
+    // /help 명령 처리 (사용법 안내) — 운영자에게는 운영자 명령어도 함께 안내
     if (text === '/help') {
-      await sendTelegramMessage(
-        chatId,
-        [
-          '📋 <b>사용 가능한 명령어</b>',
+      const helpLines = [
+        '📋 <b>사용 가능한 명령어</b>',
+        '',
+        '/rank — 지금 내 키워드 순위 보기',
+        '/today — 오늘의 변동 리포트 즉시 보기',
+        '/keywords — 추적 중인 키워드 목록',
+        '/stop — 자동 알림 끄기 (다시 켜려면 설정 페이지)',
+        '/help — 이 도움말 보기',
+      ]
+      if (isAdmin) {
+        helpLines.push(
           '',
-          '/rank — 지금 내 키워드 순위 보기',
-          '/today — 오늘의 변동 리포트 즉시 보기',
-          '/keywords — 추적 중인 키워드 목록',
-          '/stop — 자동 알림 끄기 (다시 켜려면 설정 페이지)',
-          '/help — 이 도움말 보기',
-          '',
-          '매일 설정한 시각에 자동 리포트를 보내드려요.',
-        ].join('\n')
-      )
+          '🛎️ <b>운영자 전용</b>',
+          '/admin — 운영자 명령어 도움말',
+          '/stat — 종합 통계',
+          '/users — 최근 가입자',
+          '/pay — 최근 결제',
+          '/cron — cron 상태'
+        )
+      } else {
+        helpLines.push('', '매일 설정한 시각에 자동 리포트를 보내드려요.')
+      }
+      await sendTelegramMessage(chatId, helpLines.join('\n'))
       return NextResponse.json({ ok: true })
     }
 
