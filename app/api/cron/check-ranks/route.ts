@@ -8,6 +8,9 @@ import { recordCronStart, recordCronEnd, notifyAdminCronFailure } from '@/lib/cr
 // Vercel 함수 타임아웃 설정 (Pro: 최대 300초)
 export const maxDuration = 300
 
+// 빌드 시 prerender 시도 차단 — request.headers 사용으로 인한 빌드 단계 false alarm 방지
+export const dynamic = 'force-dynamic'
+
 // GET /api/cron/check-ranks — 모든 키워드의 순위를 자동 체크 (Vercel Cron)
 export async function GET(request: Request) {
   let runId: string | null = null

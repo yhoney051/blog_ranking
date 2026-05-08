@@ -14,6 +14,9 @@ import {
 
 export const maxDuration = 60
 
+// 빌드 시 prerender 시도 차단 — request.headers 사용으로 인한 빌드 단계 false alarm 방지
+export const dynamic = 'force-dynamic'
+
 // 어제 KST 자정 ~ 오늘 KST 자정 범위를 ISO 문자열로 반환
 function getYesterdayKstRange(): { start: string; end: string; dateLabel: string } {
   const now = new Date()

@@ -4,6 +4,9 @@ import { supabaseServer } from '@/lib/supabase/server'
 import { processRenewal, downgradeToFree } from '@/lib/billing/subscription'
 import { recordCronStart, recordCronEnd, notifyAdminCronFailure } from '@/lib/cron-runner'
 
+// 빌드 시 prerender 시도 차단 — request.headers 사용으로 인한 빌드 단계 false alarm 방지
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   let runId: string | null = null
   // CRON_SECRET 검증 (기존 check-ranks와 동일한 패턴)

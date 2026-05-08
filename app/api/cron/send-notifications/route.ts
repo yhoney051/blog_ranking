@@ -6,6 +6,9 @@ import { recordCronStart, recordCronEnd, notifyAdminCronFailure } from '@/lib/cr
 
 export const maxDuration = 60
 
+// 빌드 시 prerender 시도 차단 — request.headers 사용으로 인한 빌드 단계 false alarm 방지
+export const dynamic = 'force-dynamic'
+
 const NOTIFY_HOURS_KST = [9, 12, 19] as const
 
 export async function GET(request: Request) {
