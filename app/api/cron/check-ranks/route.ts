@@ -3,12 +3,14 @@ import { supabaseServer } from '@/lib/supabase/server'
 import { getNaverBlogRank } from '@/lib/serpapi'
 import { getSearchVolume, isNaverSearchAdConfigured } from '@/lib/naver-searchad'
 import { CRON } from '@/lib/constants'
+import { recordCronStart, recordCronEnd, notifyAdminCronFailure } from '@/lib/cron-runner'
 
 // Vercel 함수 타임아웃 설정 (Pro: 최대 300초)
 export const maxDuration = 300
 
 // GET /api/cron/check-ranks — 모든 키워드의 순위를 자동 체크 (Vercel Cron)
 export async function GET(request: Request) {
+  let runId: string | null = null
   try {
     // CRON_SECRET 검증 (Vercel Cron이 자동으로 Authorization 헤더에 Bearer 토큰 전송)
     const cronSecret = process.env.CRON_SECRET
@@ -21,6 +23,9 @@ export async function GET(request: Request) {
     if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // cron 실행 추적 시작 (실패해도 본 로직은 계속 진행)
+    runId = await recordCronStart('check-ranks')
 
     // 키워드 조회 (게스트 제외 + 활성 키워드만, 오래된 순)
     // user_id가 null인 게스트 키워드 + is_active=false인 보관 키워드는 자동 체크 대상에서 제외
@@ -139,7 +144,7 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json({
+    const result = {
       total: keywords.length,
       eligible: eligibleKeywords.length,
       filteredOut,
@@ -149,9 +154,13 @@ export async function GET(request: Request) {
       failed,
       volumeUpdated,
       checked_at: new Date().toISOString(),
-    })
+    }
+    await recordCronEnd(runId, 'success', { result })
+    return NextResponse.json(result)
   } catch (err) {
     console.error('[CRON] check-ranks 예상치 못한 에러:', err)
+    await recordCronEnd(runId, 'failed', { error: err })
+    await notifyAdminCronFailure('check-ranks', err)
     return NextResponse.json({ error: '순위 체크 중 오류가 발생했습니다.' }, { status: 500 })
   }
 }

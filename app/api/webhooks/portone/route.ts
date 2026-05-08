@@ -4,7 +4,43 @@
 
 import { NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase/server'
+import { notifyAdmin, escapeAdminHtml } from '@/lib/admin-notify'
 import crypto from 'crypto'
+
+// payments + subscriptions + profiles를 합쳐 운영자에게 한 줄 발송
+async function notifyAdminPayment(paymentId: string, type: 'paid' | 'refunded') {
+  try {
+    const { data: payment } = await supabaseServer
+      .from('payments')
+      .select('amount, user_id, subscription_id')
+      .eq('toss_payment_key', paymentId)
+      .single()
+    if (!payment) return
+
+    const [profileRes, subRes] = await Promise.all([
+      supabaseServer.from('profiles').select('email').eq('id', payment.user_id).single(),
+      payment.subscription_id
+        ? supabaseServer
+            .from('subscriptions')
+            .select('plan')
+            .eq('id', payment.subscription_id)
+            .single()
+        : Promise.resolve({ data: null as { plan: string } | null }),
+    ])
+
+    const email = (profileRes.data as { email?: string } | null)?.email ?? '(이메일 미상)'
+    const plan = subRes.data?.plan ?? 'unknown'
+    const amount = (payment.amount ?? 0).toLocaleString('ko-KR')
+    const icon = type === 'paid' ? '💰' : '↩️'
+    const label = type === 'paid' ? '결제 완료' : '환불 처리'
+
+    await notifyAdmin(
+      `${icon} <b>${label}</b>\n${escapeAdminHtml(email)} — ${escapeAdminHtml(plan)} ${amount}원`
+    )
+  } catch (err) {
+    console.error('[ADMIN-NOTIFY] 결제 알림 실패:', err)
+  }
+}
 
 // 포트원 웹훅 서명 검증
 function verifyWebhookSignature(
@@ -88,6 +124,7 @@ export async function POST(request: Request) {
             .from('payments')
             .update({ status: 'paid', paid_at: data.paidAt || new Date().toISOString() })
             .eq('toss_payment_key', paymentId)
+          await notifyAdminPayment(paymentId, 'paid')
         }
         break
       }
@@ -100,6 +137,7 @@ export async function POST(request: Request) {
             .from('payments')
             .update({ status: 'refunded' })
             .eq('toss_payment_key', paymentId)
+          await notifyAdminPayment(paymentId, 'refunded')
         }
         break
       }
