@@ -15,6 +15,38 @@ function getTodayKstStartUtc(): string {
   return todayKstStart.toISOString()
 }
 
+// KST 기준 오늘 yyyy-mm-dd (daily_stats.date 매칭용)
+function getTodayKstDate(): string {
+  const kstNow = new Date(Date.now() + 9 * 3600_000)
+  return kstNow.toISOString().split('T')[0]
+}
+
+// 특정 날짜의 페이지뷰/순방문자 조회 (없으면 0/0)
+async function getTrafficForDate(date: string): Promise<{ pv: number; uv: number }> {
+  const { data } = await supabaseServer
+    .from('daily_stats')
+    .select('page_views, unique_visitors')
+    .eq('date', date)
+    .maybeSingle()
+  return {
+    pv: data?.page_views ?? 0,
+    uv: data?.unique_visitors ?? 0,
+  }
+}
+
+// 오늘(KST) 트래픽 — 외부 모듈에서 재사용
+export async function getTodayTraffic(): Promise<{ pv: number; uv: number }> {
+  return getTrafficForDate(getTodayKstDate())
+}
+
+// 어제(KST) 트래픽 — admin-daily-summary cron에서 사용
+export async function getYesterdayTraffic(): Promise<{ pv: number; uv: number }> {
+  const kstNow = new Date(Date.now() + 9 * 3600_000)
+  kstNow.setUTCDate(kstNow.getUTCDate() - 1)
+  const yesterday = kstNow.toISOString().split('T')[0]
+  return getTrafficForDate(yesterday)
+}
+
 // "방금" / "N분 전" / "N시간 전" / "N일 전"
 function timeAgo(iso: string | null | undefined): string {
   if (!iso) return '시각 미상'
@@ -74,6 +106,9 @@ async function enrichPayments(
 // /stat — 종합 대시보드: 오늘 + 누적 + 최근 가입/결제/cron
 export async function buildOverallStat(): Promise<string> {
   const todayStart = getTodayKstStartUtc()
+
+  // 오늘 트래픽 (페이지뷰/순방문자)
+  const todayTraffic = await getTodayTraffic()
 
   // 오늘/누적 가입자 수
   const [todaySignupRes, totalSignupRes] = await Promise.all([
@@ -146,6 +181,7 @@ export async function buildOverallStat(): Promise<string> {
     '',
     '📅 <b>오늘</b> (KST 00:00 ~ 지금)',
     `🆕 가입 ${todaySignupRes.count ?? 0}명 · 💰 결제 ${todayPayCount}건 ${todayRevenue.toLocaleString('ko-KR')}원`,
+    `📈 페이지뷰 ${todayTraffic.pv.toLocaleString('ko-KR')}회 · 순방문자 ${todayTraffic.uv.toLocaleString('ko-KR')}명`,
     '',
     '📈 <b>누적</b>',
     `👥 전체 사용자 ${totalSignupRes.count ?? 0}명`,

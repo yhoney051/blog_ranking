@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ChannelTalk } from "@/components/channel-talk";
+import { PageViewTracker } from "@/components/page-view-tracker";
 
 export const metadata: Metadata = {
   title: {
@@ -50,6 +51,7 @@ export default function RootLayout({
         <Toaster richColors position="bottom-right" />
         <Analytics />
         <SpeedInsights />
+        <PageViewTracker />
         <ChannelTalk />
       </body>
     </html>

@@ -11,6 +11,7 @@ import {
   notifyAdminCronFailure,
   type CronJobName,
 } from '@/lib/cron-runner'
+import { getYesterdayTraffic } from '@/lib/admin-stats'
 
 export const maxDuration = 60
 
@@ -80,7 +81,10 @@ export async function GET(request: Request) {
       .not('user_id', 'is', null)
     const activeUsers = new Set(activeKwRows?.map((r) => r.user_id) ?? []).size
 
-    // 4. 어제 cron 실행 결과 (last 24h 시작 시각 기준)
+    // 4. 어제 트래픽 (페이지뷰/순방문자) — daily_stats 테이블에서 어제 KST 행 SELECT
+    const yTraffic = await getYesterdayTraffic()
+
+    // 5. 어제 cron 실행 결과 (last 24h 시작 시각 기준)
     const { data: cronRuns } = await supabaseServer
       .from('cron_runs')
       .select('job_name, status, started_at, error_text')
@@ -108,6 +112,7 @@ export async function GET(request: Request) {
       '',
       `🆕 신규 가입: <b>${signupCount ?? 0}명</b>`,
       `💰 결제: <b>${paymentCount}건</b> / ${totalRevenue.toLocaleString('ko-KR')}원`,
+      `📈 페이지뷰: <b>${yTraffic.pv.toLocaleString('ko-KR')}회</b> · 순방문자 <b>${yTraffic.uv.toLocaleString('ko-KR')}명</b>`,
       `👥 활성 사용자: <b>${activeUsers}명</b> (활성 키워드 보유)`,
       '',
       `⏰ <b>어제 cron 결과</b>`,
@@ -127,7 +132,7 @@ export async function GET(request: Request) {
     }
 
     lines.push('')
-    lines.push(`📈 사이트 조회수: vercel.com/analytics`)
+    lines.push('🔎 깊은 분석(유입경로·인기페이지): vercel.com/analytics')
 
     await notifyAdmin(lines.join('\n'))
 
@@ -136,6 +141,8 @@ export async function GET(request: Request) {
       signupCount: signupCount ?? 0,
       paymentCount,
       totalRevenue,
+      pageViews: yTraffic.pv,
+      uniqueVisitors: yTraffic.uv,
       activeUsers,
       missingCron: missing,
       failedCron: failedRuns.length,
