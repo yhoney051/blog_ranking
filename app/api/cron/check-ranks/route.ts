@@ -36,21 +36,30 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: '키워드 조회 실패' }, { status: 500 })
     }
 
-    // 사용자별 plan 조회 (무료 사용자 자동 체크 빈도 분기용)
+    // 사용자별 plan + bonus 조회 (자동 체크 대상 분기용)
     const userIds = Array.from(
       new Set(keywords.map((kw) => kw.user_id).filter((id): id is string => !!id))
     )
     const { data: profiles } = await supabaseServer
       .from('profiles')
-      .select('id, plan')
+      .select('id, plan, bonus_keyword_limit')
       .in('id', userIds)
-    const planMap = new Map<string, string>(profiles?.map((p) => [p.id, p.plan]) ?? [])
+    const planMap = new Map<string, { plan: string; bonus: number }>(
+      profiles?.map((p) => [
+        p.id,
+        {
+          plan: p.plan,
+          bonus: (p as { bonus_keyword_limit?: number }).bonus_keyword_limit ?? 0,
+        },
+      ]) ?? []
+    )
 
     // 무료 사용자는 자동 체크 OFF (수동 새로고침만 가능)
-    // 유료 사용자(standard/pro/premium)만 매일 자동 체크
+    // 단, 보너스 한도 부여받은 사용자(bonus_keyword_limit > 0)는 유료에 준해 자동 체크 대상
     const eligibleKeywords = keywords.filter((kw) => {
-      const plan = planMap.get(kw.user_id as string)
-      return plan !== 'free'
+      const info = planMap.get(kw.user_id as string)
+      if (!info) return false
+      return info.plan !== 'free' || info.bonus > 0
     })
 
     let success = 0
