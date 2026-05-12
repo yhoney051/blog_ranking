@@ -11,6 +11,7 @@ import {
   Globe,
   Calendar,
   ChevronDown,
+  Megaphone,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -129,10 +130,10 @@ export default async function HomePage() {
             </p>
           </section>
 
-          {/* 2. 도구 카드 — 메인 2/3 + 서브 1/3 */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            {/* 메인 */}
-            <Link href="/onboarding" className="group md:col-span-2">
+          {/* 2. 도구 카드 — 세로 1열, 메인만 강조 / 크기 동일 */}
+          <section className="grid grid-cols-1 gap-4 md:gap-6 max-w-2xl mx-auto">
+            {/* 1) 메인 — 수니 순위체커 (강조) */}
+            <Link href="/onboarding" className="group">
               <div className="relative h-full rounded-2xl ring-2 ring-brand-300 dark:ring-brand-400/60 bg-gradient-to-br from-brand-50 to-white dark:from-brand-900/20 dark:to-slate-800 p-6 md:p-8 transition-all hover:shadow-lg hover:-translate-y-0.5 hover:ring-brand-400">
                 <Badge className="absolute top-4 right-4 bg-slate-900 text-brand-300 hover:bg-slate-900 dark:bg-brand-300 dark:text-slate-900 dark:hover:bg-brand-300 text-[10px] font-bold tracking-wider">
                   MAIN
@@ -172,26 +173,57 @@ export default async function HomePage() {
               </div>
             </Link>
 
-            {/* 서브 */}
-            <Link href="/dashboard/keyword-pro" className="group md:col-span-1">
-              <div className="h-full rounded-2xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-5 transition-all hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-700/50">
-                    <TrendingUp className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+            {/* 2) 전문 키워드 검색 */}
+            <Link href="/dashboard/keyword-pro" className="group">
+              <div className="h-full rounded-2xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 md:p-8 transition-all hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md hover:-translate-y-0.5">
+                <div className="flex items-start gap-4">
+                  <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex-shrink-0">
+                    <TrendingUp className="h-7 w-7 text-slate-600 dark:text-slate-300" />
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">
                       전문 키워드 검색
-                    </h3>
-                    <p className="text-[11px] text-slate-400 dark:text-slate-500">고급 사용자 전용</p>
+                    </h2>
+                    <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                      검색량·경쟁도·클릭률·트렌드 그래프까지. 키워드 3개 동시 비교 분석.
+                    </p>
                   </div>
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-3">
-                  검색량·경쟁도·클릭률·트렌드 그래프까지. 키워드 3개 동시 비교 분석.
-                </p>
-                <span className="inline-flex items-center gap-1 mt-4 text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:gap-2 transition-all">
-                  바로가기 <ArrowRight className="h-4 w-4" />
-                </span>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full mt-6 h-12 text-base font-semibold rounded-xl"
+                >
+                  검색 도구 열기
+                  <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-0.5" />
+                </Button>
+              </div>
+            </Link>
+
+            {/* 3) 블로그 마케팅 대행 */}
+            <Link href="/contact" className="group">
+              <div className="h-full rounded-2xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 md:p-8 transition-all hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md hover:-translate-y-0.5">
+                <div className="flex items-start gap-4">
+                  <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex-shrink-0">
+                    <Megaphone className="h-7 w-7 text-slate-600 dark:text-slate-300" />
+                  </div>
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100">
+                      블로그 마케팅 대행
+                    </h2>
+                    <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                      어디부터 손봐야 할지 막막하다면 수니에게 맡겨보세요. 빠르게 연락드릴게요.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full mt-6 h-12 text-base font-semibold rounded-xl"
+                >
+                  대행 문의하기
+                  <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-0.5" />
+                </Button>
               </div>
             </Link>
           </section>
