@@ -2,6 +2,7 @@
 // 구독 활성화, 취소, 갱신, 다운그레이드 처리
 
 import { supabaseServer } from '@/lib/supabase/server'
+import { notifyAdmin, escapeAdminHtml } from '@/lib/admin-notify'
 import { PLANS, type PlanType } from './constants'
 import { requestBillingKeyPayment, cancelPayment } from './portone'
 
@@ -139,6 +140,18 @@ export async function activateSubscription(
       }
     }
 
+    // 운영자 즉시 알림 (웹훅 도착과 무관하게 결제 성공 시점에 발송)
+    // notifyAdmin 내부에 try/catch + 환경변수 미설정 silent skip이 있으므로 본 흐름 깨지지 않음
+    const { data: notifyProfile } = await supabaseServer
+      .from('profiles')
+      .select('email')
+      .eq('id', userId)
+      .single()
+    const notifyEmail = (notifyProfile as { email?: string } | null)?.email ?? '(이메일 미상)'
+    await notifyAdmin(
+      `💰 <b>결제 완료</b>\n${escapeAdminHtml(notifyEmail)} — ${escapeAdminHtml(plan)} ${amount.toLocaleString('ko-KR')}원`
+    )
+
     return { success: true }
   } catch (dbError) {
     // DB 실패 시 결제 환불
@@ -274,6 +287,17 @@ export async function processRenewal(subscriptionId: string): Promise<ActivateRe
       })
 
     if (payError) throw payError
+
+    // 운영자 즉시 알림 (갱신 결제도 동일하게 즉시 발송)
+    const { data: notifyProfile } = await supabaseServer
+      .from('profiles')
+      .select('email')
+      .eq('id', sub.user_id)
+      .single()
+    const notifyEmail = (notifyProfile as { email?: string } | null)?.email ?? '(이메일 미상)'
+    await notifyAdmin(
+      `🔄 <b>갱신 결제 완료</b>\n${escapeAdminHtml(notifyEmail)} — ${escapeAdminHtml(planKey)} ${amount.toLocaleString('ko-KR')}원`
+    )
 
     return { success: true }
   } catch (dbError) {
