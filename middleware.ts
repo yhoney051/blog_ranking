@@ -61,5 +61,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/onboarding', '/dashboard/:path*', '/login', '/signup', '/api/((?!auth|cron|webhooks|guest-rank-check|telegram|keyword-research|keyword-pro).*)'],
+  matcher: ['/', '/onboarding', '/dashboard/:path*', '/login', '/signup', '/api/((?!auth|cron|webhooks|guest-rank-check|telegram|keyword-research|keyword-pro|contact).*)'],
 }
