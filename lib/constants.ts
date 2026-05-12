@@ -35,10 +35,12 @@ export const PAGINATION = {
 
 // Cron 작업 설정
 export const CRON = {
-  /** 순위 체크 배치 크기 (한 번에 처리할 키워드 수) */
-  RANK_CHECK_CHUNK_SIZE: 110,
-  /** 요청 간 딜레이 (밀리초) — IP 차단 방지 */
-  RANK_CHECK_DELAY_MS: 2000,
+  /** 순위 체크 배치 크기 (한 번 cron 실행에서 처리할 키워드 수) */
+  RANK_CHECK_CHUNK_SIZE: 500,
+  /** 동시 호출 수 (Promise.all로 병렬 처리) — Bright Data 글로벌 한도 QPS 100 대비 매우 안전 */
+  RANK_CHECK_CONCURRENT: 10,
+  /** 요청 간 딜레이 (밀리초) — Bright Data가 프록시 풀로 분산 처리하므로 0으로 둠 (네이버 IP 차단 위험 없음) */
+  RANK_CHECK_DELAY_MS: 0,
   /** 검색량 갱신 주기 (일) — 이 기간 이내면 스킵 */
   SEARCH_VOLUME_REFRESH_DAYS: 7,
 } as const
