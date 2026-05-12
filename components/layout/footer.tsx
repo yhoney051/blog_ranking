@@ -18,7 +18,9 @@ export function Footer() {
         </div>
 
         {/* 약관 링크 */}
-        <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground flex-wrap">
+          <Link href="/contact" className="hover:text-foreground transition-colors">대행 문의</Link>
+          <span>·</span>
           <Link href="/terms" className="hover:text-foreground transition-colors">이용약관</Link>
           <span>·</span>
           <Link href="/privacy" className="hover:text-foreground transition-colors">개인정보처리방침</Link>

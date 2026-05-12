@@ -117,6 +117,21 @@ export const keywordResearchSchema = z.object({
     .max(5, '한 번에 최대 5개까지 검색할 수 있습니다.'),
 })
 
+// 대행 문의 접수 검증 — 비로그인 사용자도 호출
+export const contactCreateSchema = z.object({
+  name: z.string().trim().min(1, '이름을 입력해주세요.').max(40, '이름은 40자 이내로 입력해주세요.'),
+  contact: z
+    .string()
+    .trim()
+    .min(1, '연락처를 입력해주세요.')
+    .max(80, '연락처는 80자 이내로 입력해주세요.'),
+  message: z
+    .string()
+    .trim()
+    .min(5, '문의 내용을 5자 이상 적어주세요.')
+    .max(1000, '문의 내용은 1000자 이내로 입력해주세요.'),
+})
+
 // 전문 키워드 검색 도구 요청 검증 — 비회원도 호출 가능
 // 트렌드 차트 가독성을 위해 입력 한도 3개로 좁힘.
 export const keywordProSchema = z.object({
