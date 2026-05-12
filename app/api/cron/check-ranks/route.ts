@@ -78,36 +78,41 @@ export async function GET(request: Request) {
     const skipped = eligibleKeywords.length - chunk.length
     const filteredOut = keywords.length - eligibleKeywords.length
 
-    for (const kw of chunk) {
-      try {
-        const rank = await getNaverBlogRank(kw.keyword, kw.blog_url)
+    // 동시 N개씩 병렬 처리 (Bright Data가 프록시 풀로 분산 → 네이버 IP 차단 위험 없음)
+    // QPS 100 한도 대비 동시 10개는 매우 안전. 응답 시간 1~2초 기준 청크 500개를 약 50~100초에 처리.
+    const CONCURRENT = CRON.RANK_CHECK_CONCURRENT
+    for (let i = 0; i < chunk.length; i += CONCURRENT) {
+      const batch = chunk.slice(i, i + CONCURRENT)
+      await Promise.all(
+        batch.map(async (kw) => {
+          try {
+            const rank = await getNaverBlogRank(kw.keyword, kw.blog_url)
 
-        // keywords 테이블 업데이트
-        await supabaseServer
-          .from('keywords')
-          .update({
-            previous_rank: kw.current_rank,
-            current_rank: rank,
-            last_checked_at: new Date().toISOString(),
-          })
-          .eq('id', kw.id)
+            // keywords 테이블 업데이트
+            await supabaseServer
+              .from('keywords')
+              .update({
+                previous_rank: kw.current_rank,
+                current_rank: rank,
+                last_checked_at: new Date().toISOString(),
+              })
+              .eq('id', kw.id)
 
-        // rank_histories에 기록 저장
-        if (rank !== null) {
-          const { error: histErr } = await supabaseServer
-            .from('rank_histories')
-            .insert({ keyword_id: kw.id, rank })
-          if (histErr) console.error(`[CRON] 히스토리 저장 실패 (${kw.id}):`, histErr.message)
-        }
+            // rank_histories에 기록 저장
+            if (rank !== null) {
+              const { error: histErr } = await supabaseServer
+                .from('rank_histories')
+                .insert({ keyword_id: kw.id, rank })
+              if (histErr) console.error(`[CRON] 히스토리 저장 실패 (${kw.id}):`, histErr.message)
+            }
 
-        success++
-      } catch (err) {
-        console.error(`[CRON] 키워드 처리 실패 (${kw.id}):`, err)
-        failed++
-      }
-
-      // IP 차단 방지 딜레이 (2초)
-      await new Promise((r) => setTimeout(r, CRON.RANK_CHECK_DELAY_MS))
+            success++
+          } catch (err) {
+            console.error(`[CRON] 키워드 처리 실패 (${kw.id}):`, err)
+            failed++
+          }
+        })
+      )
     }
 
     if (skipped > 0) {
