@@ -119,7 +119,7 @@ export default async function HomePage() {
             />
             <div className="space-y-2">
               <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-slate-100 tracking-tight text-balance">
-                내 블로그, 지금 몇 위에 있을까?
+                내가 쓴 블로그 지금 몇위에 있을까?
               </h1>
               <p className="text-base md:text-xl text-slate-600 dark:text-slate-300 font-medium">
                 수니가 매일 알려드려요 🐑
@@ -228,96 +228,70 @@ export default async function HomePage() {
             </Link>
           </section>
 
-          {/* 3. 결과 미리보기 — onboarding mock UI 차용 */}
-          <section className="space-y-5">
-            <div className="text-center space-y-1">
-              <p className="text-xs font-semibold text-brand-600 dark:text-brand-300 uppercase tracking-wider">미리보기</p>
-              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-                쓰면 이런 화면이 나와요
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* A: 조회 직후 결과 카드 */}
-              <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-slate-400">키워드</p>
-                    <p className="font-semibold text-slate-900 dark:text-slate-100">강남역 피부과</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-400">블로그</p>
-                    <p className="text-sm text-slate-500">blog.naver.com/sample</p>
-                  </div>
-                </div>
-                <div className="border-t border-slate-100 dark:border-slate-700 pt-4 text-center">
-                  <p className="text-xs text-slate-400 mb-1">N사 통합검색 순위</p>
-                  <p className="text-4xl md:text-5xl font-bold tabular-nums text-brand-500 dark:text-brand-300">
-                    1<span className="text-lg font-normal text-slate-400">위</span>
-                  </p>
-                  <p className="text-xs text-slate-400 mt-2">조회 즉시 결과 확인</p>
-                </div>
+          {/* 3. 결과 미리보기 — 매일 추적 대시보드만 (블로그 주소 열 포함) */}
+          <section className="space-y-3 max-w-2xl mx-auto">
+            <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 overflow-hidden">
+              <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_52px_52px_52px_52px] gap-2 px-3 py-2.5 bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200/60 dark:border-slate-700/50">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">키워드</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">블로그</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">순위</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">추이</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">변동</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">조회</span>
               </div>
-
-              {/* B: 매일 추적 대시보드 — onboarding 226~248행 차용 + 행 추가 */}
-              <div className="rounded-2xl border border-slate-200/60 dark:border-slate-700/50 bg-white dark:bg-slate-800 overflow-hidden">
-                <div className="grid grid-cols-[minmax(0,1fr)_56px_56px_56px_56px] gap-2 px-3 py-2.5 bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200/60 dark:border-slate-700/50">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">키워드</span>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">순위</span>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">추이</span>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">변동</span>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider text-center">조회</span>
+              {/* 행 1 */}
+              <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_52px_52px_52px_52px] gap-2 px-3 py-3 items-center border-b border-slate-100 dark:border-slate-700/50">
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">강남역 피부과</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">blog.naver.com/clinic_gn</span>
+                <div className="text-center">
+                  <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-brand-300 text-slate-800 dark:bg-brand-900/30 dark:text-brand-300 font-bold">1</span>
                 </div>
-                {/* 행 1 */}
-                <div className="grid grid-cols-[minmax(0,1fr)_56px_56px_56px_56px] gap-2 px-3 py-3 items-center border-b border-slate-100 dark:border-slate-700/50">
-                  <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">강남역 피부과</span>
-                  <div className="text-center">
-                    <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-brand-300 text-slate-800 dark:bg-brand-900/30 dark:text-brand-300 font-bold">1</span>
-                  </div>
-                  <div className="text-center">
-                    <svg width="48" height="20" className="inline-block">
-                      <path d="M2,16 L12,12 L24,14 L36,6 L46,3" fill="none" stroke="#E4FD60" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx="46" cy="3" r="2" fill="#E4FD60" />
-                    </svg>
-                  </div>
-                  <div className="text-center">
-                    <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-300">▲4</span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 tabular-nums text-center">방금</span>
+                <div className="text-center">
+                  <svg width="48" height="20" className="inline-block">
+                    <path d="M2,16 L12,12 L24,14 L36,6 L46,3" fill="none" stroke="#E4FD60" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="46" cy="3" r="2" fill="#E4FD60" />
+                  </svg>
                 </div>
-                {/* 행 2 */}
-                <div className="grid grid-cols-[minmax(0,1fr)_56px_56px_56px_56px] gap-2 px-3 py-3 items-center border-b border-slate-100 dark:border-slate-700/50">
-                  <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">다산동 카페</span>
-                  <div className="text-center">
-                    <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-slate-100 text-slate-700 dark:bg-slate-700/50 dark:text-slate-200 font-bold">7</span>
-                  </div>
-                  <div className="text-center">
-                    <svg width="48" height="20" className="inline-block">
-                      <path d="M2,8 L12,10 L24,7 L36,11 L46,9" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx="46" cy="9" r="2" fill="#94a3b8" />
-                    </svg>
-                  </div>
-                  <div className="text-center">
-                    <span className="text-[10px] text-slate-400">—</span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 tabular-nums text-center">2시간</span>
+                <div className="text-center">
+                  <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-brand-100 text-brand-600 dark:bg-brand-900/30 dark:text-brand-300">▲4</span>
                 </div>
-                {/* 행 3 */}
-                <div className="grid grid-cols-[minmax(0,1fr)_56px_56px_56px_56px] gap-2 px-3 py-3 items-center">
-                  <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">분당 성형외과</span>
-                  <div className="text-center">
-                    <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-slate-100 text-slate-700 dark:bg-slate-700/50 dark:text-slate-200 font-bold">12</span>
-                  </div>
-                  <div className="text-center">
-                    <svg width="48" height="20" className="inline-block">
-                      <path d="M2,4 L12,8 L24,12 L36,10 L46,14" fill="none" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx="46" cy="14" r="2" fill="#f87171" />
-                    </svg>
-                  </div>
-                  <div className="text-center">
-                    <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-300">▼2</span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 tabular-nums text-center">오늘</span>
+                <span className="text-[10px] text-slate-400 tabular-nums text-center">방금</span>
+              </div>
+              {/* 행 2 */}
+              <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_52px_52px_52px_52px] gap-2 px-3 py-3 items-center border-b border-slate-100 dark:border-slate-700/50">
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">다산동 카페</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">blog.naver.com/dasan_cafe</span>
+                <div className="text-center">
+                  <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-slate-100 text-slate-700 dark:bg-slate-700/50 dark:text-slate-200 font-bold">7</span>
                 </div>
+                <div className="text-center">
+                  <svg width="48" height="20" className="inline-block">
+                    <path d="M2,8 L12,10 L24,7 L36,11 L46,9" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="46" cy="9" r="2" fill="#94a3b8" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <span className="text-[10px] text-slate-400">—</span>
+                </div>
+                <span className="text-[10px] text-slate-400 tabular-nums text-center">2시간</span>
+              </div>
+              {/* 행 3 */}
+              <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_52px_52px_52px_52px] gap-2 px-3 py-3 items-center">
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">분당 성형외과</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">blog.naver.com/seoul_ps</span>
+                <div className="text-center">
+                  <span className="inline-flex items-center justify-center h-6 min-w-[1.5rem] rounded-lg px-1.5 text-xs tabular-nums bg-slate-100 text-slate-700 dark:bg-slate-700/50 dark:text-slate-200 font-bold">12</span>
+                </div>
+                <div className="text-center">
+                  <svg width="48" height="20" className="inline-block">
+                    <path d="M2,4 L12,8 L24,12 L36,10 L46,14" fill="none" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="46" cy="14" r="2" fill="#f87171" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-300">▼2</span>
+                </div>
+                <span className="text-[10px] text-slate-400 tabular-nums text-center">오늘</span>
               </div>
             </div>
             <p className="text-xs text-center text-slate-400">* 실제 화면은 더 디테일해요</p>
