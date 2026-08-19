@@ -52,14 +52,21 @@ async function getBrightDataBlogRank(
     }),
   })
 
+  // Bright Data는 계정 정지·프록시 실패 시에도 HTTP 200 + 빈 본문을 돌려주고
+  // 실제 사유는 x-brd-err-msg 헤더로만 알려준다 → 에러 메시지에 실어 로그에 원인이 남도록 한다
+  const brdError = res.headers.get('x-brd-err-msg') ?? res.headers.get('x-brd-error')
+
   if (!res.ok) {
     const errText = await res.text()
-    throw new Error(`Bright Data API 오류: ${res.status} - ${errText}`)
+    const detail = brdError ? ` - ${brdError}` : ''
+    throw new Error(`Bright Data API 오류: ${res.status}${detail} - ${errText}`)
   }
 
   const html = await res.text()
   if (!html || html.length < 100) {
-    throw new Error('Bright Data API 빈 응답')
+    throw new Error(
+      brdError ? `Bright Data 호출 실패: ${brdError}` : 'Bright Data API 빈 응답'
+    )
   }
 
   // HTML 파싱하여 블로그 결과 추출

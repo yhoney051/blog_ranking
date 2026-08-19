@@ -1,5 +1,6 @@
 // 검색 엔진 크롤러 접근 제어
 import { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/site'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/dashboard/', '/api/'],
     },
-    sitemap: 'https://blogrank.kr/sitemap.xml',
+    sitemap: `${SITE_URL}/sitemap.xml`,
   }
 }

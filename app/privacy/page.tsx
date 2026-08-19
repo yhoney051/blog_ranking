@@ -87,7 +87,7 @@ export default function PrivacyPage() {
               개인정보 처리에 관한 문의는 아래 연락처로 문의해주세요.
             </p>
             <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-              <li>이메일: support@blogrank.kr</li>
+              <li>이메일: support@sooni.ai.kr</li>
             </ul>
           </section>
 

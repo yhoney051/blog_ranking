@@ -5,8 +5,11 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ChannelTalk } from "@/components/channel-talk";
 import { PageViewTracker } from "@/components/page-view-tracker";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
+  // OG 이미지·상대경로 URL 해석 기준 (없으면 Next.js가 경고하고 절대경로가 깨짐)
+  metadataBase: new URL(SITE_URL),
   title: {
     default: '수니 — 네이버 블로그 키워드 순위 추적',
     template: '%s | 수니',
