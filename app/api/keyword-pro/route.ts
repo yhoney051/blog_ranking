@@ -78,9 +78,14 @@ export async function POST(req: Request) {
   const { keywords, period } = parsed.data
   const trendEnabled = isNaverDatalabConfigured()
 
+  // 트렌드(데이터랩)는 API 스펙상 최대 5개까지만 비교 가능 → 입력 순서 기준 앞 5개만 사용.
+  // 검색량 표는 입력 전체를 그대로 보여준다.
+  const trendKeywords = keywords.slice(0, KEYWORD_PRO.TREND_MAX_KEYWORDS)
+  const trendLimited = keywords.length > KEYWORD_PRO.TREND_MAX_KEYWORDS
+
   // 캐시 조회 (메트릭 + 트렌드 따로)
   const metricsCacheKey = makeCacheKey(keywords)
-  const trendCacheKey = makeTrendCacheKey(keywords, period)
+  const trendCacheKey = makeTrendCacheKey(trendKeywords, period)
   const cachedMetrics = getCached(metricsCacheKey)
   const cachedTrend = trendEnabled ? getCachedTrend(trendCacheKey) : null
 
@@ -90,6 +95,8 @@ export async function POST(req: Request) {
       metrics: cachedMetrics,
       trend: cachedTrend,
       trendDisabled: !trendEnabled,
+      trendLimited,
+      trendKeywords,
       cached: true,
       remaining: rl.remaining,
     })
@@ -102,7 +109,7 @@ export async function POST(req: Request) {
   const trendP: Promise<TrendResult | null> = trendEnabled
     ? cachedTrend
       ? Promise.resolve(cachedTrend)
-      : fetchSearchTrend(keywords, period as TrendPeriod)
+      : fetchSearchTrend(trendKeywords, period as TrendPeriod)
     : Promise.resolve(null)
 
   const [metricsRes, trendRes] = await Promise.allSettled([metricsP, trendP])
@@ -134,6 +141,8 @@ export async function POST(req: Request) {
     metrics,
     trend,
     trendDisabled: !trendEnabled,
+    trendLimited,
+    trendKeywords,
     trendError,
     cached: false,
     remaining: rl.remaining,

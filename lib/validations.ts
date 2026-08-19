@@ -1,5 +1,6 @@
 // API 요청 입력값 검증 스키마
 import { z } from 'zod'
+import { KEYWORD_PRO } from '@/lib/constants'
 
 // SSRF 방지 — 내부 네트워크 주소 차단
 const BLOCKED_HOSTNAMES = [
@@ -133,7 +134,7 @@ export const contactCreateSchema = z.object({
 })
 
 // 전문 키워드 검색 도구 요청 검증 — 비회원도 호출 가능
-// 트렌드 차트 가독성을 위해 입력 한도 3개로 좁힘.
+// 네이버 API를 5개씩 나눠 호출하므로 대량 입력(최대 100개)을 지원한다.
 export const keywordProSchema = z.object({
   keywords: z
     .array(
@@ -143,6 +144,9 @@ export const keywordProSchema = z.object({
         .max(40, '키워드는 40자 이내로 입력해주세요.')
     )
     .min(1, '최소 1개 이상의 키워드가 필요합니다.')
-    .max(3, '한 번에 최대 3개까지 분석할 수 있습니다.'),
+    .max(
+      KEYWORD_PRO.MAX_INPUT_KEYWORDS,
+      `한 번에 최대 ${KEYWORD_PRO.MAX_INPUT_KEYWORDS}개까지 분석할 수 있습니다.`
+    ),
   period: z.enum(['1m', '3m', '6m', '12m']).default('12m'),
 })

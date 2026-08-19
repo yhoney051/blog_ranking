@@ -61,10 +61,16 @@ export const KEYWORD_RESEARCH = {
   CACHE_TTL_HOURS: 24,
 } as const
 
-// 전문 키워드 검색 도구 설정 (트렌드 차트 가독성 위해 입력 한도를 좁힘)
+// 전문 키워드 검색 도구 설정
 export const KEYWORD_PRO = {
-  /** 한 번에 입력 가능한 키워드 수 (트렌드 라인 색상 구분 한도) */
-  MAX_INPUT_KEYWORDS: 3,
+  /** 한 번에 입력 가능한 키워드 수 — 네이버 API를 5개씩 나눠 호출하므로 개수 제한 없음 */
+  MAX_INPUT_KEYWORDS: 100,
+  /** 네이버 검색광고 API 요청당 키워드 한도 (API 스펙) */
+  NAVER_BATCH_SIZE: 5,
+  /** 배치 간 딜레이 (밀리초) — 네이버 rate limit 방지 */
+  BATCH_DELAY_MS: 300,
+  /** 트렌드 차트 최대 키워드 수 (네이버 데이터랩 API 스펙상 5개 고정) */
+  TREND_MAX_KEYWORDS: 5,
   /** 결과 표에 표시할 연관 키워드 상위 개수 (발굴 도구 깊이) */
   RELATED_DISPLAY_LIMIT: 100,
   /** 트렌드 캐시 TTL (시간) — 검색량 캐시보다 짧게 (일별 변화 의미 있음) */

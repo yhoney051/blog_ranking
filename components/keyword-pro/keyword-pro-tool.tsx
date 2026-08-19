@@ -1,43 +1,24 @@
 'use client'
 
 // 전문 키워드 검색 도구 — 메인 UI
-// 입력 키워드 1~3개 + 기간 → 검색량/경쟁도 메트릭 + 트렌드 차트
-// 좌(입력) / 우(트렌드 차트) 2열 레이아웃, 결과 표는 그 아래 전체 너비.
+// 여러 줄 붙여넣기로 최대 100개 키워드의 검색량을 한 번에 조회한다.
+// (네이버 검색광고 API는 요청당 5개 한도 → 서버에서 5개씩 나눠 호출)
+// 좌(입력) / 우(트렌드 차트) 2열 레이아웃, 결과는 그 아래에
+// '내 키워드' 표와 '연관 키워드' 표를 각각 별도 카드로 분리해 보여준다.
 // 기본 결과(defaultData)는 서버 컴포넌트가 미리 fetch해 prop으로 전달 — 마운트 시 외부 호출 0.
-// 표 인라인 필터: 키워드 검색창 + 컬럼 헤더 클릭 정렬 + 체크박스 다운로드.
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  Search,
-  TrendingUp,
-  Loader2,
-  AlertTriangle,
-  Download,
-  ArrowUp,
-  ArrowDown,
-  ArrowUpDown,
-} from 'lucide-react'
+import { Search, TrendingUp, Loader2, AlertTriangle, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { KeywordTrendChart } from '@/components/keyword-pro/keyword-trend-chart'
+import { KeywordMetricTable, type MetricRow } from '@/components/keyword-pro/keyword-metric-table'
+import { RegisterSelectedSheet } from '@/components/keyword-pro/register-selected-sheet'
+import { KEYWORD_PRO } from '@/lib/constants'
 import type { TrendResult } from '@/lib/naver-datalab'
-
-type MetricRow = {
-  keyword: string
-  monthlyPcQcCnt: number
-  monthlyMobileQcCnt: number
-  totalSearchVolume: number
-  compIdx?: string
-  monthlyAvePcClkCnt?: number
-  monthlyAveMobileClkCnt?: number
-  monthlyAvePcCtr?: number
-  monthlyAveMobileCtr?: number
-  plAvgDepth?: number
-}
 
 type Metrics = {
   searched: MetricRow[]
@@ -48,16 +29,12 @@ type Response = {
   metrics: Metrics
   trend: TrendResult | null
   trendDisabled?: boolean
+  trendLimited?: boolean
+  trendKeywords?: string[]
   trendError?: string | null
   cached?: boolean
   remaining?: number
 }
-
-type SortKey = 'keyword' | 'monthlyPcQcCnt' | 'monthlyMobileQcCnt' | 'totalSearchVolume' | 'compIdx'
-type SortDir = 'asc' | 'desc'
-
-// 경쟁도 정렬 순서 — 낮음(1) < 중간(2) < 높음(3). 빈 값은 0
-const COMP_ORDER: Record<string, number> = { 낮음: 1, 중간: 2, 높음: 3 }
 
 const PERIOD_OPTIONS: { value: '1m' | '3m' | '6m' | '12m'; label: string }[] = [
   { value: '1m', label: '1개월' },
@@ -67,10 +44,28 @@ const PERIOD_OPTIONS: { value: '1m' | '3m' | '6m' | '12m'; label: string }[] = [
 ]
 
 const DEFAULT_KEYWORD = '강남피부과'
+const MAX = KEYWORD_PRO.MAX_INPUT_KEYWORDS
+const TREND_MAX = KEYWORD_PRO.TREND_MAX_KEYWORDS
+
+// 붙여넣은 텍스트를 키워드 배열로 변환
+// 줄바꿈/쉼표/탭 구분 모두 허용 (엑셀·메모장에서 그대로 복사 가능), 중복은 제거하고 입력 순서 유지
+function parseKeywords(raw: string): string[] {
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const piece of raw.split(/[,\n\t]/)) {
+    const kw = piece.trim()
+    if (!kw) continue
+    const key = kw.replace(/\s+/g, '').toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    result.push(kw)
+  }
+  return result
+}
 
 // 서버에서 전달되는 기본 데이터 형태 (page.tsx의 DefaultData와 호환)
 type DefaultData = {
-  metrics: { searched: MetricRow[]; related: MetricRow[] }
+  metrics: Metrics
   trend: TrendResult | null
   trendDisabled: boolean
   trendError: string | null
@@ -100,27 +95,31 @@ export function KeywordProTool({ isLoggedIn, defaultData }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [highlighted, setHighlighted] = useState<string | null>(null)
-  const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [filterText, setFilterText] = useState('')
-  const [sort, setSort] = useState<{ key: SortKey | null; dir: SortDir }>({ key: null, dir: 'desc' })
+  // 마지막으로 서버에 보낸 키워드 개수 — 조회되지 않은 키워드 안내에 사용
+  const [requestedCount, setRequestedCount] = useState<number>(defaultData ? 1 : 0)
+  // 표에서 체크한 키워드를 순위 추적에 등록하는 패널 상태
+  const [registerTargets, setRegisterTargets] = useState<string[]>([])
+  const [registerOpen, setRegisterOpen] = useState(false)
 
-  // 외부 호출 공통 — handleSearch와 mount 자동 검색이 공유
-  const fetchKeywords = async (keywordsArr: string[], periodArg: '1m' | '3m' | '6m' | '12m') => {
-    if (keywordsArr.length === 0) {
+  // 입력창에서 인식된 키워드 (실시간 카운터용)
+  const parsed = useMemo(() => parseKeywords(input), [input])
+  const overLimit = parsed.length > MAX
+
+  const handleSearch = async () => {
+    const keywords = parsed.slice(0, MAX)
+    if (keywords.length === 0) {
       setError('키워드를 1개 이상 입력해주세요.')
       return
     }
     setError(null)
     setLoading(true)
     setHighlighted(null)
-    setSelected(new Set())
-    setFilterText('')
-    setSort({ key: null, dir: 'desc' })
+    setRequestedCount(keywords.length)
     try {
       const res = await fetch('/api/keyword-pro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keywords: keywordsArr, period: periodArg }),
+        body: JSON.stringify({ keywords, period }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -136,179 +135,33 @@ export function KeywordProTool({ isLoggedIn, defaultData }: Props) {
     }
   }
 
-  const handleSearch = () => {
-    const keywords = input
-      .split(/[,\n]/)
-      .map((k) => k.trim())
-      .filter(Boolean)
-      .slice(0, 3)
-    void fetchKeywords(keywords, period)
-  }
-
-  // 자동 fetch는 서버에서 미리 받은 defaultData로 대체 → 마운트 시 외부 호출 없음
-
-  const formatNumber = (n: number | undefined): string => {
-    if (n === undefined || n === null) return '-'
-    if (n < 10 && n > 0) return '< 10'
-    return n.toLocaleString('ko-KR', { maximumFractionDigits: 1 })
-  }
-
-  const getCompBadge = (comp: string | undefined) => {
-    if (!comp) return null
-    const map: Record<string, { cls: string }> = {
-      낮음: { cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' },
-      중간: { cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-      높음: { cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
-    }
-    const style = map[comp]
-    return (
-      <Badge variant="secondary" className={cn('text-[10px]', style?.cls)}>
-        {comp}
-      </Badge>
-    )
-  }
-
-  // 검색량 비교용 정규화 — 공백/대소문자 무시
-  const normalize = (s: string) => s.replace(/\s+/g, '').toLowerCase()
-
-  // 표에 표시되는 통합 행 목록 (입력 + 연관) — 원본 순서 보존
-  const allRows = useMemo(
-    () =>
-      data
-        ? [
-            ...data.metrics.searched.map((r) => ({ row: r, isSearched: true })),
-            ...data.metrics.related.map((r) => ({ row: r, isSearched: false })),
-          ]
-        : [],
-    [data]
-  )
-
-  // 화면용: 텍스트 필터 + 정렬 적용
-  const displayedRows = useMemo(() => {
-    let rows = allRows
-    if (filterText.trim()) {
-      const q = normalize(filterText)
-      rows = rows.filter((r) => normalize(r.row.keyword).includes(q))
-    }
-    if (sort.key) {
-      const key = sort.key
-      const dirMul = sort.dir === 'asc' ? 1 : -1
-      rows = [...rows].sort((a, b) => {
-        if (key === 'keyword') {
-          return a.row.keyword.localeCompare(b.row.keyword, 'ko') * dirMul
-        }
-        if (key === 'compIdx') {
-          const aV = COMP_ORDER[a.row.compIdx ?? ''] ?? 0
-          const bV = COMP_ORDER[b.row.compIdx ?? ''] ?? 0
-          return (aV - bV) * dirMul
-        }
-        const aN = (a.row[key] as number) ?? 0
-        const bN = (b.row[key] as number) ?? 0
-        return (aN - bN) * dirMul
-      })
-    }
-    return rows
-  }, [allRows, filterText, sort])
-
-  // 컬럼 헤더 클릭으로 정렬 토글: desc → asc → null(해제)
-  const handleSortClick = (key: SortKey) => {
-    setSort((prev) => {
-      if (prev.key !== key) return { key, dir: 'desc' }
-      if (prev.dir === 'desc') return { key, dir: 'asc' }
-      return { key: null, dir: 'desc' }
-    })
-  }
-
-  const SortIcon = ({ k }: { k: SortKey }) => {
-    if (sort.key !== k) return <ArrowUpDown className="h-3 w-3 inline-block ml-1 opacity-40" />
-    return sort.dir === 'desc' ? (
-      <ArrowDown className="h-3 w-3 inline-block ml-1 text-foreground" />
-    ) : (
-      <ArrowUp className="h-3 w-3 inline-block ml-1 text-foreground" />
-    )
-  }
-
-  // "전체 선택" 체크박스: 현재 화면에 보이는 행 기준으로 동작 (필터링 직관)
-  const allVisibleSelected = displayedRows.length > 0 && displayedRows.every((r) => selected.has(r.row.keyword))
-  const someVisibleSelected = !allVisibleSelected && displayedRows.some((r) => selected.has(r.row.keyword))
-
-  const toggleSelectOne = (keyword: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(keyword)) next.delete(keyword)
-      else next.add(keyword)
-      return next
-    })
-  }
-
-  const toggleSelectAllVisible = () => {
-    if (allVisibleSelected) {
-      // 보이는 행만 선택 해제
-      setSelected((prev) => {
-        const next = new Set(prev)
-        displayedRows.forEach((r) => next.delete(r.row.keyword))
-        return next
-      })
-    } else {
-      // 보이는 행만 선택 추가
-      setSelected((prev) => {
-        const next = new Set(prev)
-        displayedRows.forEach((r) => next.add(r.row.keyword))
-        return next
-      })
+  // Ctrl/Cmd + Enter로 실행 (Enter는 줄바꿈이므로)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault()
+      void handleSearch()
     }
   }
 
-  // .xlsx 생성 + AutoFilter 적용 + 다운로드 트리거
-  // xlsx 패키지는 동적 import로 초기 번들에서 분리 (다운로드 버튼 클릭 시에만 로드)
-  const downloadXlsx = async (rows: { row: MetricRow; isSearched: boolean }[], suffix: string) => {
-    if (rows.length === 0) return
-    const XLSX = await import('xlsx')
-    const headers = ['키워드', 'PC 검색량', '모바일 검색량', '합계', '경쟁도']
-    const aoa: (string | number)[][] = [
-      headers,
-      ...rows.map(({ row }) => [
-        row.keyword,
-        row.monthlyPcQcCnt,
-        row.monthlyMobileQcCnt,
-        row.totalSearchVolume,
-        row.compIdx ?? '',
-      ]),
-    ]
-    const ws = XLSX.utils.aoa_to_sheet(aoa)
-    // 숫자 셀(B/C/D 컬럼 = PC/모바일/합계)에 천 단위 콤마 포맷 적용
-    const numFmt = '#,##0'
-    for (let r = 1; r <= rows.length; r++) {
-      for (const c of [1, 2, 3]) {
-        const addr = XLSX.utils.encode_cell({ r, c })
-        const cell = ws[addr]
-        if (cell && typeof cell.v === 'number') {
-          cell.t = 'n'
-          cell.z = numFmt
-        }
-      }
-    }
-    // 헤더 + 데이터 전체 범위에 AutoFilter 적용
-    ws['!autofilter'] = { ref: `A1:E${rows.length + 1}` }
-    ws['!cols'] = [
-      { wch: 28 },
-      { wch: 14 },
-      { wch: 14 },
-      { wch: 12 },
-      { wch: 10 },
-    ]
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, '키워드 분석')
-    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-    XLSX.writeFile(wb, `keyword-pro-${suffix}-${today}.xlsx`)
+  const handleRowClick = (keyword: string) => {
+    setHighlighted((cur) => (cur === keyword ? null : keyword))
   }
 
-  // 다운로드는 화면 필터/정렬 결과와 무관하게 원본 allRows 기준
-  const handleDownloadAll = () => void downloadXlsx(allRows, 'all')
-  const handleDownloadSelected = () => {
-    const rows = allRows.filter((r) => selected.has(r.row.keyword))
-    void downloadXlsx(rows, `selected-${rows.length}`)
+  // 표의 '선택 등록' 클릭 → 등록 패널 열기 (비회원은 가입 유도)
+  const handleRegisterSelected = (selectedKeywords: string[]) => {
+    if (!isLoggedIn) {
+      router.push('/signup')
+      return
+    }
+    if (selectedKeywords.length === 0) return
+    setRegisterTargets(selectedKeywords)
+    setRegisterOpen(true)
   }
+
+  const searchedRows = data?.metrics.searched ?? []
+  const relatedRows = data?.metrics.related ?? []
+  // 네이버가 검색량을 돌려주지 않은 키워드 수 (오타·신규 키워드 등)
+  const missingCount = Math.max(0, requestedCount - searchedRows.length)
 
   // 트렌드 차트 영역 — data 없을 땐 placeholder, 있으면 케이스별 렌더
   const renderTrendBody = () => {
@@ -335,7 +188,20 @@ export function KeywordProTool({ isLoggedIn, defaultData }: Props) {
       )
     }
     if (data.trend && data.trend.series.length > 0) {
-      return <KeywordTrendChart trend={data.trend} highlightedKeyword={highlighted} />
+      return (
+        <div className="space-y-2">
+          {data.trendLimited && (
+            <div className="rounded-lg border border-sky-200/60 bg-sky-50 dark:border-sky-800/50 dark:bg-sky-900/20 p-2.5 text-[11px] text-sky-800 dark:text-sky-300 flex items-start gap-1.5">
+              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              <span>
+                네이버 트렌드는 최대 {TREND_MAX}개까지만 비교할 수 있어, 입력 순서 기준 앞{' '}
+                {TREND_MAX}개만 표시합니다. 검색량 표에는 전체가 나옵니다.
+              </span>
+            </div>
+          )}
+          <KeywordTrendChart trend={data.trend} highlightedKeyword={highlighted} />
+        </div>
+      )
     }
     return <p className="text-sm text-muted-foreground py-8 text-center">트렌드 데이터가 없습니다.</p>
   }
@@ -351,27 +217,52 @@ export function KeywordProTool({ isLoggedIn, defaultData }: Props) {
             <div className="flex-1">
               <h3 className="text-sm font-semibold">전문 키워드 검색</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                검색량 + 경쟁도 + 트렌드 그래프까지 한눈에. 한 번에 최대 3개 키워드를 비교 분석합니다.
+                검색량 + 경쟁도 + 트렌드 그래프까지 한눈에. 엑셀·메모장에서 복사한 키워드를 그대로
+                붙여넣으면 한 번에 최대 {MAX}개까지 조회합니다.
               </p>
             </div>
           </div>
 
-          {/* 입력창 */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              placeholder="예: 다산동 카페, 강남 미용실 (쉼표로 구분, 최대 3개)"
+          {/* 입력창 — 여러 줄 붙여넣기 지원 */}
+          <div className="space-y-2">
+            <Textarea
+              placeholder={'키워드를 한 줄에 하나씩 붙여넣으세요.\n\n예)\n김해 인테리어 업체\n해운대 인테리어 업체\n동래 인테리어 업체'}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={handleKeyDown}
               disabled={loading}
+              rows={7}
+              className="min-h-[160px] text-sm resize-y"
             />
-            <Button onClick={handleSearch} disabled={loading || !input.trim()} className="sm:w-32">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <span
+                className={cn(
+                  'text-[11px] tabular-nums',
+                  overLimit ? 'text-red-600 dark:text-red-400 font-medium' : 'text-muted-foreground'
+                )}
+              >
+                {overLimit
+                  ? `${parsed.length}개 인식됨 — 최대 ${MAX}개까지만 조회됩니다`
+                  : `${parsed.length}개 인식됨 (최대 ${MAX}개)`}
+              </span>
+              <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                Ctrl + Enter로 바로 분석
+              </span>
+            </div>
+            <Button
+              onClick={() => void handleSearch()}
+              disabled={loading || parsed.length === 0}
+              className="w-full"
+            >
               {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <>
+                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                  조회 중... (키워드가 많으면 최대 10초)
+                </>
               ) : (
                 <>
                   <Search className="h-4 w-4 mr-1.5" />
-                  분석하기
+                  {parsed.length > 1 ? `${Math.min(parsed.length, MAX)}개 한번에 분석하기` : '분석하기'}
                 </>
               )}
             </Button>
@@ -420,159 +311,72 @@ export function KeywordProTool({ isLoggedIn, defaultData }: Props) {
       {/* 로딩 */}
       {loading && (
         <div className="rounded-xl border bg-card p-4 lg:p-6 space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-10 rounded-lg" />
           ))}
         </div>
       )}
 
-      {/* 결과 — 입력 키워드 + 연관 키워드 통합 테이블 */}
-      {!loading && data && allRows.length > 0 && (
-        <div className="rounded-xl border bg-card p-4 lg:p-6 space-y-4">
-          {/* 헤더: 제목/카운터 + 검색창 + 다운로드 버튼 */}
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="text-sm font-semibold">키워드 분석 결과</h4>
-              <span className="text-[11px] text-muted-foreground tabular-nums">
-                총 {allRows.length}개{filterText.trim() && ` / 필터 후 ${displayedRows.length}개`}
-              </span>
-              {data.cached && <span className="text-[10px] text-muted-foreground">캐시 결과</span>}
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Input
-                placeholder="키워드 필터 검색"
-                value={filterText}
-                onChange={(e) => setFilterText(e.target.value)}
-                className="w-44 h-8 text-sm"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={selected.size === 0}
-                onClick={handleDownloadSelected}
-                title={selected.size === 0 ? '체크박스로 키워드를 먼저 선택해주세요' : `${selected.size}개 키워드 다운로드`}
-              >
-                <Download className="h-3.5 w-3.5 mr-1.5" />
-                선택 다운로드 ({selected.size})
-              </Button>
-              <Button variant="default" size="sm" onClick={handleDownloadAll}>
-                <Download className="h-3.5 w-3.5 mr-1.5" />
-                전체 다운로드
-              </Button>
-            </div>
-          </div>
-
-          <div className="overflow-auto rounded-lg border max-h-[600px]">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 sticky top-0 z-10">
-                <tr className="text-xs text-muted-foreground">
-                  <th className="px-3 py-2 w-10 text-center">
-                    <input
-                      type="checkbox"
-                      checked={allVisibleSelected}
-                      ref={(el) => {
-                        if (el) el.indeterminate = someVisibleSelected
-                      }}
-                      onChange={toggleSelectAllVisible}
-                      className="h-4 w-4 rounded border-border accent-brand-500"
-                      aria-label="화면에 표시된 키워드 전체 선택"
-                    />
-                  </th>
-                  <th className="px-3 py-2 text-center">구분</th>
-                  <th
-                    className="px-3 py-2 text-left cursor-pointer select-none hover:text-foreground transition-colors"
-                    onClick={() => handleSortClick('keyword')}
-                  >
-                    키워드 <SortIcon k="keyword" />
-                  </th>
-                  <th
-                    className="px-3 py-2 text-right cursor-pointer select-none hover:text-foreground transition-colors"
-                    onClick={() => handleSortClick('monthlyPcQcCnt')}
-                  >
-                    PC 검색량 <SortIcon k="monthlyPcQcCnt" />
-                  </th>
-                  <th
-                    className="px-3 py-2 text-right cursor-pointer select-none hover:text-foreground transition-colors"
-                    onClick={() => handleSortClick('monthlyMobileQcCnt')}
-                  >
-                    모바일 검색량 <SortIcon k="monthlyMobileQcCnt" />
-                  </th>
-                  <th
-                    className="px-3 py-2 text-right cursor-pointer select-none hover:text-foreground transition-colors"
-                    onClick={() => handleSortClick('totalSearchVolume')}
-                  >
-                    합계 <SortIcon k="totalSearchVolume" />
-                  </th>
-                  <th
-                    className="px-3 py-2 text-center cursor-pointer select-none hover:text-foreground transition-colors"
-                    onClick={() => handleSortClick('compIdx')}
-                  >
-                    경쟁도 <SortIcon k="compIdx" />
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayedRows.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-3 py-8 text-center text-xs text-muted-foreground">
-                      필터에 일치하는 키워드가 없습니다.
-                    </td>
-                  </tr>
-                ) : (
-                  displayedRows.map(({ row, isSearched }) => (
-                    <tr
-                      key={`${isSearched ? 's' : 'r'}-${row.keyword}`}
-                      onClick={() => setHighlighted((cur) => (cur === row.keyword ? null : row.keyword))}
-                      className={cn(
-                        'border-t cursor-pointer hover:bg-muted/30 transition-colors',
-                        isSearched && 'bg-brand-300/20 dark:bg-brand-900/15',
-                        highlighted === row.keyword && 'bg-brand-300/40 dark:bg-brand-900/30'
-                      )}
-                    >
-                      <td className="px-3 py-2 text-center" onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={selected.has(row.keyword)}
-                          onChange={() => toggleSelectOne(row.keyword)}
-                          className="h-4 w-4 rounded border-border accent-brand-500"
-                          aria-label={`${row.keyword} 선택`}
-                        />
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <Badge
-                          variant={isSearched ? 'default' : 'secondary'}
-                          className="text-[10px]"
-                        >
-                          {isSearched ? '내 키워드' : '연관'}
-                        </Badge>
-                      </td>
-                      <td className="px-3 py-2 font-medium">{row.keyword}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">{formatNumber(row.monthlyPcQcCnt)}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">{formatNumber(row.monthlyMobileQcCnt)}</td>
-                      <td className="px-3 py-2 text-right tabular-nums font-semibold">{formatNumber(row.totalSearchVolume)}</td>
-                      <td className="px-3 py-2 text-center">{getCompBadge(row.compIdx) ?? '-'}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-[10px] text-muted-foreground">
-            💡 행을 클릭하면 우측 트렌드 차트에서 해당 키워드만 강조됩니다. 컬럼 헤더 클릭으로 정렬, 검색창으로 필터링 가능. 다운로드는 필터와 무관하게 전체/선택한 키워드 기준입니다.
-          </p>
+      {/* 조회되지 않은 키워드 안내 */}
+      {!loading && data && missingCount > 0 && (
+        <div className="rounded-lg border border-amber-200/60 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-900/20 p-3 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>
+            입력한 {requestedCount}개 중 {missingCount}개는 네이버에 검색량 데이터가 없어 표에서
+            제외됐습니다. (오타이거나 검색량이 거의 없는 키워드)
+          </span>
         </div>
+      )}
+
+      {/* 결과 1 — 내가 입력한 키워드 (입력 순서 유지) */}
+      {!loading && data && (
+        <KeywordMetricTable
+          title="내 키워드"
+          description="내가 입력한 키워드입니다. 붙여넣은 순서 그대로 표시됩니다."
+          rows={searchedRows}
+          downloadPrefix="my"
+          highlightRows
+          highlighted={highlighted}
+          onRowClick={handleRowClick}
+          onRegisterSelected={handleRegisterSelected}
+          orderNote="💡 체크박스로 고른 뒤 '선택 등록'을 누르면 블로그 주소·태그만 입력해 바로 순위 추적에 등록됩니다. 행을 클릭하면 트렌드 차트에서 강조되고, 컬럼 헤더로 정렬할 수 있습니다."
+          emptyText="조회된 키워드가 없습니다. 키워드를 다시 확인해주세요."
+        />
+      )}
+
+      {/* 결과 2 — 네이버가 함께 알려준 연관 키워드 */}
+      {!loading && data && relatedRows.length > 0 && (
+        <KeywordMetricTable
+          title="연관 키워드"
+          description="네이버가 함께 추천한 키워드입니다. 검색량이 많은 순서로 정렬돼 있습니다."
+          rows={relatedRows}
+          downloadPrefix="related"
+          highlighted={highlighted}
+          onRowClick={handleRowClick}
+          onRegisterSelected={handleRegisterSelected}
+          orderNote="💡 쓸 만한 키워드를 체크하고 '선택 등록'을 누르면 바로 순위 추적에 넣을 수 있습니다."
+        />
       )}
 
       {/* 비회원 CTA */}
       {!loading && data && !isLoggedIn && (
         <div className="rounded-xl border bg-gradient-to-r from-brand-500/10 to-brand-300/20 p-4 lg:p-6 text-center space-y-2">
           <p className="text-sm font-semibold">이 키워드들로 매일 순위 체크 받으시겠어요?</p>
-          <p className="text-xs text-muted-foreground">가입하면 매일 자동으로 네이버 블로그탭 순위를 추적해 드려요.</p>
+          <p className="text-xs text-muted-foreground">
+            가입하면 매일 자동으로 네이버 블로그탭 순위를 추적해 드려요.
+          </p>
           <Button onClick={() => router.push('/signup')} className="w-full sm:w-auto sm:px-8 mt-2">
             무료로 시작하기
           </Button>
         </div>
       )}
+
+      {/* 선택한 키워드 등록 패널 */}
+      <RegisterSelectedSheet
+        open={registerOpen}
+        onOpenChange={setRegisterOpen}
+        keywords={registerTargets}
+      />
     </div>
   )
 }

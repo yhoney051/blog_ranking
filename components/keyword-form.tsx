@@ -16,10 +16,10 @@ type Props = {
 
 type Row = { keyword: string; blogUrl: string; tag: string }
 
-const MAX_ROWS = 10
+const MAX_ROWS = 50
 const emptyRow = (): Row => ({ keyword: '', blogUrl: '', tag: '' })
 
-// 키워드 + 블로그 URL 다중 등록 폼 (최대 10개까지 한 번에 등록)
+// 키워드 + 블로그 URL 다중 등록 폼 (최대 50개까지 한 번에 등록)
 export function KeywordForm({ onAdded, currentActiveCount, keywordLimit }: Props) {
   const router = useRouter()
   const [rows, setRows] = useState<Row[]>([emptyRow()])
