@@ -27,6 +27,8 @@ yarn-error.log*
 
 # local env files
 .env*.local
+# 백업/사본까지 차단 (.env*.local 패턴은 .env.local.backup을 못 잡음)
+.env*.local.*
 
 # vercel
 .vercel
